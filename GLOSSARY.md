@@ -59,3 +59,19 @@ _Avoid_: right next to, immediately
 **Connected**:
 Forming one unbroken chain of desks touching side to side, never diagonally. A single coworker counts as connected.
 _Avoid_: adjacent, together, grouped
+
+**Declare**:
+The office manager's move: naming a coworker as sick or well. A declaration is accepted only when it is both correct and forced.
+_Avoid_: guess, mark, flag, accuse
+
+**Forced**:
+A coworker whose state is the same in every board that fits everything known so far: every revealed clue and every coworker already declared.
+_Avoid_: provable, certain, deducible, obvious
+
+**Hint**:
+Help the office manager asks for: it points at one forced coworker and the fewest clues that force it.
+_Avoid_: tip, clue
+
+**Difficulty**:
+How hard a puzzle is: Easy, Medium or Hard, set by its hardest step, the most clues the office manager must combine to find any forced coworker.
+_Avoid_: level, rating
