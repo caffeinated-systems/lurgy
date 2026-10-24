@@ -5,19 +5,19 @@ A daily deduction puzzle: a bug is doing the rounds of an open-plan office, and 
 ## Language
 
 **Coworker**:
-One person on the board. Each coworker has a name, a department and a desk, and is either sick or well. A coworker is a member of the cast who is in the office this week.
+One person on the board: a member of the cast who is in the office that week, sitting at one desk, and either sick or well.
 _Avoid_: suspect, colleague, employee, person
 
 **Cast**:
-Everyone who works at the office, whether or not they are in this week. Each member has a unique first name and a department, and keeps their personality from week to week.
+Everyone who works at the office, whether or not they are in that week. Each member has a unique first name and a department, and keeps their personality from week to week.
 _Avoid_: characters, staff
 
 **Week**:
-The five puzzles from Monday to Friday that share the same twenty coworkers at the same desks, and one story.
+The five puzzles from Monday to Friday that share the same coworkers at the same desks, and at most one story.
 _Avoid_: episode, season
 
 **Story**:
-A week's flavour lines, written to run from Monday's setup to Friday's finale. The story never says or hints whether a coworker on the board is sick or well.
+The tale a week's flavour tells, from Monday's setup to Friday's finale. The story never says or suggests whether a coworker on the board is sick or well.
 _Avoid_: plot, arc, lore
 
 **Sick**:
@@ -49,7 +49,7 @@ A true statement a revealed coworker makes about how many coworkers are sick or 
 _Avoid_: hint, statement, evidence
 
 **Flavour**:
-What a revealed coworker says instead of a clue: a joke or a line of the week's story. Flavour never carries logic, nor hints at it.
+What a revealed coworker says instead of a clue: a joke or a line of the week's story. Flavour never carries or suggests logic.
 _Avoid_: banter, filler
 
 **Group**:
