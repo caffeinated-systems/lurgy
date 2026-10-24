@@ -87,3 +87,19 @@ _Avoid_: tip, clue
 **Difficulty**:
 How hard a puzzle is: Easy, Medium or Hard, set by its hardest step, the most clues the office manager must combine to find any forced coworker.
 _Avoid_: level, rating
+
+**Mistake**:
+A declaration the game rejects with "Not enough evidence", whether it was wrong or not yet forced. A coworker carries at most one mistake.
+_Avoid_: error, strike, wrong guess
+
+**Taunt**:
+The game's own jab at the office manager, after a mistake, a hint or a solve. Coworkers make clues and flavour, never taunts.
+_Avoid_: diss, insult, banter
+
+**Verdict**:
+The taunt on solving a puzzle, chosen by how clean the result is.
+_Avoid_: score, grade, rating
+
+**Result**:
+What a solved puzzle leaves to share: the time, the verdict, and one square per coworker showing any mistake or hint on it.
+_Avoid_: score, scorecard
