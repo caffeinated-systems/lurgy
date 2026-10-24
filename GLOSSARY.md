@@ -49,7 +49,7 @@ A true statement a revealed coworker makes about how many coworkers are sick or 
 _Avoid_: hint, statement, evidence
 
 **Flavour**:
-What a revealed coworker says instead of a clue: a joke or a line of the week's story. Flavour never carries or suggests logic.
+What a revealed coworker says that is not a clue: a joke or a line of the week's story in place of a clue, or a short joke after one. Flavour never carries or suggests logic.
 _Avoid_: banter, filler
 
 **Group**:
@@ -81,7 +81,7 @@ A coworker whose state is the same in every board that fits everything known so 
 _Avoid_: provable, certain, deducible, obvious
 
 **Hint**:
-Help the office manager asks for: it points at one forced coworker and the fewest clues that force it.
+Help the office manager asks for: first the fewest clues that force some coworker, then, if asked again, that coworker too. The hint stays on that coworker either way.
 _Avoid_: tip, clue
 
 **Difficulty**:
@@ -89,7 +89,7 @@ How hard a puzzle is: Easy, Medium or Hard, set by its hardest step, the most cl
 _Avoid_: level, rating
 
 **Mistake**:
-A declaration the game rejects with "Not enough evidence", whether it was wrong or not yet forced. A coworker carries at most one mistake.
+What a declaration rejected with "Not enough evidence" leaves on a coworker, whether the declaration was wrong or not yet forced. A coworker carries at most one.
 _Avoid_: error, strike, wrong guess
 
 **Taunt**:
@@ -97,9 +97,9 @@ The game's own jab at the office manager, after a mistake, a hint or a solve. Co
 _Avoid_: diss, insult, banter
 
 **Verdict**:
-The taunt on solving a puzzle, chosen by how clean the result is.
+The taunt on solving a puzzle, chosen by how many coworkers carry a mistake or a hint: none, a few, or many.
 _Avoid_: score, grade, rating
 
 **Result**:
-What a solved puzzle leaves to share: the time, the verdict, and one square per coworker showing any mistake or hint on it.
+What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers carry a mistake or a hint.
 _Avoid_: score, scorecard
