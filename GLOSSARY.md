@@ -31,3 +31,31 @@ _Avoid_: profession, team, role
 **Neighbours**:
 The coworkers at the desks touching a coworker's desk, diagonals included: up to eight.
 _Avoid_: adjacent, nearby
+
+**Clue**:
+A true statement a revealed coworker makes about how many coworkers are sick or well in one or more groups. Every clue is true, whoever says it. A clue names coworkers in the first person when they are the speaker ("my neighbours", "I").
+_Avoid_: hint, statement, evidence
+
+**Flavour**:
+What a revealed coworker says instead of a clue: a joke or a line of the week's story. Flavour never carries logic.
+_Avoid_: banter, filler
+
+**Group**:
+A set of desks a clue talks about: a row, a column, a coworker's neighbours, the desks between two coworkers, the corners, the edges, or a department.
+_Avoid_: unit, area, zone, region
+
+**Between**:
+The desks in a straight line strictly between two coworkers in the same row or column, not counting the two themselves. When the line runs to the edge it reads as above, below, to the left of or to the right of a coworker.
+_Avoid_: from-to, inside
+
+**Above / below / left / right**:
+Anywhere in the same column (above, below) or the same row (left, right), seen from the office manager's side of the board, not just the next desk.
+_Avoid_: over, under
+
+**Directly**:
+Only the next desk in that direction: "directly below" is the one desk underneath.
+_Avoid_: right next to, immediately
+
+**Connected**:
+Forming one unbroken chain of desks touching side to side, never diagonally. A single coworker counts as connected.
+_Avoid_: adjacent, together, grouped
