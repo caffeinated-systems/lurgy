@@ -9,7 +9,7 @@ app = FastAPI()
 
 
 class Health(BaseModel):
-    status: Literal["ok"] = "ok"
+    status: Literal["ok", "down"] = "ok"
 
 
 @app.get("/api/health")
