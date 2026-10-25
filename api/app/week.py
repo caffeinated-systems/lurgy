@@ -81,4 +81,7 @@ def load_days(directory: Path) -> dict[date, tuple[Board, Day]]:
                 msg = f"{day.date} is in more than one Week file"
                 raise ValueError(msg)
             days[day.date] = (week.board, day)
+    if not days:
+        msg = f"no Week files in {directory}"
+        raise ValueError(msg)
     return days

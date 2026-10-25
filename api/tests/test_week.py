@@ -47,6 +47,11 @@ def test_two_files_cannot_hold_the_same_day(tmp_path: Path) -> None:
         load_days(tmp_path)
 
 
+def test_an_empty_puzzles_dir_is_an_error(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="no Week files"):
+        load_days(tmp_path)
+
+
 def test_a_right_and_a_wrong_unforced_guess_take_the_same_work(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
