@@ -1,9 +1,10 @@
 import os
+from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta, timezone
 from functools import cache
 from http import HTTPStatus
 from pathlib import Path
-from typing import Annotated, Any, Literal, Self
+from typing import TYPE_CHECKING, Annotated, Any, Literal, Self
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -12,6 +13,25 @@ from pydantic import BaseModel, Field
 from app.board import DESKS, Board, Desk
 from app.clues import State
 from app.week import Day, load_days
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
+# UTC+14 (Kiribati): where every day starts first.
+EARLIEST = timezone(timedelta(hours=14))
+
+
+@cache
+def days() -> dict[date, tuple[Board, Day]]:
+    """Every day in the Week files, read once from `PUZZLES_DIR`."""
+    return load_days(Path(os.environ["PUZZLES_DIR"]))
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    days()  # A missing or bad Week file fails the boot, not the first request.
+    yield
+
 
 # ponytail: version mirrors pyproject.toml (the project isn't installed, so
 # importlib.metadata can't read it); title is a placeholder until #16 names the game.
@@ -22,16 +42,8 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     redoc_url=None,
     swagger_ui_oauth2_redirect_url=None,
+    lifespan=lifespan,
 )
-
-# UTC+14 (Kiribati): where every day starts first.
-EARLIEST = timezone(timedelta(hours=14))
-
-
-@cache
-def days() -> dict[date, tuple[Board, Day]]:
-    """Every day in the Week files, read once from `PUZZLES_DIR`."""
-    return load_days(Path(os.environ["PUZZLES_DIR"]))
 
 
 def today_anywhere() -> date:
@@ -100,9 +112,15 @@ class RevealedCoworker(BaseModel):
 
 
 class DayResponse(BaseModel):
-    date: Annotated[date, Field(description="The puzzle's day.")]
+    date: Annotated[
+        date, Field(description="The puzzle's day.", examples=["2026-10-19"])
+    ]
     coworkers: Annotated[
-        list[SeatedCoworker], Field(description="Everyone on the board, A1 to D5.")
+        list[SeatedCoworker],
+        Field(
+            description="Everyone on the board, A1 to D5.",
+            examples=[[{"desk": "A1", "name": "Aisha", "department": "Facilities"}]],
+        ),
     ]
     start: Annotated[
         RevealedCoworker, Field(description="The coworker revealed at the start.")
@@ -117,12 +135,17 @@ class Declaration(BaseModel):
 
 
 class DeclarationRequest(BaseModel):
-    date: Annotated[date, Field(description="The puzzle's day.")]
+    date: Annotated[
+        date, Field(description="The puzzle's day.", examples=["2026-10-19"])
+    ]
     declared: Annotated[
         list[Declaration],
         Field(
             description="Every declaration accepted so far, in order, "
-            "not counting the starting coworker."
+            "not counting the starting coworker.",
+            examples=[[{"desk": "A3", "state": "sick"}]],
+            # Everyone but the starting coworker and this declaration.
+            max_length=len(DESKS) - 2,
         ),
     ]
     declaration: Annotated[Declaration, Field(description="The new declaration.")]

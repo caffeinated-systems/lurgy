@@ -50,11 +50,12 @@ class Day(_Model):
         for i, (desk, state) in enumerate(
             [(self.start, self.state(self.start)), *steps]
         ):
-            if desk in known or state != self.state(desk):
-                return False
             sick = (BOARDS >> DESKS.index(desk) & 1).astype(np.bool_)
-            # Correct, so forced means no board left where they're the opposite.
-            if i and np.any(alive & (sick != (state == "sick"))):
+            # Every step scans in full before deciding, so a wrong guess and a right
+            # but unforced one take the same time. Forced: no board left with the
+            # opposite state, which only means something once the state is correct.
+            opposite = np.count_nonzero(alive & (sick != (state == "sick")))
+            if desk in known or state != self.state(desk) or (i and opposite):
                 return False
             known.add(desk)
             alive &= sick == (state == "sick")

@@ -1,9 +1,10 @@
+from datetime import date
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, today_anywhere
 from app.week import load_days
 from tests.factories import FIXTURES, MONDAY
 from tests.test_monday_sample import REVEALS, SICK
@@ -90,7 +91,9 @@ def test_an_unforced_step_in_the_declarations_so_far_is_rejected() -> None:
 
 
 def test_a_wrong_step_in_the_declarations_so_far_is_rejected() -> None:
-    assert declare([{"desk": "A3", "state": "well"}], "A4", "well") == REJECTED
+    # A3 sick is forced from the start alone, so only the wrong D5 can reject it.
+    assert declare([], "A3", "sick") != REJECTED
+    assert declare([{"desk": "D5", "state": "well"}], "A3", "sick") == REJECTED
 
 
 def test_a_repeated_declaration_is_rejected() -> None:
@@ -116,6 +119,31 @@ def test_a_declaration_for_an_unknown_day_is_not_found() -> None:
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_a_declaration_for_a_day_not_started_anywhere_is_not_found() -> None:
+    app.dependency_overrides[today_anywhere] = lambda: date(2026, 10, 18)
+
+    response = client.post(
+        "/api/declarations",
+        json={
+            "date": "2026-10-19",
+            "declared": [],
+            "declaration": {"desk": "A3", "state": "sick"},
+        },
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_more_declarations_than_desks_are_invalid() -> None:
+    a3 = {"desk": "A3", "state": "sick"}
+    response = client.post(
+        "/api/declarations",
+        json={"date": "2026-10-19", "declared": [a3] * 19, "declaration": a3},
+    )
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 def test_a_desk_off_the_board_is_invalid() -> None:

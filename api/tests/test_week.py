@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pytest
 from pydantic import ValidationError
 
@@ -9,6 +10,8 @@ from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD, board_index
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from numpy.typing import NDArray
 
 
 def test_the_fixture_loads_the_monday_sample() -> None:
@@ -42,3 +45,25 @@ def test_two_files_cannot_hold_the_same_day(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="2026-10-19"):
         load_days(tmp_path)
+
+
+def test_a_right_and_a_wrong_unforced_guess_take_the_same_work(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    board, day = load_days(FIXTURES)[MONDAY]
+    scans: list[int] = []
+    count_nonzero = np.count_nonzero
+
+    def spy(a: NDArray[np.bool_]) -> int:
+        scans.append(a.size)
+        return int(count_nonzero(a))
+
+    monkeypatch.setattr(np, "count_nonzero", spy)
+    works = []
+    for state in ("sick", "well"):  # D5 is sick, but nothing forces it yet
+        scans.clear()
+        assert not day.accepts(board, [("D5", state)])
+        works.append(list(scans))
+
+    assert works[0] == works[1]
+    assert works[0]

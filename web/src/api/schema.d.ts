@@ -91,11 +91,19 @@ export interface components {
              * Date
              * Format: date
              * @description The puzzle's day.
+             * @example 2026-10-19
              */
             date: string;
             /**
              * Coworkers
              * @description Everyone on the board, A1 to D5.
+             * @example [
+             *       {
+             *         "department": "Facilities",
+             *         "desk": "A1",
+             *         "name": "Aisha"
+             *       }
+             *     ]
              */
             coworkers: components["schemas"]["SeatedCoworker"][];
             /** @description The coworker revealed at the start. */
@@ -120,11 +128,18 @@ export interface components {
              * Date
              * Format: date
              * @description The puzzle's day.
+             * @example 2026-10-19
              */
             date: string;
             /**
              * Declared
              * @description Every declaration accepted so far, in order, not counting the starting coworker.
+             * @example [
+             *       {
+             *         "desk": "A3",
+             *         "state": "sick"
+             *       }
+             *     ]
              */
             declared: components["schemas"]["Declaration"][];
             /** @description The new declaration. */

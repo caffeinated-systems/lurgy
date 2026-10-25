@@ -1,10 +1,10 @@
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, datetime, timedelta
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 from fastapi.testclient import TestClient
 
-from app.main import app, days, today_anywhere
+from app.main import EARLIEST, app, days, today_anywhere
 from app.week import load_days
 from tests.factories import FIXTURES, MONDAY
 
@@ -60,14 +60,15 @@ def test_a_day_that_has_not_started_anywhere_is_not_found() -> None:
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_today_anywhere_is_utc_or_a_day_ahead() -> None:
-    utc = datetime.now(UTC).date()
-
-    assert today_anywhere() in {utc, utc + timedelta(days=1)}
+def test_today_anywhere_is_utc_plus_14() -> None:
+    assert EARLIEST.utcoffset(None) == timedelta(hours=14)
+    assert today_anywhere() == datetime.now(EARLIEST).date()
 
 
 def test_days_come_from_puzzles_dir(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("PUZZLES_DIR", str(FIXTURES))
     days.cache_clear()
 
+    with TestClient(app):  # runs the startup hook, which loads them
+        assert days.cache_info().currsize == 1
     assert MONDAY in days()
