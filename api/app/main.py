@@ -3,17 +3,29 @@ from typing import Literal
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-app = FastAPI()
+# ponytail: version mirrors pyproject.toml (the project isn't installed, so
+# importlib.metadata can't read it); title is a placeholder until #16 names the game.
+app = FastAPI(
+    title="Office bug API",
+    version="0.1.0",
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json",
+    redoc_url=None,
+    swagger_ui_oauth2_redirect_url=None,
+)
 
 
 class Health(BaseModel):
-    status: Literal["ok"] = "ok"
+    status: Literal["ok"] = Field(
+        default="ok", description="Always `ok` while the API is up.", examples=["ok"]
+    )
 
 
 @app.get("/api/health")
 def health() -> Health:
+    """Report that the API is up."""
     return Health()
 
 

@@ -11,7 +11,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Health */
+        /**
+         * Health
+         * @description Report that the API is up.
+         */
         get: operations["health_api_health_get"];
         put?: never;
         post?: never;
@@ -29,7 +32,9 @@ export interface components {
         Health: {
             /**
              * Status
+             * @description Always `ok` while the API is up.
              * @default ok
+             * @example ok
              * @constant
              */
             status: "ok";
