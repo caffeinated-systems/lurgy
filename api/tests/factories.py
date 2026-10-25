@@ -1,4 +1,10 @@
+from datetime import date
+from pathlib import Path
+
 from app.board import DESKS, Board, Coworker, Desk
+
+FIXTURES = Path(__file__).parent / "fixtures" / "puzzles"
+MONDAY = date(2026, 10, 19)  # the Monday sample's day in the fixture Week
 
 # The Monday sample from the voice prototype: names run A to T across the floor.
 SAMPLE_DEPARTMENTS = (

@@ -1,0 +1,363 @@
+{
+  "board": {
+    "coworkers": [
+      {
+        "name": "Aisha",
+        "department": "Facilities"
+      },
+      {
+        "name": "Barry",
+        "department": "Facilities"
+      },
+      {
+        "name": "Carol",
+        "department": "HR"
+      },
+      {
+        "name": "Dev",
+        "department": "Marketing"
+      },
+      {
+        "name": "Erin",
+        "department": "IT"
+      },
+      {
+        "name": "Fergus",
+        "department": "Facilities"
+      },
+      {
+        "name": "Gemma",
+        "department": "Marketing"
+      },
+      {
+        "name": "Hamid",
+        "department": "Finance"
+      },
+      {
+        "name": "Imogen",
+        "department": "IT"
+      },
+      {
+        "name": "Jas",
+        "department": "HR"
+      },
+      {
+        "name": "Kev",
+        "department": "IT"
+      },
+      {
+        "name": "Linda",
+        "department": "Sales"
+      },
+      {
+        "name": "Mo",
+        "department": "Finance"
+      },
+      {
+        "name": "Nadia",
+        "department": "Sales"
+      },
+      {
+        "name": "Ollie",
+        "department": "Sales"
+      },
+      {
+        "name": "Priya",
+        "department": "Marketing"
+      },
+      {
+        "name": "Quentin",
+        "department": "Finance"
+      },
+      {
+        "name": "Rosa",
+        "department": "Sales"
+      },
+      {
+        "name": "Steve",
+        "department": "HR"
+      },
+      {
+        "name": "Tariq",
+        "department": "IT"
+      }
+    ]
+  },
+  "days": [
+    {
+      "date": "2026-10-19",
+      "start": "B3",
+      "sick": [
+        "A1",
+        "C1",
+        "D1",
+        "A2",
+        "C2",
+        "A3",
+        "A5",
+        "D5"
+      ],
+      "reveals": [
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "column",
+              "column": "A"
+            },
+            "op": "exactly",
+            "n": 4,
+            "state": "sick"
+          },
+          "text": "Four people in my column are sick. I did wipe the door handles. Once."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "row",
+              "row": 1
+            },
+            "op": "exactly",
+            "n": 3,
+            "state": "sick"
+          },
+          "text": "Three people in row 1 are sick. I'm working from the stairwell today."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "department",
+              "name": "HR"
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "Only one person in HR is sick. I'll need that in writing."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "between",
+              "a": "D1",
+              "b": "D4"
+            },
+            "op": "exactly",
+            "n": 0,
+            "state": "sick"
+          },
+          "text": "Nobody between me and Priya is sick. Think of me as a soft launch."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "direction",
+              "of": "A2",
+              "direction": "right"
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "One person to my right is sick. It's not a bug, it's a feature."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "department",
+              "name": "Facilities"
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "Only one of us in Facilities is sick. I'll get the mop."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "department",
+              "name": "Marketing"
+            },
+            "op": "exactly",
+            "n": 2,
+            "state": "sick"
+          },
+          "text": "Two of us in Marketing are sick. We're calling it engagement."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "direction",
+              "of": "D2",
+              "direction": "above"
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "Exactly one person above me is sick. They sneezed on my monitor."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "between",
+              "a": "A3",
+              "b": "A5"
+            },
+            "op": "exactly",
+            "n": 0,
+            "state": "sick"
+          },
+          "text": "Nobody between me and Quentin is sick. Have you tried turning me off and on again?"
+        },
+        {
+          "clue": {
+            "kind": "more",
+            "a": {
+              "kind": "row",
+              "row": 3
+            },
+            "b": {
+              "kind": "direction",
+              "of": "B3",
+              "direction": "right"
+            },
+            "state": "sick"
+          },
+          "text": "My row has more sick people than the sick people to my right. I've logged it. Formally."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "between",
+              "a": "C3",
+              "b": "C1"
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "One sick person between me and Carol. Sounds like a you problem, boss."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "row",
+              "row": 3
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "Just one person in my row is sick. I'm keeping my distance. Two metres, minimum."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "direction",
+              "of": "A4",
+              "direction": "below"
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "Exactly one person below me is sick. I've done the numbers twice."
+        },
+        {
+          "clue": null,
+          "text": "Has anyone seen my mug? WORLD'S BEST CLOSER. Someone's been drinking out of it."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "neighbours",
+              "of": "C4"
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "One of my neighbours is sick. One out of eight. I like those odds."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "column",
+              "column": "D"
+            },
+            "op": "exactly",
+            "n": 2,
+            "state": "sick"
+          },
+          "text": "Two people in my column are sick. I've drafted a strongly worded email."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "department",
+              "name": "Finance"
+            },
+            "op": "exactly",
+            "n": 1,
+            "state": "sick"
+          },
+          "text": "Only one of us in Finance is sick. Don't tell anyone I came in."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "column",
+              "column": "C"
+            },
+            "op": "exactly",
+            "n": 2,
+            "state": "sick"
+          },
+          "text": "Two people in column C are sick. Not me. I'm made of sterner stuff."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "row",
+              "row": 5
+            },
+            "op": "exactly",
+            "n": 2,
+            "state": "sick"
+          },
+          "text": "Two people in my row are sick. I can't say who. Policy."
+        },
+        {
+          "clue": {
+            "kind": "count",
+            "group": {
+              "kind": "corners"
+            },
+            "op": "exactly",
+            "n": 4,
+            "state": "sick"
+          },
+          "text": "All four corners are sick. I'm in one. Obviously."
+        }
+      ]
+    }
+  ]
+}

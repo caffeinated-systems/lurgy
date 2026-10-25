@@ -8,6 +8,7 @@ export default defineConfig({
 		command:
 			"npm run build && uv run --directory ../api uvicorn app.main:app --port 8123",
 		url: "http://localhost:8123/api/health",
+		env: { PUZZLES_DIR: "tests/fixtures/puzzles" },
 		reuseExistingServer: !process.env.CI,
 	},
 });
