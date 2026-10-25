@@ -1,0 +1,60 @@
+name: Dependabot auto-merge
+# Not pull_request_target (ADR 0002). Dependabot's pull_request runs get no secrets,
+# but the permissions below still apply to their GITHUB_TOKEN.
+on: pull_request
+
+permissions:
+  pull-requests: write
+  contents: write
+  checks: read
+  actions: read
+  statuses: read
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    concurrency:
+      group: auto-merge-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Merge patch and minor updates once tests pass
+        if: ${{contains(fromJSON('["version-update:semver-patch", "version-update:semver-minor"]'), steps.metadata.outputs.update-type)}}
+        timeout-minutes: 20
+        # Only watch the e2e check: it needs api and web, so it's skipped (and we stop) if either fails.
+        # This job is a check on the PR too, so `gh pr checks --watch` would wait on itself.
+        run: |
+          while true; do
+            pr=$(gh pr view "$PR_URL" --json headRefOid,statusCheckRollup)
+            sha=$(jq -r .headRefOid <<<"$pr")
+            # A newer push gets its own run, or stays with whoever pushed it.
+            if [ "$sha" != "$HEAD_SHA" ]; then echo "head moved to $sha"; exit 0; fi
+            result=$(jq -r '[.statusCheckRollup[] | select(.workflowName == "Tests" and .name == "e2e")] | if length == 0 then "" elif any(.status != "COMPLETED") then "PENDING" else max_by(.completedAt).conclusion end' <<<"$pr")
+            case "$result" in
+              SUCCESS) break ;;
+              ""|PENDING) sleep 20 ;;
+              *) echo "tests: $result"; exit 1 ;;
+            esac
+          done
+          gh pr merge --merge --match-head-commit "$HEAD_SHA" "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          HEAD_SHA: ${{github.event.pull_request.head.sha}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Ask for a review on failing updates
+        if: ${{failure() && contains(fromJSON('["version-update:semver-patch", "version-update:semver-minor"]'), steps.metadata.outputs.update-type)}}
+        run: gh pr edit "$PR_URL" --add-reviewer da-mask
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Ask for a review on major or unclassified updates
+        if: ${{!cancelled() && !contains(fromJSON('["version-update:semver-patch", "version-update:semver-minor"]'), steps.metadata.outputs.update-type)}}
+        run: gh pr edit "$PR_URL" --add-reviewer da-mask --add-label "major update"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
