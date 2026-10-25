@@ -88,18 +88,22 @@ _Avoid_: tip, clue
 How hard a puzzle is: Easy, Medium or Hard, set by its hardest step, the most clues the office manager must combine to find any forced coworker.
 _Avoid_: level, rating
 
-**Mistake**:
-What a declaration rejected with "Not enough evidence" leaves on a coworker, whether the declaration was wrong or not yet forced. A coworker carries at most one.
-_Avoid_: error, strike, wrong guess
+**Mask**:
+What a declaration rejected with "Not enough evidence" leaves on a coworker: they answer back with a remark and put on a face mask. A wrong declaration and one not yet forced get the same mask and the same kind of remark, so neither reveals which it was. A coworker wears at most one.
+_Avoid_: mistake, error, strike, wrong guess
+
+**Remark**:
+What a coworker says back when they get a mask. Like flavour, a remark never carries or suggests logic.
+_Avoid_: comeback, retort, taunt
 
 **Taunt**:
-The game's own jab at the office manager, after a mistake, a hint or a solve. Coworkers make clues and flavour, never taunts.
+The game's own jab at the office manager, after a hint or a solve. A masked coworker's remark is theirs, not a taunt; otherwise coworkers make clues and flavour.
 _Avoid_: diss, insult, banter
 
 **Verdict**:
-The taunt on solving a puzzle, chosen by how many coworkers carry a mistake or a hint: none, a few, or many.
+The taunt on solving a puzzle, chosen by how many coworkers wear a mask or carry a hint: none, a few, or many.
 _Avoid_: score, grade, rating
 
 **Result**:
-What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers carry a mistake or a hint.
+What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers wear a mask or carry a hint.
 _Avoid_: score, scorecard
