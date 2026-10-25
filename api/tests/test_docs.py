@@ -27,7 +27,9 @@ def test_every_route_and_field_is_described() -> None:
     operations = [op for path in schema["paths"].values() for op in path.values()]
     assert operations
     assert all(op.get("description") for op in operations)
-    for model in schema["components"]["schemas"].values():
-        if model["title"] in {"HTTPValidationError", "ValidationError"}:
+    for name, model in schema["components"]["schemas"].items():
+        if name in {"HTTPValidationError", "ValidationError"}:
             continue
-        assert all(field.get("description") for field in model["properties"].values())
+        # Enums such as Desk have no fields.
+        fields = model.get("properties", {}).values()
+        assert all(field.get("description") for field in fields), name
