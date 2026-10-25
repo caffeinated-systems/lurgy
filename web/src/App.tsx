@@ -1,16 +1,31 @@
 import { useEffect, useState } from "react";
-import type { components } from "./api/schema";
+import { fetchDay } from "./api.ts";
+import type { Day } from "./game.ts";
+import { Play } from "./Play.tsx";
 
-type Health = components["schemas"]["Health"];
+/** The player's local date as YYYY-MM-DD. */
+export function localToday(now = new Date()): string {
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
 
 export function App() {
-	const [status, setStatus] = useState<Health["status"]>();
+	const [day, setDay] = useState<Day | "missing" | "offline">();
 
 	useEffect(() => {
-		fetch("/api/health")
-			.then((response) => response.json() as Promise<Health>)
-			.then((health) => setStatus(health.status));
+		// ponytail: ?day= stands in for the weekly schedule until #32.
+		const date =
+			new URLSearchParams(location.search).get("day") ?? localToday();
+		fetchDay(date).then(
+			(found) => setDay(found ?? "missing"),
+			() => setDay("offline"),
+		);
 	}, []);
 
-	return <h1>Office bug: {status ?? "…"}</h1>;
+	if (day === undefined) return <p className="notice">Opening the office…</p>;
+	if (day === "missing")
+		return <p className="notice">No puzzle for that day yet.</p>;
+	if (day === "offline")
+		return <p className="notice">Couldn't reach the office, try again.</p>;
+	return <Play day={day} />;
 }
