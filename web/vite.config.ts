@@ -4,7 +4,17 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
 	plugins: [react()],
-	server: { proxy: { "/api": "http://localhost:8000" } },
+	server: {
+		proxy: { "/api": "http://localhost:8000" },
+		// Test output, rewritten on every run: watching it reloads the open page.
+		watch: {
+			ignored: [
+				"**/coverage/**",
+				"**/test-results/**",
+				"**/playwright-report/**",
+			],
+		},
+	},
 	test: {
 		environment: "jsdom",
 		unstubGlobals: true,
