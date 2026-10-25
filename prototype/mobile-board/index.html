@@ -1,0 +1,240 @@
+<title>Office Bug Board Layouts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* PROTOTYPE, throwaway (#20): three structurally different phone layouts for the same Monday board.
+   Layout concept: one phone-width column; the board is the hero, controls sit within thumb reach. */
+:root {
+  --bg: #eef1ef; --surface: #ffffff; --ink: #1d2733; --muted: #5b6876; --line: #cfd6d3;
+  --sick: #e3e98a; --sick-ink: #5a6400; --well: #cfe6ee; --well-ink: #1f6f8b;
+  --mistake: #e0a91c; --accent: #2b4c7e; --hl: #2b4c7e22;
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12171c; --surface: #1b232b; --ink: #e6ecef; --muted: #9aa7b2; --line: #2c3740;
+  --sick: #4a5210; --sick-ink: #d6e05a; --well: #173a47; --well-ink: #7cc6de;
+  --mistake: #d9a521; --accent: #8fb3ff; --hl: #8fb3ff26; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12171c; --surface: #1b232b; --ink: #e6ecef; --muted: #9aa7b2; --line: #2c3740;
+  --sick: #4a5210; --sick-ink: #d6e05a; --well: #173a47; --well-ink: #7cc6de;
+  --mistake: #d9a521; --accent: #8fb3ff; --hl: #8fb3ff26; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 16px/1.45 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px 140px }
+main { max-width: 30rem; margin: 0 auto; display: grid; gap: 12px }
+header h1 { font: 800 1.5rem/1.1 var(--display); margin: 0; text-wrap: balance }
+header p { margin: 4px 0 0; color: var(--muted); font-size: .9rem }
+.proto-note { font-size: .78rem; color: var(--muted); border: 1px dashed var(--line); border-radius: 6px; padding: 6px 8px }
+button { font: inherit; color: inherit }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
+.coord { font: 500 .7rem/1 var(--mono); color: var(--muted); letter-spacing: .02em }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+.st-sick { background: var(--sick); }
+.st-well { background: var(--well); }
+.st-sick .state { color: var(--sick-ink) } .st-well .state { color: var(--well-ink) }
+.state { font: 700 .7rem/1 var(--body); text-transform: uppercase; letter-spacing: .08em }
+.mistake::after { content: ""; position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; background: var(--mistake); border-radius: 2px }
+.in-group { box-shadow: inset 0 0 0 3px var(--accent) }
+.toast { min-height: 1.5em; font-weight: 700 }
+.toast.bad { color: var(--mistake) }
+
+/* A: card grid + action sheet */
+.a-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px }
+.a-card { position: relative; min-height: 6.6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+  padding: 6px; text-align: left; display: flex; flex-direction: column; gap: 3px; cursor: pointer; min-width: 0 }
+.a-card .nm { font: 600 .92rem/1.1 var(--display) } .a-card .dp { font-size: .7rem; color: var(--muted) }
+.a-card .cl { font-size: .68rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden }
+.sheet-back { position: fixed; inset: 0; background: #0008; display: flex; align-items: flex-end; z-index: 20 }
+.sheet { background: var(--surface); width: 100%; border-radius: 14px 14px 0 0; display: grid; gap: 10px;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(70px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.sheet h2 { margin: 0; font: 800 1.3rem/1.1 var(--display) }
+.sheet .say { font-size: 1.05rem } .sheet .plain { color: var(--muted); font-size: .9rem }
+.big { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.big button { min-height: 56px; border-radius: 10px; border: 0; font-weight: 700; font-size: 1.05rem; cursor: pointer }
+.btn-sick { background: var(--sick); color: var(--sick-ink) } .btn-well { background: var(--well); color: var(--well-ink) }
+.btn-plain { background: transparent; border: 1px solid var(--line) !important }
+
+/* B: compact tiles + clue log + thumb bar */
+.b-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 4; background: var(--bg); padding-block: 6px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.b-tile { position: relative; aspect-ratio: 1 / .78; max-width: 100%; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+  display: grid; place-items: center; align-content: center; gap: 2px; cursor: pointer; padding: 2px; min-width: 0 }
+.b-tile .nm { font: 600 .82rem/1 var(--display); max-width: 100%; overflow: hidden; text-overflow: ellipsis }
+.b-tile.sel { outline: 3px solid var(--accent); outline-offset: 1px }
+.log { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0 }
+.log button { width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 8px 10px; cursor: pointer; display: grid; gap: 2px }
+.log .who { font-weight: 700; font-size: .85rem } .log .plain { font-size: .8rem; color: var(--muted) }
+.log button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--accent) }
+.thumb { position: fixed; left: 0; right: 0; bottom: calc(52px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: 1px solid var(--line);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 6px; z-index: 5 }
+.thumb .who { font-weight: 700 }
+
+/* C: list first, sticky mini-map */
+.mini { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 4; background: var(--bg); padding-block: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; width: 9rem }
+.mini span { position: relative; height: 1.1rem; border-radius: 3px; border: 1px solid var(--line); background: var(--surface) }
+.c-row h2 { font: 600 .8rem/1 var(--mono); color: var(--muted); margin: 8px 0 4px; letter-spacing: .04em }
+.c-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+.c-item { position: relative; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 8px 10px; display: grid; gap: 4px }
+.c-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap }
+.c-head .nm { font: 600 1rem/1.1 var(--display) } .c-head .dp { font-size: .8rem; color: var(--muted) }
+.c-item .plain { font-size: .82rem; color: var(--muted) }
+.c-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px }
+.c-acts button { min-height: 44px; border-radius: 8px; border: 0; font-weight: 700; cursor: pointer }
+
+/* switcher: obviously not part of the design */
+.switch { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 30;
+  display: flex; align-items: center; gap: 4px; background: #111; color: #fff; border-radius: 999px; padding: 4px; box-shadow: 0 4px 14px #0006; font: 600 .85rem var(--body) }
+.switch button { background: #333; color: #fff; border: 0; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.1rem }
+.switch span { padding: 0 10px; white-space: nowrap }
+@media (prefers-reduced-motion: no-preference) { .a-card, .b-tile, .c-item { transition: background-color .2s } }
+</style>
+
+<main>
+  <header>
+    <h1>Monday · Easy</h1>
+    <p>Someone brought a bug back from the weekend. Work out who's sick and send them home before it reaches the kitchen.</p>
+  </header>
+  <p class="proto-note">Prototype for layout only. A declaration here is accepted whenever it's correct; the real game also requires it to be forced. Keyboard: arrow keys move, S or W declares, Enter opens. [ and ] switch layouts.</p>
+  <p id="toast" class="toast" role="status" aria-live="polite"></p>
+  <div id="app"></div>
+</main>
+<nav class="switch" aria-label="Prototype layout switcher">
+  <button id="prev" aria-label="Previous layout">‹</button><span id="label"></span><button id="next" aria-label="Next layout">›</button>
+</nav>
+
+<script>
+const P = [
+  ["Aisha","Facilities","S","Four people in my column are sick. I did wipe the door handles. Once.","4 sick in column A.",[0,4,8,12,16]],
+  ["Barry","Facilities","W","Three people in row 1 are sick. I'm working from the stairwell today.","3 sick in row 1.",[0,1,2,3]],
+  ["Carol","HR","S","Only one person in HR is sick. I'll need that in writing.","1 sick in HR.",[2,9,18]],
+  ["Dev","Marketing","S","Nobody between me and Priya is sick. Think of me as a soft launch.","0 sick between Dev and Priya.",[7,11]],
+  ["Erin","IT","S","One person to my right is sick. It's not a bug, it's a feature.","1 sick to the right of Erin.",[5,6,7]],
+  ["Fergus","Facilities","W","Only one of us in Facilities is sick. I'll get the mop.","1 sick in Facilities.",[0,1,5]],
+  ["Gemma","Marketing","S","Two of us in Marketing are sick. We're calling it engagement.","2 sick in Marketing.",[3,6,15]],
+  ["Hamid","Finance","W","Exactly one person above me is sick. They sneezed on my monitor.","1 sick above Hamid.",[3]],
+  ["Imogen","IT","S","Nobody between me and Quentin is sick. Have you tried turning me off and on again?","0 sick between Imogen and Quentin.",[12]],
+  ["Jas","HR","W","My row has more sick people than the sick people to my right. I've logged it. Formally.","More sick in row 3 than sick to the right of Jas.",[8,9,10,11]],
+  ["Kev","IT","W","One sick person between me and Carol. Sounds like a you problem, boss.","1 sick between Kev and Carol.",[6]],
+  ["Linda","Sales","W","Just one person in my row is sick. I'm keeping my distance. Two metres, minimum.","1 sick in row 3.",[8,9,10,11]],
+  ["Mo","Finance","W","Exactly one person below me is sick. I've done the numbers twice.","1 sick below Mo.",[16]],
+  ["Nadia","Sales","W","Has anyone seen my mug? WORLD'S BEST CLOSER. Someone's been drinking out of it.",null,[]],
+  ["Ollie","Sales","W","One of my neighbours is sick. One out of eight. I like those odds.","1 sick among Ollie's neighbours.",[9,10,11,13,15,17,18,19]],
+  ["Priya","Marketing","W","Two people in my column are sick. I've drafted a strongly worded email.","2 sick in column D.",[3,7,11,15,19]],
+  ["Quentin","Finance","S","Only one of us in Finance is sick. Don't tell anyone I came in.","1 sick in Finance.",[7,12,16]],
+  ["Rosa","Sales","W","Two people in column C are sick. Not me. I'm made of sterner stuff.","2 sick in column C.",[2,6,10,14,18]],
+  ["Steve","HR","W","Two people in my row are sick. I can't say who. Policy.","2 sick in row 5.",[16,17,18,19]],
+  ["Tariq","IT","S","All four corners are sick. I'm in one. Obviously.","4 sick in the corners.",[0,3,16,19]],
+].map(([name, dept, sol, say, plain, group], i) => ({ i, name, dept, sol: sol === "S" ? "sick" : "well", say, plain, group, coord: "ABCD"[i % 4] + (Math.floor(i / 4) + 1) }));
+
+const TAUNTS = ["Not enough evidence. Wild accusations are HR's job.", "Not enough evidence. On what grounds? Vibes?", "Not enough evidence. Sit down."];
+const VARIANTS = [["a", "A · Cards + sheet"], ["b", "B · Tiles + clue log"], ["c", "C · List + mini-map"]];
+const S = { state: P.map(p => p.name === "Jas" ? "well" : "hidden"), mistake: P.map(() => false), sel: 9, focus: 9, clue: null, sheet: null, mistakes: 0, order: [9] };
+let variant = (location.hash.slice(1) || "a").toLowerCase(); if (!VARIANTS.some(v => v[0] === variant)) variant = "a";
+
+const $ = s => document.querySelector(s);
+const app = $("#app"), toast = $("#toast");
+const revealed = i => S.state[i] !== "hidden";
+const cls = i => `${revealed(i) ? "st-" + S.state[i] : ""} ${S.mistake[i] ? "mistake" : ""} ${S.clue !== null && P[S.clue].group.includes(i) ? "in-group" : ""}`;
+const stateWord = i => revealed(i) ? S.state[i] : "unknown";
+const sayOf = i => P[i].plain ? P[i].say : `“${P[i].say}” (flavour, no clue)`;
+const label = i => `${P[i].coord}, ${P[i].name}, ${P[i].dept}, ${stateWord(i)}${S.mistake[i] ? ", one mistake" : ""}${revealed(i) ? ". Says: " + P[i].say : ""}`;
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function declare(i, s) {
+  if (revealed(i)) return;
+  if (P[i].sol === s) {
+    S.state[i] = s; S.clue = null; S.order.push(i);
+    say(`${P[i].name} is ${s}. ${P[i].name} says: ${P[i].say}`, false);
+    if (S.state.every(x => x !== "hidden")) say(S.mistakes ? `Office cleared, ${S.mistakes} mistake${S.mistakes > 1 ? "s" : ""}. Took you long enough.` : "Office cleared. Have a biscuit.", false);
+  } else {
+    if (!S.mistake[i]) { S.mistake[i] = true; S.mistakes++; }
+    say(TAUNTS[(i + S.mistakes) % TAUNTS.length], true);
+  }
+  S.sheet = null; render();
+}
+function say(msg, bad) { toast.textContent = msg; toast.className = "toast" + (bad ? " bad" : ""); }
+
+function gridKeys(e, selector) {
+  const k = e.key; let f = S.focus;
+  if (k === "ArrowRight") f = Math.min(19, f + 1); else if (k === "ArrowLeft") f = Math.max(0, f - 1);
+  else if (k === "ArrowDown") f = Math.min(19, f + 4); else if (k === "ArrowUp") f = Math.max(0, f - 4);
+  else if (k === "s" || k === "S") return declare(S.focus, "sick");
+  else if (k === "w" || k === "W") return declare(S.focus, "well");
+  else return;
+  e.preventDefault(); S.focus = f; if (variant === "b") S.sel = f;
+  render(); document.querySelector(`${selector}[data-desk="${f}"]`)?.focus();
+}
+
+const views = {
+  a() {
+    const cards = P.map(p => `<button class="a-card ${cls(p.i)}" data-desk="${p.i}" data-act="open" tabindex="${p.i === S.focus ? 0 : -1}" aria-label="${esc(label(p.i))}">
+      <span class="coord">${p.coord}</span><span class="nm">${p.name}</span><span class="dp">${p.dept}</span>
+      ${revealed(p.i) ? `<span class="state">${S.state[p.i]}</span><span class="cl">${esc(p.say)}</span>` : ""}</button>`).join("");
+    let sheet = "";
+    if (S.sheet !== null) {
+      const p = P[S.sheet];
+      sheet = `<div class="sheet-back" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t">
+        <span class="coord">${p.coord} · ${p.dept}</span><h2 id="sh-t">${p.name}</h2>
+        ${revealed(p.i) ? `<p class="say">${esc(p.say)}</p><p class="plain">${p.plain ? esc(p.plain) : "Flavour: no clue."}</p>
+          <div class="big"><button class="btn-plain" data-act="close">Close</button></div>`
+        : `<p class="plain">Declare ${p.name}:</p><div class="big"><button class="btn-sick" data-act="sick" data-desk="${p.i}">Sick</button><button class="btn-well" data-act="well" data-desk="${p.i}">Well</button></div>
+          <button class="btn-plain" data-act="close" style="min-height:44px;border-radius:10px">Cancel</button>`}
+      </div></div>`;
+    }
+    return `<div class="a-grid" role="group" aria-label="Office floor, 4 desks across, 5 rows" data-grid=".a-card">${cards}</div>${sheet}`;
+  },
+  b() {
+    const tiles = P.map(p => `<button class="b-tile ${cls(p.i)} ${p.i === S.sel ? "sel" : ""}" data-desk="${p.i}" data-act="select" tabindex="${p.i === S.focus ? 0 : -1}" aria-label="${esc(label(p.i))}" aria-pressed="${p.i === S.sel}">
+      <span class="coord">${p.coord}</span><span class="nm">${p.name}</span>${revealed(p.i) ? `<span class="state">${S.state[p.i]}</span>` : ""}</button>`).join("");
+    const log = [...S.order].reverse().map(i => P[i]).map(p => `<li><button data-act="clue" data-desk="${p.i}" aria-pressed="${S.clue === p.i}">
+      <span class="who">${p.name} · ${p.coord} · ${S.state[p.i]}</span><span>${esc(p.say)}</span>${p.plain ? `<span class="plain">${esc(p.plain)}</span>` : `<span class="plain">Flavour: no clue.</span>`}</button></li>`).join("");
+    const s = P[S.sel];
+    const thumb = `<div class="thumb"><span class="who">${s.coord} · ${s.name} · ${s.dept}${revealed(s.i) ? " · " + S.state[s.i] : ""}</span>
+      ${revealed(s.i) ? `<span class="plain" style="color:var(--muted)">Already declared. Tap a clue below to see who it talks about.</span>`
+      : `<div class="big"><button class="btn-sick" data-act="sick" data-desk="${s.i}">Sick</button><button class="btn-well" data-act="well" data-desk="${s.i}">Well</button></div>`}</div>`;
+    return `<div class="b-grid" role="group" aria-label="Office floor, 4 desks across, 5 rows" data-grid=".b-tile">${tiles}</div>
+      <h2 style="font:600 .8rem var(--mono);color:var(--muted);margin:6px 0 0">CLUES, NEWEST FIRST</h2><ul class="log">${log}</ul>${thumb}`;
+  },
+  c() {
+    const mini = `<div class="mini" aria-hidden="true">${P.map(p => `<span class="${cls(p.i)}"></span>`).join("")}</div>`;
+    const rows = [0, 1, 2, 3, 4].map(r => `<section class="c-row"><h2>ROW ${r + 1}</h2><ul class="c-list">${P.slice(r * 4, r * 4 + 4).map(p => `
+      <li class="c-item ${cls(p.i)}"><div class="c-head"><span class="coord">${p.coord}</span><span class="nm">${p.name}</span><span class="dp">${p.dept}</span>
+        ${revealed(p.i) ? `<span class="state">${S.state[p.i]}</span>` : ""}${S.mistake[p.i] ? `<span class="sr">one mistake</span>` : ""}</div>
+        ${revealed(p.i) ? `<span>${esc(p.say)}</span>${p.plain ? `<button class="btn-plain" data-act="clue" data-desk="${p.i}" aria-pressed="${S.clue === p.i}" style="min-height:40px;border-radius:8px;cursor:pointer;text-align:left;padding:0 10px">${S.clue === p.i ? "Hide" : "Show"} who this is about</button>` : `<span class="plain">Flavour: no clue.</span>`}`
+        : `<div class="c-acts"><button class="btn-sick" data-act="sick" data-desk="${p.i}" aria-label="Declare ${p.name} sick">Sick</button><button class="btn-well" data-act="well" data-desk="${p.i}" aria-label="Declare ${p.name} well">Well</button></div>`}
+      </li>`).join("")}</ul></section>`).join("");
+    return mini + rows;
+  },
+};
+
+function render() {
+  app.innerHTML = views[variant]();
+  $("#label").textContent = VARIANTS.find(v => v[0] === variant)[1];
+  if (variant === "a" && S.sheet !== null) document.querySelector(".sheet button")?.focus();
+}
+
+app.addEventListener("click", e => {
+  const t = e.target.closest("[data-act]"); if (!t) return;
+  if (t.dataset.act === "close" && t !== e.target && e.target.closest(".sheet")) return;
+  const i = +t.dataset.desk;
+  switch (t.dataset.act) {
+    case "open": S.focus = i; S.sheet = i; S.clue = revealed(i) && P[i].plain ? i : null; break;
+    case "close": { const back = S.sheet; S.sheet = null; S.clue = null; render(); document.querySelector(`.a-card[data-desk="${back}"]`)?.focus(); return; }
+    case "select": S.sel = i; S.focus = i; break;
+    case "clue": S.clue = S.clue === i ? null : i; break;
+    case "sick": case "well": return declare(i, t.dataset.act);
+  }
+  render();
+});
+app.addEventListener("keydown", e => {
+  if (e.key === "Escape" && S.sheet !== null) { const back = S.sheet; S.sheet = null; S.clue = null; render(); document.querySelector(`.a-card[data-desk="${back}"]`)?.focus(); return; }
+  const g = e.target.closest("[data-grid]"); if (g && S.sheet === null) gridKeys(e, g.dataset.grid);
+});
+function go(d) { const n = VARIANTS.findIndex(v => v[0] === variant); variant = VARIANTS[(n + d + VARIANTS.length) % VARIANTS.length][0]; S.sheet = null; history.replaceState(null, "", "#" + variant); render(); }
+$("#prev").onclick = () => go(-1); $("#next").onclick = () => go(1);
+document.addEventListener("keydown", e => { if (e.target.closest("input,textarea,[contenteditable]")) return; if (e.key === "[") go(-1); if (e.key === "]") go(1); });
+render();
+</script>
