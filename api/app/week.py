@@ -43,7 +43,7 @@ class Day(_Model):
 
         The starting coworker is already known, so a step can't name them.
         """
-        # ponytail: masks span all 2^20 boards, ~140 ms for a full Week day; index
+        # ponytail: masks span all 2^20 boards, ~140 ms to replay a whole day; index
         # the surviving boards instead if #42's limits or hints need it faster.
         alive = np.ones(BOARDS.shape, dtype=np.bool_)
         known: set[Desk] = set()

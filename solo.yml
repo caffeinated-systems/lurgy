@@ -7,7 +7,9 @@ processes:
     auto_start: true
     auto_restart: true
     restart_when_changed: []
-    env: {}
+    # ponytail: the fixture Week until the puzzles repo exists (#31/#34).
+    env:
+      PUZZLES_DIR: tests/fixtures/puzzles
   npm:dev:
     command: npm run dev
     working_dir: web
