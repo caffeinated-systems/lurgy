@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -b && vite build",
-		"check": "biome check",
+		"check": "biome check --error-on-warnings",
 		"test": "vitest run --coverage",
 		"test:e2e": "playwright test",
 		"gen:api": "uv run --directory ../api python -c \"import json; from app.main import app; print(json.dumps(app.openapi()))\" | openapi-typescript -o src/api/schema.d.ts"

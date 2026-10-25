@@ -9,7 +9,7 @@ permissions:
 
 concurrency:
   group: tests-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   api:
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: lts/*
+          node-version-file: web/.nvmrc
           cache: npm
           cache-dependency-path: web/package-lock.json
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
@@ -55,7 +55,7 @@ jobs:
       - name: Tests
         run: npm test
       - name: API types match the OpenAPI schema
-        run: npm run gen:api && git diff --exit-code src/api/schema.d.ts
+        run: npm run gen:api && git diff --exit-code && test -z "$(git status --porcelain src/api)"
 
   e2e:
     needs: [api, web]
@@ -67,13 +67,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: lts/*
+          node-version-file: web/.nvmrc
           cache: npm
           cache-dependency-path: web/package-lock.json
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           working-directory: api
       - run: npm ci
+      - name: Install API dependencies
+        run: uv sync --locked
+        working-directory: api
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
       - name: Browser tests
