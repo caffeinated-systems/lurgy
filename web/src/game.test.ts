@@ -40,6 +40,17 @@ test("a saved day resumes where it left off", () => {
 	expect(game.selected).toBe("C1");
 });
 
+test("a solved day resumes with the starting coworker selected", () => {
+	save(DAY.date, {
+		reveals: [DAY.start, ...DESKS.slice(1).map(reveal)],
+		mistakes: [],
+		startedAt: 0,
+		solvedAt: 9,
+	});
+
+	expect(start(DAY, 1000).selected).toBe("A1");
+});
+
 test("broken or foreign storage starts the day afresh", () => {
 	localStorage.setItem("office-bug:2026-10-19", "{not json");
 	expect(load(DAY.date)).toBeUndefined();

@@ -1,0 +1,182 @@
+import { type KeyboardEvent, useEffect, useReducer, useState } from "react";
+import { declare as post } from "./api.ts";
+import {
+	type Day,
+	type Desk,
+	declared,
+	elapsed,
+	formatTime,
+	type Progress,
+	reducer,
+	revealOf,
+	type State,
+	save,
+	start,
+} from "./game.ts";
+import "./App.css";
+
+const COLUMNS = 4;
+
+/** The tile an arrow key moves to from tile i, or undefined at an edge. */
+function move(i: number, key: string, count: number): number | undefined {
+	const column = i % COLUMNS;
+	if (key === "ArrowLeft" && column > 0) return i - 1;
+	if (key === "ArrowRight" && column < COLUMNS - 1) return i + 1;
+	if (key === "ArrowUp" && i >= COLUMNS) return i - COLUMNS;
+	if (key === "ArrowDown" && i < count - COLUMNS) return i + COLUMNS;
+	return undefined;
+}
+
+function Timer({ progress }: { progress: Progress }) {
+	const [now, setNow] = useState(Date.now);
+
+	useEffect(() => {
+		if (progress.solvedAt !== undefined) return;
+		const id = setInterval(() => setNow(Date.now()), 1000);
+		return () => clearInterval(id);
+	}, [progress.solvedAt]);
+
+	return <span role="timer">⏱ {formatTime(elapsed(progress, now))}</span>;
+}
+
+export function Play({ day }: { day: Day }) {
+	const [game, dispatch] = useReducer(reducer, day, (d) =>
+		start(d, Date.now()),
+	);
+	const { progress, selected } = game;
+	const coworkers = day.coworkers;
+	const index = coworkers.findIndex((c) => c.desk === selected);
+	const chosen = coworkers[index];
+
+	useEffect(() => save(day.date, progress), [day.date, progress]);
+
+	async function declare(desk: Desk, state: State) {
+		if (revealOf(progress, desk)) return;
+		try {
+			const reveal = await post({
+				date: day.date,
+				declared: declared(progress),
+				declaration: { desk, state },
+			});
+			dispatch(
+				reveal
+					? { type: "accepted", reveal, at: Date.now() }
+					: { type: "rejected", desk },
+			);
+		} catch {
+			dispatch({ type: "failed" });
+		}
+	}
+
+	function onKeyDown(event: KeyboardEvent<HTMLFieldSetElement>) {
+		if (event.ctrlKey || event.metaKey || event.altKey) return;
+		const key = event.key.toLowerCase();
+		if (key === "s" || key === "w") {
+			event.preventDefault();
+			declare(selected, key === "s" ? "sick" : "well");
+			return;
+		}
+		const next = coworkers[move(index, event.key, coworkers.length) ?? -1];
+		if (!next) return;
+		event.preventDefault();
+		dispatch({ type: "selected", desk: next.desk });
+		event.currentTarget
+			.querySelector<HTMLElement>(`[data-desk="${next.desk}"]`)
+			?.focus();
+	}
+
+	const nameOf = (desk: Desk) => coworkers.find((c) => c.desk === desk)?.name;
+
+	return (
+		<main>
+			<header>
+				<h1>
+					{new Date(`${day.date}T00:00`).toLocaleDateString("en-GB", {
+						weekday: "short",
+						day: "numeric",
+						month: "short",
+					})}
+				</h1>
+				<Timer progress={progress} />
+			</header>
+
+			<fieldset
+				className="board"
+				aria-label="Office floor, 4 desks across, 5 rows"
+				onKeyDown={onKeyDown}
+			>
+				{coworkers.map((c) => {
+					const reveal = revealOf(progress, c.desk);
+					const mistake = progress.mistakes.includes(c.desk);
+					const label = [
+						c.desk,
+						c.name,
+						c.department,
+						reveal?.state ?? "unknown",
+						...(mistake ? ["one mistake"] : []),
+						...(reveal ? [`says: ${reveal.text}`] : []),
+					].join(", ");
+					return (
+						<button
+							type="button"
+							key={c.desk}
+							data-desk={c.desk}
+							className={`tile ${reveal ? `st-${reveal.state}` : ""} ${mistake ? "mistake" : ""}`}
+							tabIndex={c.desk === selected ? 0 : -1}
+							aria-pressed={c.desk === selected}
+							aria-label={label}
+							onClick={() => dispatch({ type: "selected", desk: c.desk })}
+						>
+							<span className="coord">{c.desk}</span>
+							<span className="nm">{c.name}</span>
+							{reveal && <span className="state">{reveal.state}</span>}
+						</button>
+					);
+				})}
+			</fieldset>
+
+			<h2 className="log-title">Clues, newest first</h2>
+			<ul className="log">
+				{progress.reveals.toReversed().map((r) => (
+					<li key={r.desk}>
+						<span className="who">
+							{nameOf(r.desk)} · {r.desk} · {r.state}
+						</span>
+						<span>{r.text}</span>
+						{r.kind === "flavour" && (
+							<span className="plain">Flavour: no clue.</span>
+						)}
+					</li>
+				))}
+			</ul>
+
+			<div className="thumb">
+				<p className="toast" role="status">
+					<span key={game.said}>{game.message}</span>
+				</p>
+				{chosen && (
+					<>
+						<span className="who">
+							{chosen.desk} · {chosen.name} · {chosen.department}
+							{revealOf(progress, chosen.desk) && " · Already declared"}
+						</span>
+						<div className="big">
+							{(["sick", "well"] as const).map((state) => (
+								<button
+									type="button"
+									key={state}
+									className={`btn-${state}`}
+									disabled={!!revealOf(progress, chosen.desk)}
+									aria-label={`Declare ${chosen.name} ${state}`}
+									onClick={() => declare(chosen.desk, state)}
+								>
+									{state === "sick" ? "Sick" : "Well"}
+								</button>
+							))}
+						</div>
+					</>
+				)}
+			</div>
+		</main>
+	);
+}
