@@ -22,26 +22,36 @@ export type Game = {
 	message: string;
 	// Bumped on every message, so the live region re-announces a repeated one.
 	said: number;
+	// A declaration is awaiting its answer: the next one's `declared` must include it.
+	pending: boolean;
 };
 
 export type Action =
 	| { type: "selected"; desk: Desk }
+	| { type: "sent" }
 	| { type: "accepted"; reveal: Reveal; at: number }
 	| { type: "rejected"; desk: Desk }
-	| { type: "failed" };
+	| { type: "failed" }
+	| { type: "already" };
 
 const key = (date: string) => `office-bug:${date}`;
 
-export function load(date: string): Progress | undefined {
+export function load(day: Day): Progress | undefined {
 	try {
-		const saved = JSON.parse(localStorage.getItem(key(date)) ?? "null");
+		const saved = JSON.parse(localStorage.getItem(key(day.date)) ?? "null");
 		// ponytail: shape check only; a full schema check if Progress ever changes shape.
-		return Array.isArray(saved?.reveals) ? saved : undefined;
+		const fits =
+			saved?.reveals?.[0]?.desk === day.start.desk &&
+			Array.isArray(saved.mistakes) &&
+			typeof saved.startedAt === "number";
+		return fits ? saved : undefined;
 	} catch {
 		return undefined;
 	}
 }
 
+// ponytail: last write wins across tabs; listen for the `storage` event if players
+// really do play one day in two tabs at once.
 export function save(date: string, progress: Progress): void {
 	try {
 		localStorage.setItem(key(date), JSON.stringify(progress));
@@ -51,7 +61,7 @@ export function save(date: string, progress: Progress): void {
 }
 
 export function start(day: Day, now: number): Game {
-	const progress = load(day.date) ?? {
+	const progress = load(day) ?? {
 		reveals: [day.start],
 		mistakes: [],
 		startedAt: now,
@@ -63,6 +73,7 @@ export function start(day: Day, now: number): Game {
 		selected: hidden?.desk ?? day.start.desk,
 		message: "",
 		said: 0,
+		pending: false,
 	};
 }
 
@@ -89,14 +100,20 @@ function say(game: Game, message: string): Game {
 	return { ...game, message, said: game.said + 1 };
 }
 
+/** An answer to the pending declaration: say it and allow the next one. */
+function answer(game: Game, message: string): Game {
+	return { ...say(game, message), pending: false };
+}
+
 export function reducer(game: Game, action: Action): Game {
 	const { progress } = game;
 	switch (action.type) {
 		case "selected":
 			return { ...game, selected: action.desk };
+		case "sent":
+			return { ...game, pending: true };
 		case "accepted": {
 			const { reveal, at } = action;
-			if (revealOf(progress, reveal.desk)) return game;
 			const reveals = [...progress.reveals, reveal];
 			const solved = reveals.length === game.day.coworkers.length;
 			const next = {
@@ -106,7 +123,7 @@ export function reducer(game: Game, action: Action): Game {
 			};
 			const name = game.day.coworkers.find((c) => c.desk === reveal.desk)?.name;
 			const line = `${name} is ${reveal.state}. ${name} says: ${reveal.text}`;
-			return say(
+			return answer(
 				{ ...game, progress: next },
 				solved
 					? `${line} Office cleared in ${formatTime(elapsed(next, at))}.`
@@ -117,12 +134,14 @@ export function reducer(game: Game, action: Action): Game {
 			const mistakes = progress.mistakes.includes(action.desk)
 				? progress.mistakes
 				: [...progress.mistakes, action.desk];
-			return say(
+			return answer(
 				{ ...game, progress: { ...progress, mistakes } },
 				"Not enough evidence.",
 			);
 		}
 		case "failed":
-			return say(game, "Couldn't reach the office, try again.");
+			return answer(game, "Couldn't reach the office, try again.");
+		case "already":
+			return say(game, "Already declared.");
 	}
 }

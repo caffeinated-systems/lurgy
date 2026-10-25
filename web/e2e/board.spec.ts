@@ -9,7 +9,7 @@ const SICK = new Set("A1 C1 D1 A2 C2 A3 A5 D5".split(" "));
 
 const tile = (page: Page, desk: string) =>
 	page
-		.getByRole("group", { name: /office floor/i })
+		.getByRole("grid", { name: /office floor/i })
 		.locator(`[data-desk="${desk}"]`);
 
 /** Column and row of a desk, as numbers. */

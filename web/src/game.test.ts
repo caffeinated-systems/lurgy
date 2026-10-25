@@ -53,10 +53,17 @@ test("a solved day resumes with the starting coworker selected", () => {
 
 test("broken or foreign storage starts the day afresh", () => {
 	localStorage.setItem("office-bug:2026-10-19", "{not json");
-	expect(load(DAY.date)).toBeUndefined();
+	expect(load(DAY)).toBeUndefined();
 
-	localStorage.setItem("office-bug:2026-10-19", '{"reveals": 3}');
-	expect(load(DAY.date)).toBeUndefined();
+	for (const saved of [
+		{ reveals: 3 },
+		{ reveals: [], mistakes: [], startedAt: 0 },
+		{ reveals: [DAY.start], mistakes: 3, startedAt: 0 },
+		{ reveals: [DAY.start], mistakes: [] },
+	]) {
+		localStorage.setItem("office-bug:2026-10-19", JSON.stringify(saved));
+		expect(load(DAY)).toBeUndefined();
+	}
 });
 
 test("blocked storage neither loads nor throws", () => {
@@ -67,7 +74,7 @@ test("blocked storage neither loads nor throws", () => {
 		throw new Error("blocked");
 	});
 
-	expect(load(DAY.date)).toBeUndefined();
+	expect(load(DAY)).toBeUndefined();
 	expect(() => save(DAY.date, start(DAY, 0).progress)).not.toThrow();
 	vi.restoreAllMocks();
 });
@@ -92,16 +99,6 @@ test("an accepted declaration reveals the coworker and says so", () => {
 	expect(game.message).toBe("NameB1 is sick. NameB1 says: Hi.");
 	expect(game.said).toBe(1);
 	expect(game.progress.solvedAt).toBeUndefined();
-});
-
-test("accepting an already revealed coworker changes nothing", () => {
-	const game = reducer(start(DAY, 0), {
-		type: "accepted",
-		reveal: DAY.start,
-		at: 1,
-	});
-
-	expect(game).toEqual(start(DAY, 0));
 });
 
 test("the last reveal solves the day and stops the timer", () => {
@@ -135,6 +132,25 @@ test("a network failure says so without a mistake", () => {
 
 	expect(game.progress.mistakes).toEqual([]);
 	expect(game.message).toBe("Couldn't reach the office, try again.");
+});
+
+test("a declaration is pending until its answer", () => {
+	const sent = reducer(start(DAY, 0), { type: "sent" });
+	expect(sent.pending).toBe(true);
+
+	for (const action of [
+		{ type: "accepted", reveal: reveal("B1"), at: 1 },
+		{ type: "rejected", desk: "B1" },
+		{ type: "failed" },
+	] as const) {
+		expect(reducer(sent, action).pending).toBe(false);
+	}
+});
+
+test("declaring a revealed coworker says so", () => {
+	expect(reducer(start(DAY, 0), { type: "already" }).message).toBe(
+		"Already declared.",
+	);
 });
 
 test("selecting moves the selection", () => {

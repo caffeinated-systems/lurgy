@@ -12,7 +12,7 @@ import { App, localToday } from "./App.tsx";
 import { DAY, DESKS } from "./fixture.ts";
 import type { Reveal } from "./game.ts";
 
-type Answer = Reveal | "rejected" | "down";
+type Answer = Reveal | "rejected" | "down" | Promise<Response>;
 
 /** Stubs fetch: the day comes back as given, each declaration takes the next answer. */
 function serve(day: Response | Error, ...answers: Answer[]) {
@@ -20,6 +20,7 @@ function serve(day: Response | Error, ...answers: Answer[]) {
 		if (url.startsWith("/api/days/"))
 			return day instanceof Error ? Promise.reject(day) : Promise.resolve(day);
 		const answer = answers.shift();
+		if (answer instanceof Promise) return answer;
 		if (answer === "down")
 			return Promise.resolve(new Response(null, { status: 500 }));
 		return Promise.resolve(
@@ -44,12 +45,12 @@ const sick = (desk: (typeof DESKS)[number], text = "Hi."): Reveal => ({
 async function open(...answers: Answer[]) {
 	const fetch = serve(Response.json(DAY), ...answers);
 	render(<App />);
-	await screen.findByRole("group", { name: /office floor/i });
+	await screen.findByRole("grid", { name: /office floor/i });
 	return fetch;
 }
 
 const tile = (desk: string) =>
-	within(screen.getByRole("group")).getAllByRole("button")[
+	within(screen.getByRole("grid")).getAllByRole("gridcell")[
 		DESKS.indexOf(desk as (typeof DESKS)[number])
 	] as HTMLElement;
 
@@ -104,7 +105,7 @@ test("the board shows the date, the starting coworker and the first hidden desk 
 	expect(tile("A1").getAttribute("aria-label")).toBe(
 		"A1, NameA1, HR, well, says: Two in my row.",
 	);
-	expect(tile("B1").getAttribute("aria-pressed")).toBe("true");
+	expect(tile("B1").getAttribute("aria-selected")).toBe("true");
 	expect(tile("B1").tabIndex).toBe(0);
 	expect(tile("A1").tabIndex).toBe(-1);
 	expect(screen.getByText("Two in my row.")).toBeDefined();
@@ -168,6 +169,7 @@ test("a revealed coworker can't be declared again", async () => {
 	const declare = screen.getByRole("button", { name: "Declare NameA1 sick" });
 	expect((declare as HTMLButtonElement).disabled).toBe(true);
 	fireEvent.keyDown(tile("A1"), { key: "s" });
+	expect(screen.getByRole("status").textContent).toBe("Already declared.");
 	expect(fetch).toHaveBeenCalledTimes(1);
 });
 
@@ -185,7 +187,7 @@ test("arrow keys move round the board and stop at its edges", async () => {
 	expect(document.activeElement).toBe(tile("D1"));
 	press("ArrowDown");
 	expect(document.activeElement).toBe(tile("D2"));
-	expect(tile("D2").getAttribute("aria-pressed")).toBe("true");
+	expect(tile("D2").getAttribute("aria-selected")).toBe("true");
 	expect(tile("D2").tabIndex).toBe(0);
 	press("ArrowLeft");
 	expect(document.activeElement).toBe(tile("C2"));
@@ -226,7 +228,7 @@ test("flavour says it carries no clue", async () => {
 	expect(await screen.findByText("Flavour: no clue.")).toBeDefined();
 });
 
-test("the timer ticks, survives a reload and stops on the solve", async () => {
+test("the timer ticks, stops on the solve and stays stopped after a reload", async () => {
 	vi.useFakeTimers({ shouldAdvanceTime: true, now: 0 });
 	const answers = DESKS.slice(1).map((desk) => sick(desk));
 	await open(...answers);
@@ -249,6 +251,10 @@ test("the timer ticks, survives a reload and stops on the solve", async () => {
 	const stopped = timer.textContent;
 	await act(() => vi.advanceTimersByTimeAsync(10_000));
 	expect(timer.textContent).toBe(stopped);
+
+	cleanup();
+	await open();
+	expect(screen.getByRole("timer").textContent).toBe(stopped);
 });
 
 test("a reload rebuilds the board from the browser", async () => {
@@ -261,6 +267,28 @@ test("a reload rebuilds the board from the browser", async () => {
 	const second = await open();
 
 	expect(tile("B1").getAttribute("aria-label")).toContain("sick");
-	expect(tile("C1").getAttribute("aria-pressed")).toBe("true");
+	expect(tile("C1").getAttribute("aria-selected")).toBe("true");
 	expect(second).toHaveBeenCalledTimes(1);
+});
+
+test("a second declaration waits for the first one's answer", async () => {
+	let reply: (response: Response) => void = () => {};
+	const first = new Promise<Response>((resolve) => {
+		reply = resolve;
+	});
+	const fetch = await open(first, "rejected");
+
+	fireEvent.keyDown(tile("B1"), { key: "s" });
+	fireEvent.click(tile("C1"));
+	fireEvent.keyDown(tile("C1"), { key: "w" });
+	expect(fetch).toHaveBeenCalledTimes(2);
+
+	reply(Response.json({ accepted: true, reveal: sick("B1") }));
+	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
+	fireEvent.keyDown(tile("C1"), { key: "w" });
+	await screen.findByText("Not enough evidence.");
+
+	expect(JSON.parse(fetch.mock.calls[2]?.[1]?.body as string).declared).toEqual(
+		[{ desk: "B1", state: "sick" }],
+	);
 });

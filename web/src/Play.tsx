@@ -51,7 +51,9 @@ export function Play({ day }: { day: Day }) {
 	useEffect(() => save(day.date, progress), [day.date, progress]);
 
 	async function declare(desk: Desk, state: State) {
-		if (revealOf(progress, desk)) return;
+		if (revealOf(progress, desk)) return dispatch({ type: "already" });
+		if (game.pending) return;
+		dispatch({ type: "sent" });
 		try {
 			const reveal = await post({
 				date: day.date,
@@ -68,7 +70,7 @@ export function Play({ day }: { day: Day }) {
 		}
 	}
 
-	function onKeyDown(event: KeyboardEvent<HTMLFieldSetElement>) {
+	function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
 		if (event.ctrlKey || event.metaKey || event.altKey) return;
 		const key = event.key.toLowerCase();
 		if (key === "s" || key === "w") {
@@ -85,6 +87,9 @@ export function Play({ day }: { day: Day }) {
 			?.focus();
 	}
 
+	const rows = Array.from({ length: coworkers.length / COLUMNS }, (_, r) =>
+		coworkers.slice(r * COLUMNS, (r + 1) * COLUMNS),
+	);
 	const nameOf = (desk: Desk) => coworkers.find((c) => c.desk === desk)?.name;
 
 	return (
@@ -100,40 +105,50 @@ export function Play({ day }: { day: Day }) {
 				<Timer progress={progress} />
 			</header>
 
-			<fieldset
+			{/* biome-ignore lint/a11y/useSemanticElements: an ARIA grid, not a data table, so screen readers pass arrows and S/W to the page */}
+			<div
 				className="board"
+				role="grid"
 				aria-label="Office floor, 4 desks across, 5 rows"
 				onKeyDown={onKeyDown}
 			>
-				{coworkers.map((c) => {
-					const reveal = revealOf(progress, c.desk);
-					const mistake = progress.mistakes.includes(c.desk);
-					const label = [
-						c.desk,
-						c.name,
-						c.department,
-						reveal?.state ?? "unknown",
-						...(mistake ? ["one mistake"] : []),
-						...(reveal ? [`says: ${reveal.text}`] : []),
-					].join(", ");
-					return (
-						<button
-							type="button"
-							key={c.desk}
-							data-desk={c.desk}
-							className={`tile ${reveal ? `st-${reveal.state}` : ""} ${mistake ? "mistake" : ""}`}
-							tabIndex={c.desk === selected ? 0 : -1}
-							aria-pressed={c.desk === selected}
-							aria-label={label}
-							onClick={() => dispatch({ type: "selected", desk: c.desk })}
-						>
-							<span className="coord">{c.desk}</span>
-							<span className="nm">{c.name}</span>
-							{reveal && <span className="state">{reveal.state}</span>}
-						</button>
-					);
-				})}
-			</fieldset>
+				{rows.map((row) => (
+					// biome-ignore lint/a11y/useSemanticElements: a row of the ARIA grid above
+					// biome-ignore lint/a11y/useFocusableInteractive: a grid row only groups its cells
+					<div role="row" className="row" key={row[0]?.desk}>
+						{row.map((c) => {
+							const reveal = revealOf(progress, c.desk);
+							const mistake = progress.mistakes.includes(c.desk);
+							const label = [
+								c.desk,
+								c.name,
+								c.department,
+								reveal?.state ?? "unknown",
+								...(mistake ? ["one mistake"] : []),
+								...(reveal ? [`says: ${reveal.text}`] : []),
+							].join(", ");
+							return (
+								// biome-ignore lint/a11y/useSemanticElements: a cell of the ARIA grid above
+								<button
+									type="button"
+									key={c.desk}
+									data-desk={c.desk}
+									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${mistake ? "mistake" : ""}`}
+									tabIndex={c.desk === selected ? 0 : -1}
+									role="gridcell"
+									aria-selected={c.desk === selected}
+									aria-label={label}
+									onClick={() => dispatch({ type: "selected", desk: c.desk })}
+								>
+									<span className="coord">{c.desk}</span>
+									<span className="nm">{c.name}</span>
+									{reveal && <span className="state">{reveal.state}</span>}
+								</button>
+							);
+						})}
+					</div>
+				))}
+			</div>
 
 			<h2 className="log-title">Clues, newest first</h2>
 			<ul className="log">
