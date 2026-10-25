@@ -282,6 +282,8 @@ test("a second declaration waits for the first one's answer", async () => {
 	fireEvent.click(tile("C1"));
 	fireEvent.keyDown(tile("C1"), { key: "w" });
 	expect(fetch).toHaveBeenCalledTimes(2);
+	const well = screen.getByRole("button", { name: "Declare NameC1 well" });
+	expect((well as HTMLButtonElement).disabled).toBe(true);
 
 	reply(Response.json({ accepted: true, reveal: sick("B1") }));
 	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");

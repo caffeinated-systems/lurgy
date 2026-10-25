@@ -136,6 +136,7 @@ export function Play({ day }: { day: Day }) {
 									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${mistake ? "mistake" : ""}`}
 									tabIndex={c.desk === selected ? 0 : -1}
 									role="gridcell"
+									aria-keyshortcuts="S W"
 									aria-selected={c.desk === selected}
 									aria-label={label}
 									onClick={() => dispatch({ type: "selected", desk: c.desk })}
@@ -181,7 +182,7 @@ export function Play({ day }: { day: Day }) {
 									type="button"
 									key={state}
 									className={`btn-${state}`}
-									disabled={!!revealOf(progress, chosen.desk)}
+									disabled={game.pending || !!revealOf(progress, chosen.desk)}
 									aria-label={`Declare ${chosen.name} ${state}`}
 									onClick={() => declare(chosen.desk, state)}
 								>

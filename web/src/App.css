@@ -65,6 +65,9 @@ main,
 main {
 	display: grid;
 	gap: 10px;
+	/* header, board, log title, log (takes the slack), thumb bar at the bottom */
+	grid-template-rows: auto auto auto 1fr auto;
+	min-height: calc(100dvh - 12px);
 }
 button {
 	font: inherit;
@@ -173,6 +176,7 @@ header h1 {
 }
 .log {
 	display: grid;
+	align-content: start;
 	gap: 6px;
 	list-style: none;
 	margin: 0;
@@ -239,9 +243,6 @@ header h1 {
 	color: var(--well-ink);
 }
 @media (prefers-reduced-motion: no-preference) {
-	.row {
-		display: contents;
-	}
 	.tile {
 		transition: background-color 0.2s;
 	}

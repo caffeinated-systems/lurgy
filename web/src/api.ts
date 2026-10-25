@@ -23,6 +23,8 @@ export async function declare(
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(request),
+		// A stalled request fails rather than blocking every later declaration.
+		signal: AbortSignal.timeout(10_000),
 	});
 	const result: Schemas["Accepted"] | Schemas["Rejected"] = await (
 		await ok(response)
