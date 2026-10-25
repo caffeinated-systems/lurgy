@@ -78,3 +78,32 @@ def test_departments() -> None:
     assert SAMPLE_BOARD.departments == [
         "Facilities", "Finance", "HR", "IT", "Marketing", "Sales",
     ]  # fmt: skip
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"kind": "row", "row": 0},
+        {"kind": "row", "row": 6},
+        {"kind": "column", "column": "E"},
+        {"kind": "neighbours", "of": "E1"},
+        {"kind": "neighbours", "of": "A6"},
+        {"kind": "direction", "of": "A1", "direction": "diagonal"},
+    ],
+)
+def test_invalid_groups(data: dict[str, object]) -> None:
+    with pytest.raises(ValidationError):
+        TypeAdapter(Group).validate_python(data)
+
+
+def test_names_are_unique() -> None:
+    twins = (Coworker(name="Kev", department="IT"),) * 20
+
+    with pytest.raises(ValidationError, match="different name"):
+        Board(coworkers=twins)
+
+
+@pytest.mark.parametrize(("name", "department"), [("", "IT"), ("Kev", "")])
+def test_names_and_departments_are_not_empty(name: str, department: str) -> None:
+    with pytest.raises(ValidationError):
+        Coworker(name=name, department=department)

@@ -1,8 +1,8 @@
 import pytest
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 
 from app.board import Corners, Department, Desk, Direction, Neighbours, Row
-from app.clues import Clue, Count, More, NoMoreThan, Total, forced
+from app.clues import Clue, ContradictionError, Count, More, NoMoreThan, Total, forced
 from tests.factories import SAMPLE_BOARD, board_index
 
 
@@ -94,5 +94,21 @@ def test_declared_well_counts_too() -> None:
 
 
 def test_contradiction_raises() -> None:
-    with pytest.raises(ValueError, match="no board fits"):
+    with pytest.raises(ContradictionError):
         forced(SAMPLE_BOARD, [Count(group=Row(row=1), n=0)], {"A1": True})
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"kind": "count", "group": {"kind": "corners"}, "n": -1},
+        {"kind": "total", "n": -1},
+        {"kind": "no_more_than", "family": "rows", "n": -1},
+        {"kind": "no_more_than", "family": "desks", "n": 1},
+        {"kind": "count", "group": {"kind": "corners"}, "n": 1, "op": "at_most"},
+        {"kind": "riddle"},
+    ],
+)
+def test_invalid_clues(data: dict[str, object]) -> None:
+    with pytest.raises(ValidationError):
+        TypeAdapter(Clue).validate_python(data)

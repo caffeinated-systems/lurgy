@@ -97,6 +97,13 @@ class More(_Model):
 type Clue = Annotated[Count | Total | NoMoreThan | More, Field(discriminator="kind")]
 
 
+class ContradictionError(Exception):
+    """The clues and declarations contradict each other."""
+
+    def __init__(self) -> None:
+        super().__init__("no board fits the clues and declarations")
+
+
 def forced(
     board: Board, clues: Iterable[Clue], declared: Mapping[Desk, bool]
 ) -> dict[Desk, bool]:
@@ -110,8 +117,7 @@ def forced(
 
     survivors = BOARDS[alive]
     if survivors.size == 0:
-        msg = "no board fits the clues and declarations"
-        raise ValueError(msg)
+        raise ContradictionError
     always = int(np.bitwise_and.reduce(survivors))
     ever = int(np.bitwise_or.reduce(survivors))
     return {

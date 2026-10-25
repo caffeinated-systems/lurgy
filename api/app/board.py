@@ -100,8 +100,8 @@ type Group = Annotated[
 
 
 class Coworker(_Model):
-    name: str
-    department: str
+    name: Annotated[str, Field(min_length=1)]
+    department: Annotated[str, Field(min_length=1)]
 
 
 class Board(_Model):
@@ -110,6 +110,13 @@ class Board(_Model):
     coworkers: Annotated[
         tuple[Coworker, ...], Field(min_length=len(DESKS), max_length=len(DESKS))
     ]
+
+    @model_validator(mode="after")
+    def _unique_names(self) -> Board:
+        if len({c.name for c in self.coworkers}) < len(self.coworkers):
+            msg = "every coworker needs a different name"
+            raise ValueError(msg)
+        return self
 
     @property
     def departments(self) -> list[str]:
