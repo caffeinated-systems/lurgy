@@ -1,0 +1,17 @@
+# Visit https://soloterm.com to learn more
+processes:
+  API:
+    # Solo's AppImage leaks its Python env into child shells; unset it so uv's Python works.
+    command: env -u LD_LIBRARY_PATH -u PYTHONHOME -u PYTHONPATH uv run uvicorn app.main:app --reload
+    working_dir: api
+    auto_start: true
+    auto_restart: true
+    restart_when_changed: []
+    env: {}
+  npm:dev:
+    command: npm run dev
+    working_dir: web
+    auto_start: true
+    auto_restart: false
+    restart_when_changed: []
+    env: {}

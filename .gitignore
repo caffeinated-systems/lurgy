@@ -1,2 +1,10 @@
 .learnings/
 CLAUDE.local.md
+.venv/
+__pycache__/
+.coverage
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
