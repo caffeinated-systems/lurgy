@@ -14,10 +14,11 @@ def test_docs_are_served_under_api() -> None:
     assert "/api/openapi.json" in response.text
 
 
-def test_docs_are_not_served_at_fastapi_defaults() -> None:
-    paths = {getattr(route, "path", None) for route in app.routes}
+def test_every_route_is_under_api() -> None:
+    # The static web mount has path "", everything else must live under /api.
+    paths = [p for route in app.routes if (p := getattr(route, "path", ""))]
 
-    assert {"/docs", "/redoc", "/openapi.json"}.isdisjoint(paths)
+    assert all(path.startswith("/api/") for path in paths)
 
 
 def test_every_route_and_field_is_described() -> None:

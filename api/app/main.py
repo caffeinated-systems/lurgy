@@ -13,6 +13,7 @@ app = FastAPI(
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
     redoc_url=None,
+    swagger_ui_oauth2_redirect_url=None,
 )
 
 
