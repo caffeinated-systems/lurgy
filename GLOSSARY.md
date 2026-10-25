@@ -89,8 +89,12 @@ How hard a puzzle is: Easy, Medium or Hard, set by its hardest step, the most cl
 _Avoid_: level, rating
 
 **Mask**:
-What a declaration rejected with "Not enough evidence" leaves on a coworker: they answer back with a remark and put on a face mask. It marks a declaration made without enough evidence, whether it was wrong or not yet forced. A coworker wears at most one.
+What a declaration rejected with "Not enough evidence" leaves on a coworker: they answer back with a remark and put on a face mask. A wrong declaration and one not yet forced get the same mask and the same kind of remark, so neither reveals which it was. A coworker wears at most one.
 _Avoid_: mistake, error, strike, wrong guess
+
+**Remark**:
+What a coworker says back when they get a mask. Like flavour, a remark never carries or suggests logic.
+_Avoid_: comeback, retort, taunt
 
 **Taunt**:
 The game's own jab at the office manager, after a hint or a solve. A masked coworker's remark is theirs, not a taunt; otherwise coworkers make clues and flavour.
