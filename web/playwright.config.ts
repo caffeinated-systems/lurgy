@@ -1,0 +1,13 @@
+import { defineConfig } from "@playwright/test";
+
+export default defineConfig({
+	testDir: "e2e",
+	forbidOnly: !!process.env.CI,
+	use: { baseURL: "http://localhost:8123", trace: "retain-on-failure" },
+	webServer: {
+		command:
+			"npm run build && uv run --directory ../api uvicorn app.main:app --port 8123",
+		url: "http://localhost:8123/api/health",
+		reuseExistingServer: !process.env.CI,
+	},
+});
