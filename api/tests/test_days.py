@@ -2,25 +2,16 @@ from datetime import UTC, date, datetime, timedelta
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app, days, today_anywhere
 from app.week import load_days
-from tests.test_week import FIXTURES, MONDAY
+from tests.factories import FIXTURES, MONDAY
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    import pytest
 
 client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def fixture_week() -> Iterator[None]:
-    app.dependency_overrides[days] = lambda: load_days(FIXTURES)
-    app.dependency_overrides[today_anywhere] = lambda: MONDAY
-    yield
-    app.dependency_overrides.clear()
 
 
 def test_a_day_shows_the_board_and_the_starting_clue() -> None:

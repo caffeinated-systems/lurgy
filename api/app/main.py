@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 from functools import cache
 from http import HTTPStatus
 from pathlib import Path
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -39,14 +39,19 @@ def today_anywhere() -> date:
     return datetime.now(EARLIEST).date()
 
 
-def playable(
-    on: date,
-    days: Annotated[dict[date, tuple[Board, Day]], Depends(days)],
-    today: Annotated[date, Depends(today_anywhere)],
+type Days = Annotated[dict[date, tuple[Board, Day]], Depends(days)]
+type Today = Annotated[date, Depends(today_anywhere)]
+NOT_FOUND: dict[int | str, dict[str, Any]] = {
+    HTTPStatus.NOT_FOUND: {"description": "No puzzle for that day yet."}
+}
+
+
+def find(
+    on: date, days: dict[date, tuple[Board, Day]], today: date
 ) -> tuple[Board, Day]:
     """The day's board and puzzle, if it exists and has started somewhere."""
     if on > today or on not in days:
-        raise HTTPException(HTTPStatus.NOT_FOUND, "No puzzle for that day.")
+        raise HTTPException(HTTPStatus.NOT_FOUND, "No puzzle for that day yet.")
     return days[on]
 
 
@@ -88,7 +93,7 @@ class RevealedCoworker(BaseModel):
         reveal = day.reveal(desk)
         return cls(
             desk=desk,
-            state="sick" if desk in day.sick else "well",
+            state=day.state(desk),
             kind="flavour" if reveal.clue is None else "clue",
             text=reveal.text,
         )
@@ -104,29 +109,77 @@ class DayResponse(BaseModel):
     ]
 
 
+class Declaration(BaseModel):
+    desk: Annotated[Desk, Field(description="Who is declared.", examples=["A3"])]
+    state: Annotated[
+        State, Field(description="Sick or well, as declared.", examples=["sick"])
+    ]
+
+
+class DeclarationRequest(BaseModel):
+    date: Annotated[date, Field(description="The puzzle's day.")]
+    declared: Annotated[
+        list[Declaration],
+        Field(
+            description="Every declaration accepted so far, in order, "
+            "not counting the starting coworker."
+        ),
+    ]
+    declaration: Annotated[Declaration, Field(description="The new declaration.")]
+
+
+class Accepted(BaseModel):
+    accepted: Annotated[
+        Literal[True], Field(description="The declaration was accepted.")
+    ] = True
+    reveal: Annotated[
+        RevealedCoworker, Field(description="The declared coworker, now revealed.")
+    ]
+
+
+class Rejected(BaseModel):
+    accepted: Annotated[Literal[False], Field(description="Not enough evidence.")] = (
+        False
+    )
+
+
 @app.get("/api/health")
 def health() -> Health:
     """Report that the API is up."""
     return Health()
 
 
-@app.get("/api/days/{on}", responses={HTTPStatus.NOT_FOUND: {}})
-def get_day(
-    on: date, puzzle: Annotated[tuple[Board, Day], Depends(playable)]
-) -> DayResponse:
+@app.get("/api/days/{day}", responses=NOT_FOUND)
+def get_day(day: date, days: Days, today: Today) -> DayResponse:
     """A day's board and its starting coworker's clue.
 
     404 for a day with no puzzle or one that hasn't started anywhere on Earth yet.
     """
-    board, day = puzzle
+    board, puzzle = find(day, days, today)
     return DayResponse(
-        date=on,
+        date=day,
         coworkers=[
             SeatedCoworker(desk=desk, name=c.name, department=c.department)
             for desk, c in zip(DESKS, board.coworkers, strict=True)
         ],
-        start=RevealedCoworker.at(day, day.start),
+        start=RevealedCoworker.at(puzzle, puzzle.start),
     )
+
+
+@app.post("/api/declarations", responses=NOT_FOUND)
+def declare(
+    request: DeclarationRequest, days: Days, today: Today
+) -> Accepted | Rejected:
+    """Declare a coworker sick or well.
+
+    Accepted only if every declaration so far, then this one, was correct and forced
+    when made. Otherwise rejected, always with the same body, whatever the reason.
+    """
+    board, puzzle = find(request.date, days, today)
+    steps = [(d.desk, d.state) for d in [*request.declared, request.declaration]]
+    if not puzzle.accepts(board, steps):
+        return Rejected()
+    return Accepted(reveal=RevealedCoworker.at(puzzle, request.declaration.desk))
 
 
 # ponytail: fixed repo-relative path; make it configurable if the deploy (#34) needs.

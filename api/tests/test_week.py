@@ -1,15 +1,14 @@
-from datetime import date
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import ValidationError
 
 from app.board import DESKS
 from app.week import Day, load_days
-from tests.factories import SAMPLE_BOARD, board_index
+from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD, board_index
 
-FIXTURES = Path(__file__).parent / "fixtures" / "puzzles"
-MONDAY = date(2026, 10, 19)
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_the_fixture_loads_the_monday_sample() -> None:

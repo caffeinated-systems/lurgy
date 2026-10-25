@@ -1,12 +1,14 @@
 from datetime import date
 from typing import TYPE_CHECKING, Annotated
 
+import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.board import DESKS, Board, Desk
-from app.clues import Clue
+from app.clues import BOARDS, Clue, State
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import Path
 
 
@@ -32,6 +34,33 @@ class Day(_Model):
 
     def reveal(self, desk: Desk) -> Reveal:
         return self.reveals[DESKS.index(desk)]
+
+    def state(self, desk: Desk) -> State:
+        return "sick" if desk in self.sick else "well"
+
+    def accepts(self, board: Board, steps: Iterable[tuple[Desk, State]]) -> bool:
+        """Whether every step, in order, was correct and forced when it was made.
+
+        The starting coworker is already known, so a step can't name them.
+        """
+        # ponytail: masks span all 2^20 boards, ~140 ms for a full Week day; index
+        # the surviving boards instead if #42's limits or hints need it faster.
+        alive = np.ones(BOARDS.shape, dtype=np.bool_)
+        known: set[Desk] = set()
+        for i, (desk, state) in enumerate(
+            [(self.start, self.state(self.start)), *steps]
+        ):
+            if desk in known or state != self.state(desk):
+                return False
+            sick = (BOARDS >> DESKS.index(desk) & 1).astype(np.bool_)
+            # Correct, so forced means no board left where they're the opposite.
+            if i and np.any(alive & (sick != (state == "sick"))):
+                return False
+            known.add(desk)
+            alive &= sick == (state == "sick")
+            if clue := self.reveal(desk).clue:
+                alive &= clue.mask(board)
+        return True
 
 
 class Week(_Model):

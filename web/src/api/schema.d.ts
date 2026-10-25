@@ -24,10 +24,119 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/days/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Day
+         * @description A day's board and its starting coworker's clue.
+         *
+         *     404 for a day with no puzzle or one that hasn't started anywhere on Earth yet.
+         */
+        get: operations["get_day_api_days__day__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/declarations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Declare
+         * @description Declare a coworker sick or well.
+         *
+         *     Accepted only if every declaration so far, then this one, was correct and forced
+         *     when made. Otherwise rejected, always with the same body, whatever the reason.
+         */
+        post: operations["declare_api_declarations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Accepted */
+        Accepted: {
+            /**
+             * Accepted
+             * @description The declaration was accepted.
+             * @default true
+             * @constant
+             */
+            accepted: true;
+            /** @description The declared coworker, now revealed. */
+            reveal: components["schemas"]["RevealedCoworker"];
+        };
+        /** DayResponse */
+        DayResponse: {
+            /**
+             * Date
+             * Format: date
+             * @description The puzzle's day.
+             */
+            date: string;
+            /**
+             * Coworkers
+             * @description Everyone on the board, A1 to D5.
+             */
+            coworkers: components["schemas"]["SeatedCoworker"][];
+            /** @description The coworker revealed at the start. */
+            start: components["schemas"]["RevealedCoworker"];
+        };
+        /** Declaration */
+        Declaration: {
+            /**
+             * @description Who is declared.
+             * @example A3
+             */
+            desk: components["schemas"]["Desk"];
+            /**
+             * @description Sick or well, as declared.
+             * @example sick
+             */
+            state: components["schemas"]["State"];
+        };
+        /** DeclarationRequest */
+        DeclarationRequest: {
+            /**
+             * Date
+             * Format: date
+             * @description The puzzle's day.
+             */
+            date: string;
+            /**
+             * Declared
+             * @description Every declaration accepted so far, in order, not counting the starting coworker.
+             */
+            declared: components["schemas"]["Declaration"][];
+            /** @description The new declaration. */
+            declaration: components["schemas"]["Declaration"];
+        };
+        /** @enum {string} */
+        Desk: "A1" | "B1" | "C1" | "D1" | "A2" | "B2" | "C2" | "D2" | "A3" | "B3" | "C3" | "D3" | "A4" | "B4" | "C4" | "D4" | "A5" | "B5" | "C5" | "D5";
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
         /** Health */
         Health: {
             /**
@@ -38,6 +147,77 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** Rejected */
+        Rejected: {
+            /**
+             * Accepted
+             * @description Not enough evidence.
+             * @default false
+             * @constant
+             */
+            accepted: false;
+        };
+        /** RevealedCoworker */
+        RevealedCoworker: {
+            /**
+             * @description Where they sit.
+             * @example B3
+             */
+            desk: components["schemas"]["Desk"];
+            /**
+             * @description Whether they're sick or well.
+             * @example well
+             */
+            state: components["schemas"]["State"];
+            /**
+             * Kind
+             * @description Whether they gave a clue or only flavour.
+             * @example clue
+             * @enum {string}
+             */
+            kind: "clue" | "flavour";
+            /**
+             * Text
+             * @description What they say.
+             * @example Two people in my column are sick.
+             */
+            text: string;
+        };
+        /** SeatedCoworker */
+        SeatedCoworker: {
+            /**
+             * @description Where they sit.
+             * @example A1
+             */
+            desk: components["schemas"]["Desk"];
+            /**
+             * Name
+             * @description Their first name.
+             * @example Aisha
+             */
+            name: string;
+            /**
+             * Department
+             * @description The department they work in.
+             * @example HR
+             */
+            department: string;
+        };
+        /** @enum {string} */
+        State: "sick" | "well";
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
     };
     responses: never;
@@ -64,6 +244,84 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    get_day_api_days__day__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayResponse"];
+                };
+            };
+            /** @description No puzzle for that day yet. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    declare_api_declarations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeclarationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Accepted"] | components["schemas"]["Rejected"];
+                };
+            };
+            /** @description No puzzle for that day yet. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
