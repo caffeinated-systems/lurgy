@@ -1,6 +1,12 @@
 """Build days: a hidden solution, and a true clue for each coworker as they're found."""
 
+import argparse
+import random
+import secrets
+import subprocess
+from datetime import date, datetime, timedelta
 from itertools import combinations
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
@@ -22,15 +28,14 @@ from app.board import (
     Row,
     cell,
 )
+from app.cast import STUB_BOARD
 from app.clues import BOARDS, Clue, Count, NoMoreThan, State, Total, settled
 from app.grade import Grade, Step, next_step
-from app.week import Day, Difficulty, Reveal
+from app.week import Day, Difficulty, Generator, Reveal, Week
 from app.wording import explanation, wording
 
 if TYPE_CHECKING:
-    import random
-    from collections.abc import Iterator
-    from datetime import date
+    from collections.abc import Iterator, Sequence
 
     from app.clues import Boards, Mask
 
@@ -65,7 +70,7 @@ def generate_day(
             msg = "a generated day failed its replay"
             raise AssertionError(msg)
         if graded.difficulty == difficulty:
-            return puzzle
+            return puzzle.model_copy(update={"difficulty": difficulty})
     msg = f"no {difficulty} day for {day} in {attempts} attempts"
     raise GenerationError(msg)
 
@@ -220,3 +225,52 @@ def _groups(board: Board) -> list[Group]:
     ]
     # ponytail: one-desk groups are the "about one coworker" family, left for #29.
     return [g for g in groups if board.bits(g).bit_count() > 1]
+
+
+# Monday to Friday.
+SCHEDULE: tuple[Difficulty, ...] = ("Easy", "Medium", "Medium", "Hard", "Hard")
+
+
+def generate_week(board: Board, monday: date, seed: int, commit: str) -> Week:
+    """A Week's five days, each from its own generator seeded by the Week's seed."""
+    days = [monday + timedelta(days=i) for i in range(len(SCHEDULE))]
+    return Week(
+        board=board,
+        days=tuple(
+            # ponytail: random, not secrets: the seed is the secret, and it must replay.
+            generate_day(board, day, difficulty, random.Random(f"{seed}:{day}"))  # noqa: S311
+            for day, difficulty in zip(days, SCHEDULE, strict=True)
+        ),
+        generator=Generator(commit=commit, seed=seed),
+    )
+
+
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(
+        prog="python -m app.generate",
+        description="Build a Week file. Prints only where it went and how hard.",
+    )
+    parser.add_argument("week", type=_monday, help="the ISO week, e.g. 2026-W45")
+    parser.add_argument("-o", "--out", type=Path, required=True, help="the file")
+    args = parser.parse_args(argv)
+
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],  # noqa: S607 (git from PATH, as in CI)
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    week = generate_week(STUB_BOARD, args.week, secrets.randbits(128), commit)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(week.model_dump_json(indent=2) + "\n")
+    tiers = ", ".join(str(d.difficulty) for d in week.days)
+    print(f"wrote {args.out} ({tiers})")  # noqa: T201 (the CLI's one line)
+
+
+def _monday(week: str) -> date:
+    """The Monday of an ISO week such as 2026-W45."""
+    return datetime.strptime(f"{week}-1", "%G-W%V-%u").date()  # noqa: DTZ007 (a date)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()
