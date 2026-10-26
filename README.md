@@ -24,7 +24,7 @@ A daily deduction puzzle: a bug is doing the rounds of an open-plan office, and 
 ## How it's made
 
 - **Every puzzle is generated, not written.** An offline generator picks a hidden outbreak and gives each coworker a true clue, and a solver checks each step against all 2²⁰ possible offices. A puzzle ships only if it can be solved without guessing and grades at the day's difficulty.
-- **The office is written by hand.** The cast and each Week's story live in [`stories/`](stories/). Their lines never hint at who's sick.
+- **The office has a script.** The cast and each Week's story are edited text files in [`stories/`](stories/). Their lines never hint at who's sick.
 - **Solutions never touch this repo.** Built Weeks go to a private repo. The server checks every declaration and never sends a solution or an unrevealed clue to the browser ([ADR 0002](docs/adr/0002-puzzles-in-a-private-repo.md)).
 - **Stack:** a stateless FastAPI JSON API in [`api/`](api/) and a React + TypeScript single-page app in [`web/`](web/), deployed together ([ADR 0001](docs/adr/0001-fastapi-json-api-with-react-spa.md)). The words the game uses are in [`GLOSSARY.md`](GLOSSARY.md).
 
