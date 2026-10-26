@@ -275,17 +275,15 @@ export function Play({ day }: { day: Day }) {
 									<span className="plain">Flavour: no clue.</span>
 								)}
 							</button>
-							{r.kind === "clue" && (
-								<button
-									type="button"
-									className="dim"
-									aria-pressed={dimmed}
-									aria-label={`Dim ${nameOf(r.desk)}'s clue`}
-									onClick={() => dispatch({ type: "dimmed", desk: r.desk })}
-								>
-									Dim
-								</button>
-							)}
+							<button
+								type="button"
+								className="dim"
+								aria-pressed={dimmed}
+								aria-label={`Dim ${nameOf(r.desk)}'s ${r.kind === "clue" ? "clue" : "message"}`}
+								onClick={() => dispatch({ type: "dimmed", desk: r.desk })}
+							>
+								Dim
+							</button>
 							{explained?.desk === r.desk && explained.explanation && (
 								<p className="explain" id={`explain-${r.desk}`}>
 									{explained.explanation}

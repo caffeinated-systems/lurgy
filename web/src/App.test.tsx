@@ -358,14 +358,14 @@ test("a dimmed clue stays dimmed after a reload, and undims", async () => {
 	expect(dim().closest("li")?.className).toBe("");
 });
 
-test("flavour can be read but not dimmed", async () => {
+test("flavour can be read and dimmed like a clue", async () => {
 	await open({ ...sick("B1", "Nice weather."), kind: "flavour" });
 	fireEvent.keyDown(tile("B1"), { key: "s" });
 	await screen.findByText("Flavour: no clue.");
 
-	expect(
-		screen.queryByRole("button", { name: "Dim NameB1's clue" }),
-	).toBeNull();
+	const dim = screen.getByRole("button", { name: "Dim NameB1's message" });
+	fireEvent.click(dim);
+	expect(dim.closest("li")?.className).toBe("dimmed");
 	fireEvent.click(screen.getByRole("button", { name: /Nice weather\./ }));
 	expect(tile("B1").getAttribute("aria-label")).toContain(
 		"said the clue you're reading",
