@@ -18,3 +18,11 @@ processes:
     auto_restart: false
     restart_when_changed: []
     env: {}
+  API tests:
+    # Run by hand; it stops when the suite finishes, so its status says when it's done.
+    command: env -u LD_LIBRARY_PATH -u PYTHONHOME -u PYTHONPATH uv run pytest -q
+    working_dir: api
+    auto_start: false
+    auto_restart: false
+    restart_when_changed: []
+    env: {}
