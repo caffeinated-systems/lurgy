@@ -2,7 +2,7 @@ from datetime import date
 from typing import TYPE_CHECKING, Annotated, Literal
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
 from app.board import DESKS, Board, Desk
 from app.clues import BOARDS, Clue, State
@@ -32,7 +32,10 @@ class Reveal(_Model):
 class Day(_Model):
     date: date
     start: Desk
-    sick: frozenset[Desk]
+    # In desk order: a set's order changes with PYTHONHASHSEED, and the file mustn't.
+    sick: Annotated[
+        frozenset[Desk], PlainSerializer(lambda s: sorted(s, key=DESKS.index))
+    ]
     # Files built before #24 have no difficulty.
     difficulty: Difficulty | None = None
     reveals: Annotated[
@@ -74,7 +77,7 @@ class Day(_Model):
 class Generator(_Model):
     """What built a Week: rerunning this commit with this seed rebuilds it."""
 
-    commit: Annotated[str, Field(pattern=r"^[0-9a-f]{40}$")]
+    commit: Annotated[str, Field(pattern=r"^[0-9a-f]{40}(-dirty)?$")]
     seed: int  # from `secrets`; as secret as the solutions, so never logged
 
 

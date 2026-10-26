@@ -42,6 +42,8 @@ def test_every_coworker_says_a_true_clue_in_words() -> None:
         assert reveal.clue.mask(STUB_BOARD)[solution], reveal.clue
         assert reveal.text.endswith(".")
         assert reveal.explanation
+    said = [r.clue for r in day.reveals]
+    assert len(set(said)) == len(said), "a clue said twice"
 
 
 def test_the_same_seed_builds_the_same_day() -> None:

@@ -94,7 +94,7 @@ def test_wording(clue: Clue, said: str) -> None:
     [
         (
             Count(group=Row(row=3), n=2),
-            "My row is Imogen, me, Kev and Linda: exactly two of them are sick.",
+            "My row is Imogen, Kev, Linda and me: exactly two of them are sick.",
         ),
         (
             Count(group=Row(row=1), n=1),
@@ -121,7 +121,7 @@ def test_wording(clue: Clue, said: str) -> None:
         (
             Count(group=Between(a="A3", b="D3"), n=2),
             (
-                "The people between Imogen and Linda are me and Kev:"
+                "The people between Imogen and Linda are Kev and me:"
                 " exactly two of them are sick."
             ),
         ),
@@ -138,7 +138,7 @@ def test_wording(clue: Clue, said: str) -> None:
         ),
         (
             Count(group=Department(name="HR"), n=2),
-            "My department is Carol, me and Steve: exactly two of them are sick.",
+            "My department is Carol, Steve and me: exactly two of them are sick.",
         ),
         (
             Count(group=Department(name="Sales"), n=2),

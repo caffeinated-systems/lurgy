@@ -8,5 +8,5 @@ dist/
 coverage/
 test-results/
 # Built Weeks hold solutions: never commit them to this public repo.
-api/out/
+out/
 playwright-report/

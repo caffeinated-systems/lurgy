@@ -143,9 +143,10 @@ def _noun(board: Board, speaker: Desk, group: Group) -> tuple[str, bool]:
 
 
 def _names(board: Board, speaker: Desk, bits: int) -> str:
-    return _list(
-        [_who(board, speaker, d) for i, d in enumerate(DESKS) if bits >> i & 1]
-    )
+    """Everyone in the desks, in desk order, but the speaker last: "…, Kev and me"."""
+    desks = [d for i, d in enumerate(DESKS) if bits >> i & 1]
+    desks.sort(key=lambda d: d == speaker)
+    return _list([_who(board, speaker, d) for d in desks])
 
 
 def _list(items: list[str]) -> str:

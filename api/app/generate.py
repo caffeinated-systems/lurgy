@@ -29,8 +29,8 @@ from app.board import (
     cell,
 )
 from app.cast import STUB_BOARD
-from app.clues import BOARDS, Clue, Count, NoMoreThan, State, Total, settled
-from app.grade import Grade, Step, next_step
+from app.clues import BOARDS, EVERYONE, Clue, Count, NoMoreThan, State, Total, settled
+from app.grade import Grade, Step, grade, next_step
 from app.week import Day, Difficulty, Generator, Reveal, Week
 from app.wording import explanation, wording
 
@@ -66,11 +66,15 @@ def generate_day(
         if (built := _attempt(board, day, difficulty, rng)) is None:
             continue
         puzzle, order, graded = built
-        if not puzzle.accepts(board, order):  # pragma: no cover (a generator bug)
+        if graded.difficulty != difficulty:
+            continue
+        # Guards against generator bugs: a fresh replay, and the grader agreeing.
+        if (
+            not puzzle.accepts(board, order) or grade(board, puzzle) != graded
+        ):  # pragma: no cover
             msg = "a generated day failed its replay"
             raise AssertionError(msg)
-        if graded.difficulty == difficulty:
-            return puzzle.model_copy(update={"difficulty": difficulty})
+        return puzzle.model_copy(update={"difficulty": difficulty})
     msg = f"no {difficulty} day for {day} in {attempts} attempts"
     raise GenerationError(msg)
 
@@ -93,6 +97,7 @@ def _attempt(
     clues: dict[Desk, Clue] = {}
     steps: list[Step] = []
     new = [start]
+    said: list[Clue] = []
     # Rounds as the grader plays them: everyone just declared speaks, then the
     # fewest clues that force anyone decide who's declared next.
     while True:
@@ -106,10 +111,11 @@ def _attempt(
                 rng=rng,
                 easy=difficulty == "Easy",
             )
+            said.append(clue)
+            catalogue.remove(clue)  # no one says it twice
             alive = alive[clue.mask(board, alive)]
         if len(declared) == len(DESKS):
             break
-        said = list(clues.values())
         try:
             step, forced = next_step(
                 said, [c.mask(board, known) for c in said], known, declared
@@ -149,17 +155,23 @@ def _choose(  # noqa: PLR0913
 ) -> Clue:
     """A clue that forces someone new.
 
-    Easy wants it to force on its own; harder days want it to need earlier clues,
-    since every clue forcing alone grades Easy.
+    Easy wants it to force on its own. Harder days want clues that don't: single-
+    clue progress has to stall for a step to need two. Once someone is settled
+    but not yet declared, the next round can't get stuck, so any such clue will do.
     """
 
     def forces(clue: Clue, boards: Boards) -> bool:
-        return bool(settled(boards[clue.mask(board, boards)], declared))
+        # Someone may be settled already but not yet declared: only new ones count.
+        before = settled(boards, declared).keys()
+        return bool(settled(boards[clue.mask(board, boards)], declared).keys() - before)
 
     alone = [c for c in candidates if forces(c, known)]
     if easy:
         return rng.choice(alone or candidates)
-    together = [c for c in candidates if c not in alone and forces(c, alive)]
+    held = [c for c in candidates if c not in alone]
+    if settled(alive, declared):
+        return rng.choice(held or candidates)
+    together = [c for c in held if forces(c, alive)]
     return rng.choice(together or alone or candidates)
 
 
@@ -185,18 +197,22 @@ def _true_clues(board: Board, solution: int, rng: random.Random) -> Iterator[Clu
                     group=group, op="at_least", n=rng.randint(1, most), state=state
                 )
     for state in states:
-        n = _how_many(2 ** len(DESKS) - 1, solution, state)
+        n = _how_many(EVERYONE, solution, state)
         yield Total(n=n, state=state)
         yield Total(op="at_least", n=rng.randint(1, n), state=state)
+        # The board with everyone in this state, which passes only a tautology.
+        extreme = np.array([EVERYONE if state == "sick" else 0], dtype=np.uint32)
         for family in FAMILIES:
             # The tightest true bound: the fewest n that the solution passes.
-            yield next(
+            clue = next(
                 clue
                 for n in range(len(DESKS))
                 if (clue := NoMoreThan(family=family, n=n, state=state)).mask(
                     board, np.array([solution], dtype=np.uint32)
                 )[0]
             )
+            if not clue.mask(board, extreme)[0]:
+                yield clue
 
 
 def _how_many(bits: int, solution: int, state: State) -> int:
@@ -255,7 +271,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     args = parser.parse_args(argv)
 
     commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"],  # noqa: S607 (git from PATH, as in CI)
+        # A dirty tree can't rebuild the Week from its commit, so it says so.
+        ["git", "describe", "--always", "--dirty", "--abbrev=40"],  # noqa: S607 (git from PATH, as in CI)
         capture_output=True,
         text=True,
         check=True,
