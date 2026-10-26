@@ -27,6 +27,14 @@ function move(i: number, key: string, count: number): number | undefined {
 	return undefined;
 }
 
+export function Logo() {
+	return (
+		<h1 className="logo">
+			<img src="/logo.svg" alt="Office Lurgy" width="262" height="148" />
+		</h1>
+	);
+}
+
 function Timer({ progress }: { progress: Progress }) {
 	const [now, setNow] = useState(Date.now);
 
@@ -95,14 +103,17 @@ export function Play({ day }: { day: Day }) {
 	return (
 		<main>
 			<header>
-				<h1>
-					{new Date(`${day.date}T00:00`).toLocaleDateString("en-GB", {
-						weekday: "short",
-						day: "numeric",
-						month: "short",
-					})}
-				</h1>
-				<Timer progress={progress} />
+				<Logo />
+				<div className="today">
+					<p className="date">
+						{new Date(`${day.date}T00:00`).toLocaleDateString("en-GB", {
+							weekday: "short",
+							day: "numeric",
+							month: "short",
+						})}
+					</p>
+					<Timer progress={progress} />
+				</div>
 			</header>
 
 			{/* biome-ignore lint/a11y/useSemanticElements: an ARIA grid, not a data table, so screen readers pass arrows and S/W to the page */}

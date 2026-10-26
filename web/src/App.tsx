@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchDay } from "./api.ts";
 import type { Day } from "./game.ts";
-import { Play } from "./Play.tsx";
+import { Logo, Play } from "./Play.tsx";
 
 /** The player's local date as YYYY-MM-DD. */
 export function localToday(now = new Date()): string {
@@ -22,10 +22,36 @@ export function App() {
 		);
 	}, []);
 
-	if (day === undefined) return <p className="notice">Opening the office…</p>;
-	if (day === "missing")
-		return <p className="notice">No puzzle for that day yet.</p>;
-	if (day === "offline")
-		return <p className="notice">Couldn't reach the office, try again.</p>;
-	return <Play day={day} />;
+	return (
+		<>
+			{day === undefined ? (
+				<Notice>Opening the office…</Notice>
+			) : day === "missing" ? (
+				<Notice>No puzzle for that day yet.</Notice>
+			) : day === "offline" ? (
+				<Notice>Couldn't reach the office, try again.</Notice>
+			) : (
+				<Play day={day} />
+			)}
+			<footer>
+				Built with{" "}
+				<span role="img" aria-label="love">
+					♥
+				</span>{" "}
+				by <a href="https://caffeinated.systems">Caffeinated Systems</a>
+				<span aria-hidden="true"> · </span>
+				Also from Caffeinated Systems:{" "}
+				<a href="https://wordis.caffeinated.systems">Wordis</a>
+			</footer>
+		</>
+	);
+}
+
+function Notice({ children }: { children: string }) {
+	return (
+		<main className="notice">
+			<Logo />
+			<p>{children}</p>
+		</main>
+	);
 }

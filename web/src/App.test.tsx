@@ -73,6 +73,9 @@ test("with no ?day it asks for the player's local today", async () => {
 	render(<App />);
 
 	expect(screen.getByText("Opening the office…")).toBeDefined();
+	expect(
+		screen.getByRole("heading", { level: 1, name: "Office Lurgy" }),
+	).toBeDefined();
 	expect(await screen.findByText("No puzzle for that day yet.")).toBeDefined();
 	expect(fetch).toHaveBeenCalledWith(`/api/days/${localToday()}`);
 });
@@ -96,12 +99,13 @@ test.each([
 	).toBeDefined();
 });
 
-test("the board shows the date, the starting coworker and the first hidden desk selected", async () => {
+test("the board shows the logo, the date, the starting coworker and the first hidden desk selected", async () => {
 	await open();
 
-	expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
-		"Mon 19 Oct",
-	);
+	expect(
+		screen.getByRole("heading", { level: 1, name: "Office Lurgy" }),
+	).toBeDefined();
+	expect(screen.getByText("Mon 19 Oct")).toBeDefined();
 	expect(tile("A1").getAttribute("aria-label")).toBe(
 		"A1, NameA1, HR, well, says: Two in my row.",
 	);
@@ -293,4 +297,17 @@ test("a second declaration waits for the first one's answer", async () => {
 	expect(JSON.parse(fetch.mock.calls[2]?.[1]?.body as string).declared).toEqual(
 		[{ desk: "B1", state: "sick" }],
 	);
+});
+
+test("the footer links to Caffeinated Systems and Wordis", async () => {
+	await open();
+
+	expect(
+		screen
+			.getByRole("link", { name: "Caffeinated Systems" })
+			.getAttribute("href"),
+	).toBe("https://caffeinated.systems");
+	expect(
+		screen.getByRole("link", { name: "Wordis" }).getAttribute("href"),
+	).toBe("https://wordis.caffeinated.systems");
 });
