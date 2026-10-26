@@ -2,7 +2,7 @@
 
 The office is one big open-plan floor above a carpet warehouse on the ring road. Everyone hot-desks, and the booking system seats people alphabetically by first name, which nobody asked for and nobody can turn off. Ten departments share the floor and a kettle. The kitchen fridge is a crime scene, the lift has moods, and the reception plant is called Gary.
 
-Notes for writers: about ten members carry the stories and the rest drop in. Keep the threads quiet. Nobody in the office knows about Hamid and Gemma, and Priya has no idea about Fergus.
+Notes for writers: about ten members carry the stories and the rest drop in. Keep the threads quiet. Nobody in the office knows about Henry and Gemma, and Priya has no idea about Fergus.
 
 ## Aisha
 Department: Facilities
@@ -52,10 +52,10 @@ A main character. Kind, relentless and armed with a handbook. Believes every pro
 - Per the handbook.
 - That's going in your file, positively.
 
-## Dev
+## Milla
 Department: Marketing
 
-Speaks fluent buzzword and has rebranded most of the stationery. Means every word of it, which is the worrying part. Has a content strategy for his lunch.
+Social media manager who speaks fluent buzzword and has rebranded most of the stationery. Means every word of it, which is the worrying part. Has a content strategy for her lunch.
 
 ### Lines
 - I've rebranded the stationery cupboard as a creative resource hub.
@@ -116,7 +116,7 @@ A main character. Sharp, ambitious and always mid-campaign. Changes the subject 
 - Strictly professional.
 - Don't read into that.
 
-## Hamid
+## Henry
 Department: Finance
 
 A main character. Meticulous, colour-codes everything and treats a rounding error as a personal insult. Has lately become oddly generous about Marketing's budget and switched to oat milk, for no reason he will discuss.
@@ -303,10 +303,10 @@ Lovely, harmless and the owner of the longest anecdotes in the building, usually
 - Long story.
 - Steady as she goes.
 
-## Tariq
+## Tania
 Department: IT
 
-Security-minded to the point of paranoia. Sends fake phishing emails to test everyone, and everyone fails. Kev's sparring partner.
+Security-minded to the point of paranoia. Sends fake phishing emails to test everyone, and everyone fails, which she finds deeply satisfying. Kev's sparring partner and the only one who reads his logs.
 
 ### Lines
 - That email from the CEO offering free pizza was me, and you all clicked it.
@@ -334,10 +334,10 @@ A main character. Head of Legal, terrifying, drafts a disclaimer for everything 
 - So stipulated.
 - Let the record show.
 
-## Nigel
+## Anika
 Department: Legal
 
-Paralegal and pedant. Corrects the posters, the minutes and the menu at the leaving do. Not wrong, which is worse.
+Paralegal and pedant. Corrects the posters, the minutes and the menu at the leaving do. Not wrong, which is worse, and she knows it.
 
 ### Lines
 - Technically it's a meeting room, not a huddle space, I've checked the lease.
@@ -379,10 +379,10 @@ Sees everyone come and go and remembers all of it. Guards the visitor book and t
 - Gary agrees.
 - Signed in.
 
-## Vince
+## Kelly
 Department: Reception
 
-Ex-bouncer, gentle giant, takes lanyards extremely seriously. Has turned away the Finance Director more than once and slept soundly after.
+Ex-bouncer, unshakeable, takes lanyards extremely seriously. Has turned away the Finance Director more than once and slept soundly after. Cheryl handles the visitors; Kelly handles everyone else.
 
 ### Lines
 - No lanyard, no entry, and yes that includes you, Quentin.
@@ -424,7 +424,7 @@ Stern, thorough and Quentin's only true ally. Nothing enters the building withou
 - Processed.
 - Raised and approved.
 
-## Zach
+## Aiden
 Department: Procurement
 
 Junior buyer, chaotic, keen and bad at ordering. The pallet of staplers in the corridor is his.
@@ -454,10 +454,10 @@ The calmest voice on the phone and the most savage one off it. Takes her headset
 - Thanks for holding.
 - Is there anything else I can help with?
 
-## Wilf
+## Dan
 Department: Customer Services
 
-Came out of retirement because the garden wasn't taking his calls. Old-school, unhurried, answers complaints by letter and is somehow the best-rated in the team.
+Came out of early retirement because the garden wasn't taking his calls. Old-school, unhurried, answers complaints by letter and is somehow the best-rated in the team. Keisha's opposite in every way, and her favourite person.
 
 ### Lines
 - I prefer to reply to complaints by letter, it gives everyone time to calm down.

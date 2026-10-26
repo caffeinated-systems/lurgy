@@ -5,6 +5,7 @@ from app.board import DESKS, Desk
 from app.cast import STUB_BOARD
 
 FIXTURES = Path(__file__).parent / "fixtures" / "puzzles"
+STORIES = Path(__file__).parent / "fixtures" / "stories"
 MONDAY = date(2026, 10, 19)  # the Monday sample's day in the fixture Week
 
 # The Monday sample from the voice prototype, which is also the stub cast.
