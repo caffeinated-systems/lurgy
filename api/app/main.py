@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.board import DESKS, Board, Desk
-from app.clues import State
+from app.clues import EVERYONE, Count, More, State
 from app.grade import hint
 from app.week import Day, Difficulty, load_days
 
@@ -182,6 +182,42 @@ class HintRequest(BaseModel):
     ]
 
 
+class ExplainedClue(BaseModel):
+    desk: Annotated[Desk, Field(description="Who said it.", examples=["B3"])]
+    explanation: Annotated[
+        str | None,
+        Field(
+            description="The clue spelled out desk by desk; "
+            "puzzles built before explanations existed have none.",
+            examples=[
+                "Kev's neighbours are Jas and Rosa: exactly one of them is sick."
+            ],
+        ),
+    ]
+    desks: Annotated[
+        list[Desk],
+        Field(description="The desks the clue talks about.", examples=[["A3", "C3"]]),
+    ]
+
+    @classmethod
+    def at(cls, board: Board, day: Day, desk: Desk) -> Self:
+        reveal = day.reveal(desk)
+        match reveal.clue:
+            case None:  # pragma: no cover (a hint only names clues)
+                raise ValueError(desk)
+            case Count(group=group):
+                bits = board.bits(group)
+            case More(a=a, b=b):
+                bits = board.bits(a) | board.bits(b)
+            case _:  # the rest are about the whole office
+                bits = EVERYONE
+        return cls(
+            desk=desk,
+            explanation=reveal.explanation,
+            desks=[d for i, d in enumerate(DESKS) if bits >> i & 1],
+        )
+
+
 class Hint(BaseModel):
     clues: Annotated[
         list[Desk],
@@ -193,6 +229,10 @@ class Hint(BaseModel):
     coworker: Annotated[
         Desk,
         Field(description="The first coworker those clues force.", examples=["A4"]),
+    ]
+    explanations: Annotated[
+        list[ExplainedClue],
+        Field(description="Each of those clues spelled out, in the same order."),
     ]
 
 
@@ -272,7 +312,11 @@ def get_hint(request: HintRequest, days: Days, today: Today) -> Hint:
     if len(steps) == len(DESKS) - 1:
         raise HTTPException(HTTPStatus.CONFLICT, "Everyone is already declared.")
     clues, coworker = hint(board, puzzle, steps)
-    return Hint(clues=clues, coworker=coworker)
+    return Hint(
+        clues=clues,
+        coworker=coworker,
+        explanations=[ExplainedClue.at(board, puzzle, d) for d in clues],
+    )
 
 
 # Vite builds web/ into here, inside api/, the only directory Laravel Cloud ships.

@@ -31,6 +31,7 @@ test("a new day starts with the starting coworker and selects the first hidden d
 		reveals: [DAY.start],
 		masks: [],
 		hints: {},
+		dimmed: [],
 		startedAt: 1000,
 	});
 	expect(game.selected).toBe("B1");
@@ -41,6 +42,7 @@ test("a saved day resumes where it left off", () => {
 		reveals: [DAY.start, reveal("B1")],
 		masks: ["C1" as const],
 		hints: {},
+		dimmed: ["A1" as const],
 		startedAt: 5,
 	};
 	save(DAY.date, progress);
@@ -56,6 +58,7 @@ test("a solved day resumes with the starting coworker selected", () => {
 		reveals: [DAY.start, ...DESKS.slice(1).map(reveal)],
 		masks: [],
 		hints: {},
+		dimmed: [],
 		startedAt: 0,
 		solvedAt: 9,
 	});
@@ -74,24 +77,48 @@ test("broken or foreign storage starts the day afresh", () => {
 		{ reveals: [DAY.start], masks: [] },
 		{ reveals: [DAY.start], masks: [], startedAt: 0, hints: "oops" },
 		{ reveals: [DAY.start], masks: [], startedAt: 0, hints: [] },
+		{ reveals: [DAY.start], masks: [], startedAt: 0, dimmed: "oops" },
 	]) {
 		localStorage.setItem("office-bug:2026-10-19", JSON.stringify(saved));
 		expect(load(DAY)).toBeUndefined();
 	}
 });
 
-test("a day saved before hints existed loads with none taken", () => {
+test("a day saved before hints or dimming existed loads with none of either", () => {
 	const saved = { reveals: [DAY.start], masks: [], startedAt: 0 };
-	for (const hints of [undefined, null]) {
+	for (const missing of [undefined, null]) {
 		localStorage.setItem(
 			"office-bug:2026-10-19",
-			JSON.stringify({ ...saved, hints }),
+			JSON.stringify({ ...saved, hints: missing, dimmed: missing }),
 		);
-		expect(load(DAY)).toEqual({ ...saved, hints: {} });
+		expect(load(DAY)).toEqual({ ...saved, hints: {}, dimmed: [] });
 	}
 });
 
-const HINT = { clues: ["A1" as const, "C2" as const], coworker: "B3" as const };
+test("reading a clue toggles it, and reading another moves on", () => {
+	const game = start(DAY, 0);
+
+	const read = reducer(game, { type: "read", desk: "A1" });
+	expect(read.reading).toBe("A1");
+	expect(reducer(read, { type: "read", desk: "B1" }).reading).toBe("B1");
+	expect(reducer(read, { type: "read", desk: "A1" }).reading).toBeUndefined();
+});
+
+test("dimming a clue toggles it in the saved progress", () => {
+	const game = start(DAY, 0);
+
+	const dimmed = reducer(game, { type: "dimmed", desk: "A1" });
+	expect(dimmed.progress.dimmed).toEqual(["A1"]);
+	expect(
+		reducer(dimmed, { type: "dimmed", desk: "A1" }).progress.dimmed,
+	).toEqual([]);
+});
+
+const HINT = {
+	clues: ["A1" as const, "C2" as const],
+	coworker: "B3" as const,
+	explanations: [],
+};
 
 test("a first hint points at its clues and marks its coworker once", () => {
 	const game = reducer(
@@ -294,6 +321,7 @@ const progress = (masks: Desk[], hints: Progress["hints"] = {}): Progress => ({
 	reveals: DESKS.map(reveal),
 	masks,
 	hints,
+	dimmed: [],
 	startedAt: 1_000,
 	solvedAt: 284_000,
 });
