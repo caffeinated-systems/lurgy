@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from fastapi.testclient import TestClient
 
-from app.main import EARLIEST, app, days, today_anywhere
+from app.main import EARLIEST, LATEST, app, days, open_week, today_anywhere
 from app.week import load_days
 from tests.factories import FIXTURES, MONDAY
 
@@ -85,3 +85,45 @@ def test_a_day_says_how_hard_it_is() -> None:
 
 def test_a_day_built_before_grading_has_no_difficulty() -> None:
     assert client.get("/api/days/2026-10-19").json()["difficulty"] is None
+
+
+def test_open_week_is_the_monday_at_utc_minus_12() -> None:
+    assert LATEST.utcoffset(None) == timedelta(hours=-12)
+    today = datetime.now(LATEST).date()
+    assert open_week().weekday() == 0
+    assert 0 <= (today - open_week()).days < 7  # noqa: PLR2004
+
+
+def test_a_day_ahead_at_utc_plus_14_still_serves_its_week() -> None:
+    # Tuesday has started in Kiribati; Monday is still today at UTC-12.
+    app.dependency_overrides[today_anywhere] = lambda: date(2026, 10, 20)
+
+    assert client.get("/api/days/2026-10-19").status_code == HTTPStatus.OK
+
+
+def test_the_week_just_ended_stays_open_all_weekend() -> None:
+    app.dependency_overrides[today_anywhere] = lambda: date(2026, 10, 26)
+
+    # Still Sunday at UTC-12, so Monday's Week is open somewhere.
+    assert client.get("/api/days/2026-10-19").status_code == HTTPStatus.OK
+
+
+def test_a_week_closes_once_monday_starts_at_utc_minus_12() -> None:
+    app.dependency_overrides[today_anywhere] = lambda: date(2026, 10, 27)
+    app.dependency_overrides[open_week] = lambda: date(2026, 10, 26)
+
+    assert client.get("/api/days/2026-10-19").status_code == HTTPStatus.NOT_FOUND
+
+
+def test_declarations_and_hints_close_with_the_week() -> None:
+    app.dependency_overrides[open_week] = lambda: date(2026, 10, 26)
+    declaration = {"desk": "A3", "state": "sick"}
+
+    declared = client.post(
+        "/api/declarations",
+        json={"date": "2026-10-19", "declared": [], "declaration": declaration},
+    )
+    hinted = client.post("/api/hints", json={"date": "2026-10-19", "declared": []})
+
+    assert declared.status_code == HTTPStatus.NOT_FOUND
+    assert hinted.status_code == HTTPStatus.NOT_FOUND
