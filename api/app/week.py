@@ -34,7 +34,8 @@ class Day(_Model):
     start: Desk
     # In desk order: a set's order changes with PYTHONHASHSEED, and the file mustn't.
     sick: Annotated[
-        frozenset[Desk], PlainSerializer(lambda s: sorted(s, key=DESKS.index))
+        frozenset[Desk],
+        PlainSerializer(lambda s: sorted(s, key=DESKS.index), when_used="json"),
     ]
     # Files built before #24 have no difficulty.
     difficulty: Difficulty | None = None

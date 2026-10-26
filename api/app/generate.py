@@ -161,10 +161,11 @@ def _choose(  # noqa: PLR0913
     """
 
     def forces(clue: Clue, boards: Boards) -> bool:
-        # Someone may be settled already but not yet declared: only new ones count.
-        before = settled(boards, declared).keys()
-        return bool(settled(boards[clue.mask(board, boards)], declared).keys() - before)
+        # Only ever asked when no one on these boards is settled yet, so anyone
+        # settled after the clue is new.
+        return bool(settled(boards[clue.mask(board, boards)], declared))
 
+    # Declarations alone never settle anyone undeclared.
     alone = [c for c in candidates if forces(c, known)]
     if easy:
         return rng.choice(alone or candidates)
@@ -270,18 +271,24 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("-o", "--out", type=Path, required=True, help="the file")
     args = parser.parse_args(argv)
 
-    commit = subprocess.run(
-        # A dirty tree can't rebuild the Week from its commit, so it says so.
-        ["git", "describe", "--always", "--dirty", "--abbrev=40"],  # noqa: S607 (git from PATH, as in CI)
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout.strip()
+    # A dirty tree, untracked files included, can't rebuild the Week from its commit.
+    commit = _git("rev-parse", "HEAD") + (
+        "-dirty" if _git("status", "--porcelain") else ""
+    )
     week = generate_week(STUB_BOARD, args.week, secrets.randbits(128), commit)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(week.model_dump_json(indent=2) + "\n")
     tiers = ", ".join(str(d.difficulty) for d in week.days)
     print(f"wrote {args.out} ({tiers})")  # noqa: T201 (the CLI's one line)
+
+
+def _git(*args: str) -> str:
+    return subprocess.run(  # noqa: S603 (fixed arguments, never user input)
+        ["git", *args],  # noqa: S607 (git from PATH, as in CI)
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
 
 
 def _monday(week: str) -> date:
