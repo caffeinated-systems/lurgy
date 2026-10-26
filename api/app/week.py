@@ -22,6 +22,8 @@ class Reveal(_Model):
 
     clue: Clue | None = None
     text: Annotated[str, Field(min_length=1)]
+    # The clue spelled out desk by desk; files built before #24 have none.
+    explanation: str | None = None
 
 
 class Day(_Model):
