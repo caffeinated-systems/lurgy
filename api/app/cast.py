@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from app.board import DESKS, Board, Coworker
+from app.board import DESKS
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -210,31 +210,6 @@ def main(argv: Sequence[str] | None = None, today: date | None = None) -> None:
             # A GitHub Actions annotation: a quiet week is allowed, so never a failure.
             print(f"::warning::no story for {path.stem}: it will be a quiet week")  # noqa: T201
     print(f"checked {len(cast)} cast members")  # noqa: T201
-
-
-# ponytail: the voice prototype's Monday sample seats every Week until the cast and
-# story files drive who's in (#30). Names run A to T across the floor.
-_STUB_DEPARTMENTS = (
-    "Facilities", "Facilities", "HR", "Marketing",
-    "IT", "Facilities", "Marketing", "Finance",
-    "IT", "HR", "IT", "Sales",
-    "Finance", "Sales", "Sales", "Marketing",
-    "Finance", "Sales", "HR", "IT",
-)  # fmt: skip
-_STUB_NAMES = (
-    "Aisha", "Barry", "Carol", "Dev",
-    "Erin", "Fergus", "Gemma", "Hamid",
-    "Imogen", "Jas", "Kev", "Linda",
-    "Mo", "Nadia", "Ollie", "Priya",
-    "Quentin", "Rosa", "Steve", "Tariq",
-)  # fmt: skip
-
-STUB_BOARD = Board(
-    coworkers=tuple(
-        Coworker(name=n, department=d)
-        for n, d in zip(_STUB_NAMES, _STUB_DEPARTMENTS, strict=True)
-    )
-)
 
 
 if __name__ == "__main__":  # pragma: no cover

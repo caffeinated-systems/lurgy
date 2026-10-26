@@ -27,6 +27,8 @@ class Reveal(_Model):
     text: Annotated[str, Field(min_length=1)]
     # The clue spelled out desk by desk; files built before #24 have none.
     explanation: str | None = None
+    # A short joke after the clue; files built before #30 have none.
+    joke: str | None = None
 
 
 class Day(_Model):
