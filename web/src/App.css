@@ -31,7 +31,7 @@
 	--sick: #e3e98a;
 	--sick-ink: #5a6400;
 	--well: #cfe6ee;
-	--well-ink: #1f6f8b;
+	--well-ink: #1c6882;
 	--mistake: #e0a91c;
 	--accent: #2b4c7e;
 	color-scheme: light;
@@ -197,13 +197,15 @@ footer a {
 .st-sick {
 	background: var(--sick);
 }
-.st-sick .state {
+.st-sick .state,
+.st-sick .coord {
 	color: var(--sick-ink);
 }
 .st-well {
 	background: var(--well);
 }
-.st-well .state {
+.st-well .state,
+.st-well .coord {
 	color: var(--well-ink);
 }
 .mistake::after {
