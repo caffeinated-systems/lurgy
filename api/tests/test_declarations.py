@@ -55,6 +55,7 @@ def test_a_forced_correct_declaration_reveals_the_next_clue() -> None:
             "kind": "clue",
             "text": "Nobody between me and Quentin is sick. "
             "Have you tried turning me off and on again?",
+            "joke": None,
         },
     }
 

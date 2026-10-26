@@ -253,6 +253,11 @@ footer a {
 	color: var(--muted);
 }
 
+.joke {
+	font-style: italic;
+	color: var(--muted);
+}
+
 .thumb {
 	position: sticky;
 	bottom: 0;
