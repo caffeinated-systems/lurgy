@@ -8,10 +8,12 @@ from app.board import (
     COLUMNS,
     DESKS,
     ROWS,
+    Between,
     Board,
     Column,
     Department,
     Desk,
+    Direction,
     Group,
     Neighbours,
     Row,
@@ -297,6 +299,31 @@ class AllIn(_Model):
         return board.bits(self.a) | board.bits(self.b)
 
 
+class Connected(_Model):
+    """Everyone sick (or well) in a line sits in one unbroken run: both of them
+    (n=2), or all of them, at least one (None)."""
+
+    kind: Literal["connected"] = "connected"
+    group: Annotated[Row | Column | Between | Direction, Field(discriminator="kind")]
+    n: Literal[2] | None
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        runs = np.zeros(boards.shape, dtype=np.uint8)
+        before = np.zeros(boards.shape, dtype=np.bool_)
+        for desk in _desks(board.bits(self.group)):  # desk order runs along a line
+            here = _is(desk, self.state, boards)
+            runs += here & ~before
+            before = here
+        one: Mask = np.equal(runs, 1)
+        if self.n is None:
+            return one
+        return one & np.equal(_count(board.bits(self.group), self.state, boards), 2)
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.group)
+
+
 def _desks(bits: int) -> list[Desk]:
     return [d for i, d in enumerate(DESKS) if bits >> i & 1]
 
@@ -314,7 +341,8 @@ type Clue = Annotated[
     | OnlyOne
     | OnlyOneNeighbours
     | Overlap
-    | AllIn,
+    | AllIn
+    | Connected,
     Field(discriminator="kind"),
 ]
 

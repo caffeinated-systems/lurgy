@@ -38,6 +38,7 @@ from app.clues import (
     WIDE,
     AllIn,
     Clue,
+    Connected,
     Count,
     Equal,
     More,
@@ -86,6 +87,7 @@ WEIGHTS = {
     "one coworker": 1,
     "uniqueness": 1,
     "overlaps": 1,
+    "connected": 1,
 }  # fmt: skip
 # Each family's forms, drawn evenly once the family is chosen, so a form with a
 # handful of clues (the most) isn't crowded out by one with hundreds (pairs).
@@ -96,6 +98,7 @@ FORMS = {
     "one coworker": ("one_of",),
     "uniqueness": ("only_one", "only_one_neighbours"),
     "overlaps": ("overlap", "all_in"),
+    "connected": ("connected",),
 }
 STATES: tuple[State, ...] = ("sick", "well")
 
@@ -287,6 +290,7 @@ def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
         _one_coworker(board, solution),
         _uniqueness(board, solution),
         _overlaps(board, solution),
+        _connections(board, solution),
     ):
         catalogue[_form(clue)].append(clue)
     return catalogue
@@ -423,6 +427,21 @@ def _overlapping(board: Board) -> tuple[tuple[Group, Group], ...]:
         and board.bits(a) & board.bits(b)
         and board.bits(a) & ~board.bits(b)
     )
+
+
+def _connections(board: Board, solution: int) -> Iterator[Clue]:
+    """Lines of three or more where the two or more sick (or well) sit in one run."""
+    one = np.array([solution], dtype=np.uint32)
+    for line in _groups(board):
+        if not isinstance(line, Row | Column | Between | Direction):
+            continue
+        if board.bits(line).bit_count() < 3:  # noqa: PLR2004 (both of two names them)
+            continue
+        for state in STATES:
+            n = _how_many(board.bits(line), solution, state)
+            clue = Connected(group=line, n=2 if n == 2 else None, state=state)  # noqa: PLR2004
+            if n >= 2 and clue.mask(board, one)[0]:  # noqa: PLR2004
+                yield clue
 
 
 def _pairs(board: Board) -> Iterator[tuple[Group, Group]]:

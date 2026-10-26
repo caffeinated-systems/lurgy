@@ -14,6 +14,7 @@ from app.board import (
 from app.clues import (
     AllIn,
     Clue,
+    Connected,
     ContradictionError,
     Count,
     Equal,
@@ -126,6 +127,16 @@ from tests.factories import SAMPLE_BOARD, board_index, desks
             {"D3"},
             True,
         ),
+        # connected: one unbroken run along a line, a single coworker included
+        (Connected(group=Row(row=1), n=None), {"A1", "B1"}, True),
+        (Connected(group=Row(row=1), n=None), {"A1", "C1"}, False),
+        (Connected(group=Row(row=1), n=None), {"B1"}, True),
+        (Connected(group=Row(row=1), n=None), set(), False),
+        (Connected(group=Row(row=1), n=2), {"B1", "C1"}, True),
+        (Connected(group=Row(row=1), n=2), {"B1", "C1", "D1"}, False),
+        (Connected(group=Row(row=1), n=2), {"A1", "C1"}, False),
+        (Connected(group=Column(column="A"), n=None, state="well"), {"A3"}, False),
+        (Connected(group=Column(column="A"), n=None, state="well"), {"A1"}, True),
         # about one coworker
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3", "A3"}, True),
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3"}, False),
@@ -186,6 +197,7 @@ ROW_3: set[Desk] = {"A3", "B3", "C3", "D3"}
             AllIn(a=Row(row=1), b=Corners(), n=None),
             {"A1", "B1", "C1", "D1", "A5", "D5"},
         ),
+        (Connected(group=Column(column="B"), n=None), {"B1", "B2", "B3", "B4", "B5"}),
         (OnlyOne(family="rows", n=1), set(DESKS)),
         (Most(group=Row(row=3)), set(DESKS)),
     ],
@@ -248,6 +260,8 @@ def test_contradiction_raises() -> None:
         {"kind": "only_one_neighbours", "group": {"kind": "corners"}, "n": -1},
         {"kind": "overlap", "a": {"kind": "corners"}, "b": {"kind": "edges"}, "n": 1},
         {"kind": "all_in", "a": {"kind": "corners"}, "b": {"kind": "edges"}, "n": 3},
+        {"kind": "connected", "group": {"kind": "corners"}, "n": None},
+        {"kind": "connected", "group": {"kind": "row", "row": 1}, "n": 3},
         {"kind": "riddle"},
     ],
 )

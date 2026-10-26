@@ -14,6 +14,7 @@ from app.board import (
 from app.clues import (
     AllIn,
     Clue,
+    Connected,
     Count,
     Equal,
     More,
@@ -185,6 +186,18 @@ SPEAKER: Desk = "B3"
         (
             AllIn(a=Row(row=5), b=Corners(), n=1),
             "The only sick person in row 5 is in a corner.",
+        ),
+        (
+            Connected(group=Row(row=3), n=None),
+            "All the sick people in my row are connected.",
+        ),
+        (
+            Connected(group=Column(column="A"), n=2, state="well"),
+            "Both well people in column A are connected.",
+        ),
+        (
+            Connected(group=Between(a="A1", b="A5"), n=None),
+            "All the sick people between Aisha and Quentin are connected.",
         ),
     ],
 )
@@ -401,6 +414,21 @@ def test_wording(clue: Clue, said: str) -> None:
                 "My row is Imogen, Kev, Linda and me. Hamid's neighbours are Carol,"
                 " Dev, Gemma, Kev and Linda. Exactly two of the first are sick, both"
                 " in the second too, so Imogen and I are not sick."
+            ),
+        ),
+        (
+            Connected(group=Row(row=3), n=None),
+            (
+                "My row is Imogen, Kev, Linda and me: at least one of them is sick,"
+                " and the sick ones sit side by side in one unbroken line, with no"
+                " well person between them."
+            ),
+        ),
+        (
+            Connected(group=Column(column="A"), n=2, state="well"),
+            (
+                "Column A is Aisha, Erin, Imogen, Mo and Quentin: exactly two of them"
+                " are well, and they sit next to each other."
             ),
         ),
         (

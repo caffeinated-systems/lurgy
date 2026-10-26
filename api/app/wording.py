@@ -20,6 +20,7 @@ from app.board import (
 from app.clues import (
     AllIn,
     Clue,
+    Connected,
     Count,
     Equal,
     Family,
@@ -101,7 +102,7 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
                 f"{NUMBERS[n]} of the {state} people {_where(board, speaker, a)}"
                 f" are {_where(board, speaker, b)}."
             )
-        case AllIn(a=a, b=b, n=n, state=state):  # pragma: no branch
+        case AllIn(a=a, b=b, n=n, state=state):
             where = _where(board, speaker, a)
             lead = {
                 1: f"The only {state} person {where} is",
@@ -112,6 +113,9 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
             if n == 1:  # one person sits in one corner, on one edge
                 there = _ONE_OF_THEM.get(there, there)
             return f"{lead} {there}."
+        case Connected(group=group, n=n, state=state):  # pragma: no branch
+            lead = f"Both {state} people" if n == 2 else f"All the {state} people"  # noqa: PLR2004
+            return f"{lead} {_where(board, speaker, group)} are connected."
 
 
 def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911, PLR0912 (a case per kind)
@@ -183,7 +187,7 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
                 f" The people in both are {both}:"
                 f" exactly {NUMBERS[n]} of them are {state}."
             )
-        case AllIn(a=a, b=b, n=n, state=state):  # pragma: no branch
+        case AllIn(a=a, b=b, n=n, state=state):
             found = {
                 1: f"Exactly one of the first is {state}, and they're in the second",
                 2: f"Exactly two of the first are {state}, both in the second",
@@ -195,6 +199,18 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
             return (
                 f"{_members(board, speaker, a)}. {_members(board, speaker, b)}."
                 f" {found} too, so {_not(board, speaker, a, b)} {state}."
+            )
+        case Connected(group=group, n=n, state=state):  # pragma: no branch
+            members = _members(board, speaker, group)
+            if n == 2:  # noqa: PLR2004
+                return (
+                    f"{members}: exactly two of them are {state},"
+                    " and they sit next to each other."
+                )
+            return (
+                f"{members}: at least one of them is {state}, and the {state} ones"
+                " sit side by side in one unbroken line, with no"
+                f" {_OTHER[state]} person between them."
             )
 
 
