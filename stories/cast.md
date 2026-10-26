@@ -4,22 +4,6 @@ The office is one big open-plan floor above a carpet warehouse on the ring road.
 
 Notes for writers: about ten members carry the stories and the rest drop in. Keep the threads quiet. Nobody in the office knows about Henry and Gemma, and Priya has no idea about Fergus.
 
-## Aisha
-Department: Facilities
-
-Runs the building like a ship and laminates anything that stands still. Brisk, practical and quietly at war with whoever keeps moving the thermostat. Her signs are a running gag: there is now a sign about the signs.
-
-### Lines
-- I've laminated a sign asking people to stop removing my laminated signs.
-- The fire drill is a surprise, so please stop asking me when it is.
-- Whoever keeps setting the thermostat to tropical, I will find you.
-- The lift isn't broken, it just likes to think about things.
-
-### Jokes
-- I'll put up a sign.
-- Laminated, obviously.
-- Mark it down.
-
 ## Barry
 Department: Facilities
 
