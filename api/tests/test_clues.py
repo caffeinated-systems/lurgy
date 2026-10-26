@@ -16,9 +16,11 @@ from app.clues import (
     ContradictionError,
     Count,
     Equal,
+    Is,
     More,
     Most,
     NoMoreThan,
+    OneOf,
     Parity,
     SickVsWell,
     Total,
@@ -89,6 +91,17 @@ from tests.factories import SAMPLE_BOARD, board_index, desks
         (Most(group=Row(row=3), state="well"), {"A1"}, False),  # rows 2-5 tie
         (Most(group=Department(name="Sales"), state="well"), set(), False),  # IT
         (Most(group=Department(name="Sales"), state="well"), {"A2"}, True),
+        # about one coworker
+        (Is(desk="C3"), {"C3"}, True),
+        (Is(desk="C3"), {"A3"}, False),
+        (Is(desk="C3", state="well"), {"A3"}, True),
+        (OneOf(desk="C3", group=Row(row=3), n=2), {"C3", "A3"}, True),
+        (OneOf(desk="C3", group=Row(row=3), n=2), {"C3"}, False),
+        (OneOf(desk="C3", group=Row(row=3), n=2), {"A3", "B3"}, False),
+        # "one of the" means at least two
+        (OneOf(desk="C3", group=Row(row=3), n=None), {"C3", "A3", "B3"}, True),
+        (OneOf(desk="C3", group=Row(row=3), n=None), {"C3"}, False),
+        (OneOf(desk="C3", group=Row(row=3), n=None, state="well"), {"A3"}, True),
         # more sick in row 3 than to the right of B3
         (More(a=Row(row=3), b=Direction(of="B3", direction="right")), {"A3"}, True),
         (More(a=Row(row=3), b=Direction(of="B3", direction="right")), {"C3"}, False),
@@ -127,6 +140,8 @@ ROW_3: set[Desk] = {"A3", "B3", "C3", "D3"}
         # the rest are about the whole office
         (Total(n=1), set(DESKS)),
         (NoMoreThan(family="rows", n=1), set(DESKS)),
+        (Is(desk="C3"), {"C3"}),
+        (OneOf(desk="C3", group=Row(row=3), n=None), ROW_3),
         (Most(group=Row(row=3)), set(DESKS)),
     ],
 )
@@ -182,6 +197,8 @@ def test_contradiction_raises() -> None:
         {"kind": "parity", "group": {"kind": "corners"}, "parity": "prime"},
         {"kind": "most", "group": {"kind": "corners"}},
         {"kind": "sick_vs_well", "group": {"kind": "corners"}, "more": "both"},
+        {"kind": "one_of", "desk": "A1", "group": {"kind": "corners"}, "n": 1},
+        {"kind": "is", "desk": "E9"},
         {"kind": "riddle"},
     ],
 )

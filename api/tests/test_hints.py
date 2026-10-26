@@ -1,6 +1,6 @@
 import random
 from http import HTTPStatus
-from itertools import combinations
+from itertools import combinations, count
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -8,7 +8,7 @@ import numpy as np
 from app.board import DESKS
 from app.clues import BOARDS, WIDE, settled
 from app.generate import generate_day
-from app.grade import MOST, hint
+from app.grade import MOST, grade, hint
 from app.main import ExplainedClue, app
 from app.week import load_days
 from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD
@@ -87,7 +87,14 @@ def _forces(
 
 
 def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
-    day = generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(2027))
+    # Any change to the generator reshuffles what a seed builds, so look for one.
+    days = (
+        generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(seed))
+        for seed in count(2026)
+    )
+    day = next(
+        d for d in days if any(s.whole_board for s in grade(SAMPLE_BOARD, d).steps)
+    )
     steps: list[tuple[Desk, State]] = []
     sizes = []
     wides = []

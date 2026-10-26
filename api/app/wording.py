@@ -21,9 +21,11 @@ from app.clues import (
     Clue,
     Count,
     Equal,
+    Is,
     More,
     Most,
     NoMoreThan,
+    OneOf,
     Op,
     Parity,
     SickVsWell,
@@ -74,8 +76,16 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
             if more is None:
                 return f"As many people {where} are sick as well."
             return f"More people {where} are {more} than {_OTHER[more]}."
-        case Most(group=group, state=state):  # pragma: no branch (exhaustive)
+        case Most(group=group, state=state):
             return f"{_noun(board, speaker, group)[0]} has the most {state} people."
+        case Is(desk=desk, state=state):
+            return f"{_subject(board, speaker, desk)} {state}."
+        case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
+            count = "the" if n is None else NUMBERS[n]
+            return (
+                f"{_subject(board, speaker, desk)} one of {count} {state} people"
+                f" {_where(board, speaker, group)}."
+            )
 
 
 def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911 (a case per kind)
@@ -123,9 +133,17 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
             if more is None:
                 return f"{members}: as many of them are sick as well."
             return f"{members}: more of them are {more} than {_OTHER[more]}."
-        case Most(group=group, state=state):  # pragma: no branch (exhaustive)
+        case Most(group=group, state=state):
             noun = _noun(board, speaker, group)[0]
             return f"{noun} has more {state} people than any other {group.kind}."
+        case Is(desk=desk, state=state):
+            they = "I am" if desk == speaker else "they are"
+            return f"That's {_who(board, speaker, desk)} alone: {they} {state}."
+        case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
+            return (
+                f"{_members(board, speaker, group)}:"
+                f" {_subject(board, speaker, desk)} {state}, and {_others(n)}."
+            )
 
 
 def _sentence(op: Op, n: int, state: State, where: str) -> str:
@@ -150,6 +168,20 @@ def _of_them(op: Op, n: int, state: State) -> str:
 
 def _who(board: Board, speaker: Desk, desk: Desk) -> str:
     return "me" if desk == speaker else board.coworkers[DESKS.index(desk)].name
+
+
+def _others(n: int | None) -> str:
+    """Everyone else in a "one of" clue's state: "so are exactly two others"."""
+    if n is None:
+        return "so is at least one other"
+    if n == 2:  # noqa: PLR2004 (this coworker and one other)
+        return "so is exactly one other"
+    return f"so are exactly {NUMBERS[n - 1]} others"
+
+
+def _subject(board: Board, speaker: Desk, desk: Desk) -> str:
+    """Someone and their "is": "Kev is", or "I am" for the speaker."""
+    return "I am" if desk == speaker else f"{_who(board, speaker, desk)} is"
 
 
 def _whose(board: Board, speaker: Desk, desk: Desk) -> str:

@@ -15,9 +15,11 @@ from app.clues import (
     Clue,
     Count,
     Equal,
+    Is,
     More,
     Most,
     NoMoreThan,
+    OneOf,
     Parity,
     SickVsWell,
     Total,
@@ -128,6 +130,16 @@ SPEAKER: Desk = "B3"
         (Most(group=Column(column="D")), "Column D has the most sick people."),
         (Most(group=Row(row=3), state="well"), "My row has the most well people."),
         (Most(group=Department(name="Sales")), "Sales has the most sick people."),
+        (Is(desk="C3"), "Kev is sick."),
+        (Is(desk="B3", state="well"), "I am well."),
+        (
+            OneOf(desk="C3", group=Row(row=3), n=3),
+            "Kev is one of three sick people in my row.",
+        ),
+        (
+            OneOf(desk="B3", group=Department(name="HR"), n=None, state="well"),
+            "I am one of the well people in my department.",
+        ),
     ],
 )
 def test_wording(clue: Clue, said: str) -> None:
@@ -261,6 +273,29 @@ def test_wording(clue: Clue, said: str) -> None:
         (
             Most(group=Department(name="Sales"), state="well"),
             "Sales has more well people than any other department.",
+        ),
+        (Is(desk="C3"), "That's Kev alone: they are sick."),
+        (Is(desk="B3", state="well"), "That's me alone: I am well."),
+        (
+            OneOf(desk="C3", group=Row(row=3), n=3),
+            (
+                "My row is Imogen, Kev, Linda and me:"
+                " Kev is sick, and so are exactly two others."
+            ),
+        ),
+        (
+            OneOf(desk="C3", group=Row(row=3), n=2, state="well"),
+            (
+                "My row is Imogen, Kev, Linda and me:"
+                " Kev is well, and so is exactly one other."
+            ),
+        ),
+        (
+            OneOf(desk="B3", group=Department(name="HR"), n=None),
+            (
+                "My department is Carol, Steve and me:"
+                " I am sick, and so is at least one other."
+            ),
         ),
     ],
 )

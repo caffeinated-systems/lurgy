@@ -37,9 +37,11 @@ from app.clues import (
     Clue,
     Count,
     Equal,
+    Is,
     More,
     Most,
     NoMoreThan,
+    OneOf,
     Parity,
     SickVsWell,
     State,
@@ -71,7 +73,7 @@ FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
 )  # fmt: skip
 # How often each clue family is drawn for a candidate.
 # ponytail: guessed weights; retune after reading a few generated weeks.
-WEIGHTS = {"counts": 4, "parity": 1, "comparisons": 1}
+WEIGHTS = {"counts": 4, "parity": 1, "comparisons": 1, "one coworker": 1}
 STATES: tuple[State, ...] = ("sick", "well")
 
 type Catalogue = dict[str, list[Clue]]
@@ -248,6 +250,7 @@ def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
         "counts": list(_counts(board, solution, rng)),
         "parity": list(_parities(board, solution)),
         "comparisons": list(_comparisons(board, solution)),
+        "one coworker": list(_one_coworker(board, solution)),
     }
 
 
@@ -317,6 +320,19 @@ def _comparisons(board: Board, solution: int) -> Iterator[Clue]:
         well = board.bits(group).bit_count() - sick
         more: State | None = None if sick == well else "sick" if sick > well else "well"
         yield SickVsWell(group=group, more=more)
+
+
+def _one_coworker(board: Board, solution: int) -> Iterator[Clue]:
+    """Each coworker's state, and each one of two or more in a group."""
+    for i, desk in enumerate(DESKS):
+        state: State = "sick" if solution >> i & 1 else "well"
+        yield Is(desk=desk, state=state)
+        for group in _groups(board):
+            if board.bits(group) >> i & 1:
+                n = _how_many(board.bits(group), solution, state)
+                if n >= 2:  # noqa: PLR2004 (one of one would just say they're sick)
+                    yield OneOf(desk=desk, group=group, n=n, state=state)
+                    yield OneOf(desk=desk, group=group, n=None, state=state)
 
 
 def _pairs(board: Board) -> Iterator[tuple[Group, Group]]:

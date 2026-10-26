@@ -188,8 +188,45 @@ class Most(_Model):
         return mask
 
 
+def _is(desk: Desk, state: State, boards: Boards) -> Mask:
+    sick: Mask = (boards >> DESKS.index(desk) & 1).astype(np.bool_)
+    return sick if state == "sick" else ~sick
+
+
+class Is(_Model):
+    """One coworker is sick (or well)."""
+
+    kind: Literal["is"] = "is"
+    desk: Desk
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:  # noqa: ARG002 (same signature as every clue)
+        return _is(self.desk, self.state, boards)
+
+    def bits(self, board: Board) -> int:  # noqa: ARG002 (same signature as every clue)
+        return 1 << DESKS.index(self.desk)
+
+
+class OneOf(_Model):
+    """A coworker is one of n sick (or well) in their group, or (None) of 2+."""
+
+    kind: Literal["one_of"] = "one_of"
+    desk: Desk
+    group: Group
+    n: Annotated[int, Field(ge=2)] | None
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        counts = _count(board.bits(self.group), self.state, boards)
+        them = counts >= 2 if self.n is None else np.equal(counts, self.n)  # noqa: PLR2004 (one of the: two or more)
+        return _is(self.desk, self.state, boards) & them
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.group)
+
+
 type Clue = Annotated[
-    Count | Total | NoMoreThan | Parity | More | Equal | SickVsWell | Most,
+    Count | Total | NoMoreThan | Parity | More | Equal | SickVsWell | Most | Is | OneOf,
     Field(discriminator="kind"),
 ]
 
