@@ -299,7 +299,6 @@ test("a hint shows its clues, then on a second press its coworker", async () => 
 	expect(fetch).toHaveBeenCalledTimes(2);
 });
 
-/** Opens a day that was already solved, with B1 masked. */
 test("reading a clue marks who said it; only a hinted one is spelled out", async () => {
 	await open({
 		clues: ["A1"],
@@ -326,6 +325,10 @@ test("reading a clue marks who said it; only a hinted one is spelled out", async
 	fireEvent.click(screen.getByRole("button", { name: "Hint" }));
 
 	expect(await screen.findByText(/^Row 1 is/)).toBeDefined();
+	expect(
+		document.getElementById(entry.getAttribute("aria-describedby") ?? "")
+			?.textContent,
+	).toMatch(/^Row 1 is/);
 	expect(tile("B1").getAttribute("aria-label")).toContain(
 		"in the clue you're reading",
 	);
@@ -369,6 +372,7 @@ test("flavour can be read but not dimmed", async () => {
 	);
 });
 
+/** Opens a day that was already solved, with B1 masked. */
 async function openSolved() {
 	localStorage.setItem(
 		"office-bug:2026-10-19",

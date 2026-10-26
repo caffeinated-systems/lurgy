@@ -158,3 +158,8 @@ def test_an_explained_clue_names_its_desks() -> None:
         assert explained.explanation == reveal.explanation
         assert explained.explanation
         assert explained.desks == [d for i, d in enumerate(DESKS) if bits >> i & 1]
+
+
+def test_a_comparing_clue_covers_both_of_its_groups() -> None:
+    # Jas (B3): "My row has more sick people than the sick people to my right."
+    assert ExplainedClue.at(BOARD, DAY, "B3").desks == ["A3", "B3", "C3", "D3"]

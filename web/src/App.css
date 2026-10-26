@@ -283,10 +283,10 @@ footer a {
 }
 .who {
 	font-weight: 700;
-	font-size: 0.85rem;
+	font-size: 0.85em;
 }
 .plain {
-	font-size: 0.8rem;
+	font-size: 0.8em;
 	color: var(--muted);
 }
 
@@ -313,7 +313,7 @@ footer a {
 	background: none;
 	color: var(--muted);
 	font: inherit;
-	font-size: 0.75rem;
+	font-size: 0.75em;
 	cursor: pointer;
 }
 .explain {

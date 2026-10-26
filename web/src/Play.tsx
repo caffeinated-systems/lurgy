@@ -259,6 +259,11 @@ export function Play({ day }: { day: Day }) {
 								type="button"
 								className="entry"
 								aria-pressed={game.reading === r.desk}
+								aria-describedby={
+									explained?.desk === r.desk && explained.explanation
+										? `explain-${r.desk}`
+										: undefined
+								}
 								onClick={() => dispatch({ type: "read", desk: r.desk })}
 							>
 								<span className="who">
@@ -282,7 +287,9 @@ export function Play({ day }: { day: Day }) {
 								</button>
 							)}
 							{explained?.desk === r.desk && explained.explanation && (
-								<p className="explain">{explained.explanation}</p>
+								<p className="explain" id={`explain-${r.desk}`}>
+									{explained.explanation}
+								</p>
 							)}
 						</li>
 					);
