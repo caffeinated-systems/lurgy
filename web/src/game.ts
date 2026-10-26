@@ -46,13 +46,16 @@ const key = (date: string) => `office-bug:${date}`;
 export function load(day: Day): Progress | undefined {
 	try {
 		const saved = JSON.parse(localStorage.getItem(key(day.date)) ?? "null");
+		// Saved before hints existed: none were taken.
+		const hints = saved?.hints ?? {};
 		// ponytail: shape check only; a full schema check if Progress ever changes shape.
 		const fits =
 			saved?.reveals?.[0]?.desk === day.start.desk &&
 			Array.isArray(saved.mistakes) &&
-			typeof saved.startedAt === "number";
-		// Saved before hints existed: none were taken.
-		return fits ? { hints: {}, ...saved } : undefined;
+			typeof saved.startedAt === "number" &&
+			typeof hints === "object" &&
+			!Array.isArray(hints);
+		return fits ? { ...saved, hints } : undefined;
 	} catch {
 		return undefined;
 	}

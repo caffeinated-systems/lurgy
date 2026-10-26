@@ -79,7 +79,14 @@ export function Play({ day }: { day: Day }) {
 	}
 
 	async function hint() {
-		if (game.hint) return dispatch({ type: "hinted-again" });
+		if (game.hint) {
+			dispatch({ type: "hinted-again" });
+			// The button disables itself, so focus goes to the coworker, ready for S or W.
+			document
+				.querySelector<HTMLElement>(`[data-desk="${game.hint.coworker}"]`)
+				?.focus();
+			return;
+		}
 		dispatch({ type: "sent" });
 		try {
 			dispatch({

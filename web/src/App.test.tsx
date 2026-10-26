@@ -259,6 +259,9 @@ test("a hint shows its clues, then on a second press its coworker", async () => 
 		declared: [],
 	});
 	expect(tile("A1").getAttribute("aria-label")).toContain("hinted clue");
+	expect(screen.getByText("Two in my row.").closest("li")?.className).toBe(
+		"hinted",
+	);
 	expect(tile("B3").getAttribute("aria-label")).toContain("one hint");
 	expect(tile("B3").textContent).toContain("🟡");
 
@@ -269,10 +272,25 @@ test("a hint shows its clues, then on a second press its coworker", async () => 
 		/two hints, the hint is about them$/,
 	);
 	expect(tile("B3").getAttribute("aria-selected")).toBe("true");
+	expect(document.activeElement).toBe(tile("B3"));
 	expect(
 		screen.getByRole("button", { name: "Who do they settle?" }),
 	).toHaveProperty("disabled", true);
 	expect(fetch).toHaveBeenCalledTimes(2);
+});
+
+test("no hint while a declaration is waiting, or once the office is cleared", async () => {
+	let respond = (_: Response) => {};
+	const waiting = new Promise<Response>((resolve) => {
+		respond = resolve;
+	});
+	await open(waiting);
+	const button = () => screen.getByRole("button", { name: "Hint" });
+
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 sick" }));
+	expect(button()).toHaveProperty("disabled", true);
+	respond(Response.json({ accepted: false }));
+	await waitFor(() => expect(button()).toHaveProperty("disabled", false));
 });
 
 test("a hint that can't reach the office says so", async () => {

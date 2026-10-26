@@ -65,6 +65,8 @@ test("broken or foreign storage starts the day afresh", () => {
 		{ reveals: [], mistakes: [], startedAt: 0 },
 		{ reveals: [DAY.start], mistakes: 3, startedAt: 0 },
 		{ reveals: [DAY.start], mistakes: [] },
+		{ reveals: [DAY.start], mistakes: [], startedAt: 0, hints: "oops" },
+		{ reveals: [DAY.start], mistakes: [], startedAt: 0, hints: [] },
 	]) {
 		localStorage.setItem("office-bug:2026-10-19", JSON.stringify(saved));
 		expect(load(DAY)).toBeUndefined();
@@ -73,9 +75,13 @@ test("broken or foreign storage starts the day afresh", () => {
 
 test("a day saved before hints existed loads with none taken", () => {
 	const saved = { reveals: [DAY.start], mistakes: [], startedAt: 0 };
-	localStorage.setItem("office-bug:2026-10-19", JSON.stringify(saved));
-
-	expect(load(DAY)).toEqual({ ...saved, hints: {} });
+	for (const hints of [undefined, null]) {
+		localStorage.setItem(
+			"office-bug:2026-10-19",
+			JSON.stringify({ ...saved, hints }),
+		);
+		expect(load(DAY)).toEqual({ ...saved, hints: {} });
+	}
 });
 
 const HINT = { clues: ["A1" as const, "C2" as const], coworker: "B3" as const };
@@ -142,8 +148,12 @@ test("the hint closes when its coworker is declared, and not before", () => {
 	expect(done.progress.hints).toEqual({ B3: 1 });
 });
 
-test("a taunt is picked the same way for the same state", () => {
-	expect(pick(["a", "b", "c"], "x", 1)).toBe(pick(["a", "b", "c"], "x", 1));
+test("a taunt depends only on the game state, so a reload shows the same one", () => {
+	const lines = ["a", "b", "c", "d", "e", "f", "g", "h"];
+	// Pinned: changing the hash would change every saved game's taunts.
+	expect(pick(lines, "2026-10-19", 1, 1)).toBe("b");
+	expect(pick(lines, "2026-10-19", 1, 2)).toBe("c");
+	expect(pick(lines, "2026-10-20", 1, 1)).toBe("h");
 	expect(pick([], "x")).toBe("");
 });
 
