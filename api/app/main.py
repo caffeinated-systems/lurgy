@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from app.board import DESKS, Board, Desk
 from app.clues import State
 from app.grade import hint
-from app.week import Day, load_days
+from app.week import Day, Difficulty, load_days
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -134,6 +134,13 @@ class DayResponse(BaseModel):
     start: Annotated[
         RevealedCoworker, Field(description="The coworker revealed at the start.")
     ]
+    difficulty: Annotated[
+        Difficulty | None,
+        Field(
+            description="How hard the puzzle is; null for Weeks built before grading.",
+            examples=["Medium"],
+        ),
+    ]
 
 
 class Declaration(BaseModel):
@@ -224,6 +231,7 @@ def get_day(day: date, days: Days, today: Today) -> DayResponse:
             for desk, c in zip(DESKS, board.coworkers, strict=True)
         ],
         start=RevealedCoworker.at(puzzle, puzzle.start),
+        difficulty=puzzle.difficulty,
     )
 
 

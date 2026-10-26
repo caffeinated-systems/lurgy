@@ -131,6 +131,11 @@ export interface components {
             coworkers: components["schemas"]["SeatedCoworker"][];
             /** @description The coworker revealed at the start. */
             start: components["schemas"]["RevealedCoworker"];
+            /**
+             * @description How hard the puzzle is; null for Weeks built before grading.
+             * @example Medium
+             */
+            difficulty: components["schemas"]["Difficulty"] | null;
         };
         /** Declaration */
         Declaration: {
@@ -170,6 +175,8 @@ export interface components {
         };
         /** @enum {string} */
         Desk: "A1" | "B1" | "C1" | "D1" | "A2" | "B2" | "C2" | "D2" | "A3" | "B3" | "C3" | "D3" | "A4" | "B4" | "C4" | "D4" | "A5" | "B5" | "C5" | "D5";
+        /** @enum {string} */
+        Difficulty: "Easy" | "Medium" | "Hard";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */

@@ -14,4 +14,5 @@ export const DAY: Day = {
 		department: "HR",
 	})),
 	start: { desk: "A1", state: "well", kind: "clue", text: "Two in my row." },
+	difficulty: "Medium",
 };
