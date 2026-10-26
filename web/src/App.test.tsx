@@ -63,6 +63,7 @@ beforeEach(() => {
 afterEach(() => {
 	cleanup();
 	vi.useRealTimers();
+	vi.unstubAllGlobals();
 });
 
 test("the local date pads its month and day", () => {
@@ -281,22 +282,78 @@ test("a hint shows its clues, then on a second press its coworker", async () => 
 	expect(fetch).toHaveBeenCalledTimes(2);
 });
 
-test("no hint once the office is cleared", async () => {
+/** Opens a day that was already solved, with B1 masked. */
+async function openSolved() {
 	localStorage.setItem(
 		"office-bug:2026-10-19",
 		JSON.stringify({
 			reveals: DESKS.map((desk) => sick(desk)),
-			masks: [],
+			masks: ["B1"],
+			hints: {},
 			startedAt: 0,
 			solvedAt: 1,
 		}),
 	);
 	await open();
+}
 
-	expect(screen.getByRole("button", { name: "Hint" })).toHaveProperty(
-		"disabled",
-		true,
+const RESULT =
+	/^Office Lurgy · Mon 19 Oct \(Medium\) · ⏱ 00:00\n"[^"]+"\n🟩😷🟩🟩\n/;
+
+test("a cleared office shows the result in place of the buttons", async () => {
+	await openSolved();
+
+	expect(screen.queryByRole("button", { name: "Hint" })).toBeNull();
+	expect(screen.queryByRole("button", { name: /^Declare/ })).toBeNull();
+	expect(screen.getByRole("button", { name: "Share" })).toBeDefined();
+});
+
+test("sharing uses the share sheet where there is one", async () => {
+	const share = vi.fn(() => Promise.resolve());
+	vi.stubGlobal("navigator", { share });
+	await openSolved();
+
+	fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+	await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+	expect(share.mock.calls[0]).toEqual([
+		{ text: expect.stringMatching(RESULT) },
+	]);
+});
+
+test("closing the share sheet does nothing", async () => {
+	const writeText = vi.fn(() => Promise.resolve());
+	const share = vi.fn(() =>
+		Promise.reject(new DOMException("closed", "AbortError")),
 	);
+	vi.stubGlobal("navigator", { share, clipboard: { writeText } });
+	await openSolved();
+
+	fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+	await waitFor(() => expect(share).toHaveBeenCalled());
+	expect(writeText).not.toHaveBeenCalled();
+});
+
+test("without a share sheet the result is copied", async () => {
+	const writeText = vi.fn(() => Promise.resolve());
+	const share = vi.fn(() => Promise.reject(new Error("not allowed")));
+	vi.stubGlobal("navigator", { share, clipboard: { writeText } });
+	await openSolved();
+
+	fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+	expect(await screen.findByText("Result copied.")).toBeDefined();
+	expect(writeText.mock.calls[0]).toEqual([expect.stringMatching(RESULT)]);
+});
+
+test("a result that can't be copied says so", async () => {
+	vi.stubGlobal("navigator", {});
+	await openSolved();
+
+	fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+	expect(await screen.findByText("Couldn't copy the result.")).toBeDefined();
 });
 
 test("no hint while a declaration is waiting", async () => {

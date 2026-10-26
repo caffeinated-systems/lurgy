@@ -3,15 +3,18 @@ import { hint as askForHint, declare as post } from "./api.ts";
 import {
 	type Day,
 	type Desk,
+	dayLabel,
 	declared,
 	elapsed,
 	formatTime,
 	type Progress,
 	reducer,
+	result,
 	revealOf,
 	type State,
 	save,
 	start,
+	verdict,
 } from "./game.ts";
 import "./App.css";
 
@@ -101,6 +104,25 @@ export function Play({ day }: { day: Day }) {
 		}
 	}
 
+	async function share() {
+		const text = result(day, progress, location.origin);
+		if (navigator.share) {
+			try {
+				return await navigator.share({ text });
+			} catch (error) {
+				// Closing the share sheet isn't a failure; anything else falls back to copying.
+				if (error instanceof DOMException && error.name === "AbortError")
+					return;
+			}
+		}
+		try {
+			await navigator.clipboard.writeText(text);
+			dispatch({ type: "shared", copied: true });
+		} catch {
+			dispatch({ type: "shared", copied: false });
+		}
+	}
+
 	function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
 		if (event.ctrlKey || event.metaKey || event.altKey) return;
 		const key = event.key.toLowerCase();
@@ -128,13 +150,7 @@ export function Play({ day }: { day: Day }) {
 			<header>
 				<Logo />
 				<div className="today">
-					<p className="date">
-						{new Date(`${day.date}T00:00`).toLocaleDateString("en-GB", {
-							weekday: "short",
-							day: "numeric",
-							month: "short",
-						})}
-					</p>
+					<p className="date">{dayLabel(day.date)}</p>
 					<Timer progress={progress} />
 				</div>
 			</header>
@@ -225,40 +241,49 @@ export function Play({ day }: { day: Day }) {
 				<p className="toast" role="status">
 					<span key={game.said}>{game.message}</span>
 				</p>
-				{chosen && (
+				{progress.solvedAt !== undefined ? (
+					<div className="result">
+						<p className="verdict">{verdict(progress, day.date)}</p>
+						<button type="button" className="btn-share" onClick={share}>
+							Share
+						</button>
+					</div>
+				) : (
 					<>
-						<span className="who">
-							{chosen.desk} · {chosen.name} · {chosen.department}
-							{revealOf(progress, chosen.desk) && " · Already declared"}
-						</span>
-						<div className="big">
-							{(["sick", "well"] as const).map((state) => (
-								<button
-									type="button"
-									key={state}
-									className={`btn-${state}`}
-									disabled={game.pending || !!revealOf(progress, chosen.desk)}
-									aria-label={`Declare ${chosen.name} ${state}`}
-									onClick={() => declare(chosen.desk, state)}
-								>
-									{state === "sick" ? "Sick" : "Well"}
-								</button>
-							))}
-						</div>
+						{chosen && (
+							<>
+								<span className="who">
+									{chosen.desk} · {chosen.name} · {chosen.department}
+									{revealOf(progress, chosen.desk) && " · Already declared"}
+								</span>
+								<div className="big">
+									{(["sick", "well"] as const).map((state) => (
+										<button
+											type="button"
+											key={state}
+											className={`btn-${state}`}
+											disabled={
+												game.pending || !!revealOf(progress, chosen.desk)
+											}
+											aria-label={`Declare ${chosen.name} ${state}`}
+											onClick={() => declare(chosen.desk, state)}
+										>
+											{state === "sick" ? "Sick" : "Well"}
+										</button>
+									))}
+								</div>
+							</>
+						)}
+						<button
+							type="button"
+							className="btn-hint"
+							disabled={game.pending || game.hint?.presses === 2}
+							onClick={hint}
+						>
+							{game.hint ? "Who do they settle?" : "Hint"}
+						</button>
 					</>
 				)}
-				<button
-					type="button"
-					className="btn-hint"
-					disabled={
-						game.pending ||
-						progress.solvedAt !== undefined ||
-						game.hint?.presses === 2
-					}
-					onClick={hint}
-				>
-					{game.hint ? "Who do they settle?" : "Hint"}
-				</button>
 			</div>
 		</main>
 	);

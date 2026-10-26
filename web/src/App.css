@@ -332,3 +332,21 @@ footer a {
 		transition: background-color 0.2s;
 	}
 }
+.result {
+	display: grid;
+	gap: 6px;
+}
+.verdict {
+	margin: 0;
+	font-style: italic;
+}
+.btn-share {
+	min-height: 56px;
+	border: 0;
+	border-radius: 10px;
+	background: var(--accent);
+	color: var(--bg);
+	font-weight: 700;
+	font-size: 1.05rem;
+	cursor: pointer;
+}

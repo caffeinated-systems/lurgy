@@ -39,7 +39,8 @@ export type Action =
 	| { type: "hinted"; hint: Hint }
 	| { type: "hinted-again" }
 	| { type: "failed" }
-	| { type: "already" };
+	| { type: "already" }
+	| { type: "shared"; copied: boolean };
 
 const key = (date: string) => `office-bug:${date}`;
 
@@ -138,6 +139,72 @@ export const REMARKS = [
 	"I'll remember this at my leaving do.",
 ];
 
+// The taunt on solving, by how many coworkers wear a mask or carry a hint:
+// none, 1 to 3, or 4 or more. Drafted with AI, edited by a human.
+export const VERDICTS = [
+	[
+		"Flawless. Have a biscuit, you've earned it.",
+		"Not one mask. HR are framing your appraisal.",
+		"Clean sweep. The kettle's on for you.",
+		"Perfect. Even Gary the plant is impressed.",
+	],
+	[
+		"Got there, with a few smudges. Nothing a biscuit won't fix.",
+		"Not bad. Not good either. But not bad.",
+		"Done, with only a little help and a little panic.",
+		"Solved. We'll call the masks a fashion choice.",
+	],
+	[
+		"Solved, eventually. The office looks like a hospital ward.",
+		"Cleared. But at what cost?",
+		"You got there, mostly by asking everyone.",
+		"Done. I've seen tidier fire drills.",
+	],
+] as const;
+
+/** Every coworker who wears a mask or carries a hint. */
+function marked(progress: Progress): Set<string> {
+	return new Set([...progress.masks, ...Object.keys(progress.hints)]);
+}
+
+export function verdict(progress: Progress, date: string): string {
+	const n = marked(progress).size;
+	const tier = n === 0 ? 0 : n <= 3 ? 1 : 2;
+	return pick([...VERDICTS[tier]], date, tier);
+}
+
+/** A coworker's square in the result: the strongest of 🟠 > 🟡 > 😷 > 🟩. */
+export function square(progress: Progress, desk: Desk): string {
+	const hints = progress.hints[desk];
+	if (hints) return hints === 2 ? "🟠" : "🟡";
+	return progress.masks.includes(desk) ? "😷" : "🟩";
+}
+
+/** "Wed 28 Oct" */
+export function dayLabel(date: string): string {
+	return new Date(`${date}T00:00`).toLocaleDateString("en-GB", {
+		weekday: "short",
+		day: "numeric",
+		month: "short",
+	});
+}
+
+/** What a solved day shares: time, verdict, grid and where to play. */
+export function result(day: Day, progress: Progress, url: string): string {
+	const difficulty = day.difficulty ? ` (${day.difficulty})` : "";
+	const time = formatTime(elapsed(progress, 0));
+	const squares = day.coworkers.map((c) => square(progress, c.desk));
+	const rows = Array.from({ length: squares.length / 4 }, (_, r) =>
+		squares.slice(r * 4, (r + 1) * 4).join(""),
+	);
+	return [
+		`Office Lurgy · ${dayLabel(day.date)}${difficulty} · ⏱ ${time}`,
+		`"${verdict(progress, day.date)}"`,
+		...rows,
+		url,
+	].join("\n");
+}
+
 /** A line from the list, the same one for the same game state on every reload. */
 export function pick(lines: string[], ...state: (string | number)[]): string {
 	let hash = 0;
@@ -178,7 +245,7 @@ export function reducer(game: Game, action: Action): Game {
 			return answer(
 				{ ...game, progress: next, hint },
 				solved
-					? `${line} Office cleared in ${formatTime(elapsed(next, at))}.`
+					? `${line} ${verdict(next, game.day.date)} Office cleared in ${formatTime(elapsed(next, at))}.`
 					: line,
 			);
 		}
@@ -252,6 +319,11 @@ export function reducer(game: Game, action: Action): Game {
 			return answer(game, "Couldn't reach the office, try again.");
 		case "already":
 			return say(game, "Already declared.");
+		case "shared":
+			return say(
+				game,
+				action.copied ? "Result copied." : "Couldn't copy the result.",
+			);
 	}
 }
 

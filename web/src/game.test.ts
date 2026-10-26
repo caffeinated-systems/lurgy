@@ -1,16 +1,22 @@
 import { beforeEach, expect, test, vi } from "vitest";
 import { DAY, DESKS } from "./fixture.ts";
 import {
+	type Desk,
 	declared,
 	elapsed,
 	formatTime,
 	HINT_TAUNTS,
 	load,
+	type Progress,
 	pick,
 	REMARKS,
 	reducer,
+	result,
 	save,
+	square,
 	start,
+	VERDICTS,
+	verdict,
 } from "./game.ts";
 
 beforeEach(() => localStorage.clear());
@@ -206,7 +212,7 @@ test("the last reveal solves the day and stops the timer", () => {
 	expect(game.progress.solvedAt).toBe(83_000);
 	expect(elapsed(game.progress, 999_999)).toBe(83_000);
 	expect(game.message).toBe(
-		"NameD5 is sick. NameD5 says: Hi. Office cleared in 01:23.",
+		`NameD5 is sick. NameD5 says: Hi. ${verdict(game.progress, DAY.date)} Office cleared in 01:23.`,
 	);
 });
 
@@ -280,4 +286,59 @@ test("times are always mm:ss", () => {
 	expect(formatTime(-5)).toBe("00:00");
 	expect(formatTime(283_999)).toBe("04:43");
 	expect(formatTime(6_000_000)).toBe("100:00");
+});
+
+const progress = (masks: Desk[], hints: Progress["hints"] = {}): Progress => ({
+	reveals: DESKS.map(reveal),
+	masks,
+	hints,
+	startedAt: 1_000,
+	solvedAt: 284_000,
+});
+
+test("the verdict goes by how many coworkers are marked: none, 1 to 3, 4 or more", () => {
+	const tier = (p: Progress) =>
+		VERDICTS.findIndex((lines) =>
+			(lines as readonly string[]).includes(verdict(p, DAY.date)),
+		);
+
+	expect(tier(progress([]))).toBe(0);
+	// A coworker with a mask and a hint counts once.
+	expect(tier(progress(["A1", "B1", "C1"], { A1: 2 }))).toBe(1);
+	expect(tier(progress(["A1", "B1", "C1"], { D1: 1 }))).toBe(2);
+	expect(verdict(progress([]), DAY.date)).toBe(verdict(progress([]), DAY.date));
+});
+
+test("a square shows the strongest mark: 🟠 over 🟡 over 😷 over 🟩", () => {
+	const p = progress(["A1", "B1", "C1"], { A1: 2, B1: 1 });
+
+	expect(["A1", "B1", "C1", "D1"].map((d) => square(p, d as Desk))).toEqual([
+		"🟠",
+		"🟡",
+		"😷",
+		"🟩",
+	]);
+});
+
+test("the result has the day, difficulty, time, verdict, grid and link", () => {
+	const p = progress(["B1", "D5"], { A2: 1, C3: 2 });
+
+	expect(result(DAY, p, "https://lurgy.caffeinated.systems")).toBe(
+		[
+			"Office Lurgy · Mon 19 Oct (Medium) · ⏱ 04:43",
+			`"${verdict(p, DAY.date)}"`,
+			"🟩😷🟩🟩",
+			"🟡🟩🟩🟩",
+			"🟩🟩🟠🟩",
+			"🟩🟩🟩🟩",
+			"🟩🟩🟩😷",
+			"https://lurgy.caffeinated.systems",
+		].join("\n"),
+	);
+});
+
+test("a day built before grading leaves the difficulty out", () => {
+	const text = result({ ...DAY, difficulty: null }, progress([]), "https://x");
+
+	expect(text.split("\n")[0]).toBe("Office Lurgy · Mon 19 Oct · ⏱ 04:43");
 });

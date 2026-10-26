@@ -66,6 +66,7 @@ test("solves the fixture day by keyboard and keeps it after a reload", async ({
 		);
 	}
 	await expect(status).toContainText(/Office cleared in \d\d:\d\d\.$/);
+	await expect(page.getByRole("button", { name: "Share" })).toBeVisible();
 	const time = (await page.getByRole("timer").textContent()) ?? "";
 
 	await page.reload();
