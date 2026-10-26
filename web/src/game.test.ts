@@ -4,7 +4,9 @@ import {
 	declared,
 	elapsed,
 	formatTime,
+	HINT_TAUNTS,
 	load,
+	pick,
 	reducer,
 	save,
 	start,
@@ -21,6 +23,7 @@ test("a new day starts with the starting coworker and selects the first hidden d
 	expect(game.progress).toEqual({
 		reveals: [DAY.start],
 		mistakes: [],
+		hints: {},
 		startedAt: 1000,
 	});
 	expect(game.selected).toBe("B1");
@@ -30,6 +33,7 @@ test("a saved day resumes where it left off", () => {
 	const progress = {
 		reveals: [DAY.start, reveal("B1")],
 		mistakes: ["C1" as const],
+		hints: {},
 		startedAt: 5,
 	};
 	save(DAY.date, progress);
@@ -44,6 +48,7 @@ test("a solved day resumes with the starting coworker selected", () => {
 	save(DAY.date, {
 		reveals: [DAY.start, ...DESKS.slice(1).map(reveal)],
 		mistakes: [],
+		hints: {},
 		startedAt: 0,
 		solvedAt: 9,
 	});
@@ -64,6 +69,82 @@ test("broken or foreign storage starts the day afresh", () => {
 		localStorage.setItem("office-bug:2026-10-19", JSON.stringify(saved));
 		expect(load(DAY)).toBeUndefined();
 	}
+});
+
+test("a day saved before hints existed loads with none taken", () => {
+	const saved = { reveals: [DAY.start], mistakes: [], startedAt: 0 };
+	localStorage.setItem("office-bug:2026-10-19", JSON.stringify(saved));
+
+	expect(load(DAY)).toEqual({ ...saved, hints: {} });
+});
+
+const HINT = { clues: ["A1" as const, "C2" as const], coworker: "B3" as const };
+
+test("a first hint points at its clues and marks its coworker once", () => {
+	const game = reducer(
+		{ ...start(DAY, 0), pending: true },
+		{ type: "hinted", hint: HINT },
+	);
+
+	expect(game.hint).toEqual({ ...HINT, presses: 1 });
+	expect(game.progress.hints).toEqual({ B3: 1 });
+	expect(game.pending).toBe(false);
+	expect(HINT_TAUNTS.some((t) => game.message.startsWith(t))).toBe(true);
+	expect(game.message).toMatch(/Look at what NameA1 and NameC2 said\.$/);
+	expect(game.selected).toBe("B1");
+});
+
+test("a second press names and selects the coworker, and marks them twice", () => {
+	const first = reducer(start(DAY, 0), { type: "hinted", hint: HINT });
+
+	const game = reducer(first, { type: "hinted-again" });
+
+	expect(game.hint?.presses).toBe(2);
+	expect(game.progress.hints).toEqual({ B3: 2 });
+	expect(game.selected).toBe("B3");
+	expect(game.message).toMatch(/Those clues settle NameB3\.$/);
+});
+
+test("a second press with no open hint does nothing", () => {
+	const game = start(DAY, 0);
+
+	expect(reducer(game, { type: "hinted-again" })).toBe(game);
+});
+
+test("asking again keeps the strongest mark", () => {
+	const twice = reducer(
+		reducer(start(DAY, 0), { type: "hinted", hint: HINT }),
+		{
+			type: "hinted-again",
+		},
+	);
+
+	const again = reducer(twice, { type: "hinted", hint: HINT });
+
+	expect(again.progress.hints).toEqual({ B3: 2 });
+});
+
+test("the hint closes when its coworker is declared, and not before", () => {
+	const hinted = reducer(start(DAY, 0), { type: "hinted", hint: HINT });
+
+	const other = reducer(hinted, {
+		type: "accepted",
+		reveal: reveal("D1"),
+		at: 1,
+	});
+	expect(other.hint).toEqual(hinted.hint);
+	const done = reducer(other, {
+		type: "accepted",
+		reveal: reveal("B3"),
+		at: 2,
+	});
+	expect(done.hint).toBeUndefined();
+	expect(done.progress.hints).toEqual({ B3: 1 });
+});
+
+test("a taunt is picked the same way for the same state", () => {
+	expect(pick(["a", "b", "c"], "x", 1)).toBe(pick(["a", "b", "c"], "x", 1));
+	expect(pick([], "x")).toBe("");
 });
 
 test("blocked storage neither loads nor throws", () => {

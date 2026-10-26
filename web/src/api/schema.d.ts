@@ -69,6 +69,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/hints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get Hint
+         * @description The fewest revealed clues that force some coworker, and that coworker.
+         *
+         *     400 with the same body as any rejection if the declarations sent aren't all
+         *     accepted, so a hint can't probe the solution.
+         */
+        post: operations["get_hint_api_hints_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -162,6 +185,44 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** Hint */
+        Hint: {
+            /**
+             * Clues
+             * @description Who said the fewest clues that, together, force someone.
+             * @example [
+             *       "B3",
+             *       "A3"
+             *     ]
+             */
+            clues: components["schemas"]["Desk"][];
+            /**
+             * @description The first coworker those clues force.
+             * @example A4
+             */
+            coworker: components["schemas"]["Desk"];
+        };
+        /** HintRequest */
+        HintRequest: {
+            /**
+             * Date
+             * Format: date
+             * @description The puzzle's day.
+             * @example 2026-10-19
+             */
+            date: string;
+            /**
+             * Declared
+             * @description Every declaration accepted so far, in order, not counting the starting coworker.
+             * @example [
+             *       {
+             *         "desk": "A3",
+             *         "state": "sick"
+             *       }
+             *     ]
+             */
+            declared: components["schemas"]["Declaration"][];
         };
         /** Rejected */
         Rejected: {
@@ -331,6 +392,60 @@ export interface operations {
             };
             /** @description No puzzle for that day yet. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_hint_api_hints_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HintRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Hint"];
+                };
+            };
+            /** @description Not enough evidence. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No puzzle for that day yet. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Everyone is already declared. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

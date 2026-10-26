@@ -1,5 +1,5 @@
 import { type KeyboardEvent, useEffect, useReducer, useState } from "react";
-import { declare as post } from "./api.ts";
+import { hint as askForHint, declare as post } from "./api.ts";
 import {
 	type Day,
 	type Desk,
@@ -78,6 +78,22 @@ export function Play({ day }: { day: Day }) {
 		}
 	}
 
+	async function hint() {
+		if (game.hint) return dispatch({ type: "hinted-again" });
+		dispatch({ type: "sent" });
+		try {
+			dispatch({
+				type: "hinted",
+				hint: await askForHint({
+					date: day.date,
+					declared: declared(progress),
+				}),
+			});
+		} catch {
+			dispatch({ type: "failed" });
+		}
+	}
+
 	function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
 		if (event.ctrlKey || event.metaKey || event.altKey) return;
 		const key = event.key.toLowerCase();
@@ -130,12 +146,19 @@ export function Play({ day }: { day: Day }) {
 						{row.map((c) => {
 							const reveal = revealOf(progress, c.desk);
 							const mistake = progress.mistakes.includes(c.desk);
+							const hints = progress.hints[c.desk];
+							const lit = game.hint?.clues.includes(c.desk);
+							const named =
+								game.hint?.presses === 2 && game.hint.coworker === c.desk;
 							const label = [
 								c.desk,
 								c.name,
 								c.department,
 								reveal?.state ?? "unknown",
 								...(mistake ? ["one mistake"] : []),
+								...(hints ? [hints === 1 ? "one hint" : "two hints"] : []),
+								...(lit ? ["hinted clue"] : []),
+								...(named ? ["the hint is about them"] : []),
 								...(reveal ? [`says: ${reveal.text}`] : []),
 							].join(", ");
 							return (
@@ -144,7 +167,7 @@ export function Play({ day }: { day: Day }) {
 									type="button"
 									key={c.desk}
 									data-desk={c.desk}
-									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${mistake ? "mistake" : ""}`}
+									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${mistake ? "mistake" : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""}`}
 									tabIndex={c.desk === selected ? 0 : -1}
 									role="gridcell"
 									aria-keyshortcuts="S W"
@@ -155,6 +178,11 @@ export function Play({ day }: { day: Day }) {
 									<span className="coord">{c.desk}</span>
 									<span className="nm">{c.name}</span>
 									{reveal && <span className="state">{reveal.state}</span>}
+									{hints && (
+										<span className="mark" aria-hidden="true">
+											{hints === 1 ? "🟡" : "🟠"}
+										</span>
+									)}
 								</button>
 							);
 						})}
@@ -165,7 +193,10 @@ export function Play({ day }: { day: Day }) {
 			<h2 className="log-title">Clues, newest first</h2>
 			<ul className="log">
 				{progress.reveals.toReversed().map((r) => (
-					<li key={r.desk}>
+					<li
+						key={r.desk}
+						className={game.hint?.clues.includes(r.desk) ? "hinted" : undefined}
+					>
 						<span className="who">
 							{nameOf(r.desk)} · {r.desk} · {r.state}
 						</span>
@@ -204,6 +235,18 @@ export function Play({ day }: { day: Day }) {
 						</div>
 					</>
 				)}
+				<button
+					type="button"
+					className="btn-hint"
+					disabled={
+						game.pending ||
+						progress.solvedAt !== undefined ||
+						game.hint?.presses === 2
+					}
+					onClick={hint}
+				>
+					{game.hint ? "Who do they settle?" : "Hint"}
+				</button>
 			</div>
 		</main>
 	);
