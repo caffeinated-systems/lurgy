@@ -364,19 +364,19 @@ Sees everyone come and go and remembers all of it. Guards the visitor book and t
 - Signed in.
 
 ## Kelly
-Department: Reception
+Department: Legal
 
-Ex-bouncer, unshakeable, takes lanyards extremely seriously. Has turned away the Finance Director more than once and slept soundly after. Cheryl handles the visitors; Kelly handles everyone else.
+Ex-bouncer turned compliance officer, unshakeable, takes contracts and lanyards extremely seriously. Has turned the Finance Director away from a meeting more than once and slept soundly after. Volunteers for reception whenever Cheryl is off, mainly for the door.
 
 ### Lines
-- No lanyard, no entry, and yes that includes you, Quentin.
-- I used to be a bouncer, and now I'm the bouncer of lanyards.
-- I've seen things in that car park I can't unsee.
+- No signed NDA, no entry, and yes that includes you, Quentin.
+- I used to be a bouncer, and now I'm the bouncer of contracts.
+- I've seen things in the small print I can't unsee.
 
 ### Jokes
 - You're on the list.
 - Moving along.
-- No lanyard, no chat.
+- Read the terms.
 
 ## Ffion
 Department: Procurement
@@ -409,14 +409,14 @@ Stern, thorough and Quentin's only true ally. Nothing enters the building withou
 - Raised and approved.
 
 ## Aiden
-Department: Procurement
+Department: HR
 
-Junior buyer, chaotic, keen and bad at ordering. The pallet of staplers in the corridor is his.
+Junior HR officer, chaotic, keen and bad at forms. The pallet of lanyards in the corridor is his, and so is the mandatory mindfulness course nobody signed up for.
 
 ### Lines
-- I may have ordered a pallet of staplers instead of a stapler.
-- Ursula says my purchase orders read like poetry, and she didn't mean it nicely.
-- If anyone needs a stapler, and I mean anyone, come and see me.
+- I may have booked the whole office onto a mindfulness course by accident.
+- Carol says my policies read like poetry, and she didn't mean it nicely.
+- If anyone needs a lanyard, and I mean anyone, come and see me.
 
 ### Jokes
 - Nailed it.
@@ -439,14 +439,14 @@ The calmest voice on the phone and the most savage one off it. Takes her headset
 - Is there anything else I can help with?
 
 ## Dan
-Department: Customer Services
+Department: IT
 
-Came out of early retirement because the garden wasn't taking his calls. Old-school, unhurried, answers complaints by letter and is somehow the best-rated in the team. Keisha's opposite in every way, and her favourite person.
+Came out of early retirement because the garden wasn't taking his calls. Old-school, unhurried, answers IT tickets by letter and is somehow the best-rated on the helpdesk. Tania's opposite in every way, and Keisha's favourite person to put through to.
 
 ### Lines
-- I prefer to reply to complaints by letter, it gives everyone time to calm down.
+- I prefer to reply to tickets by letter, it gives everyone time to calm down.
 - I came out of retirement because the garden wasn't taking my calls.
-- In my day a complaint came by pigeon and we were glad of it.
+- In my day a computer filled a room and we were glad of it.
 
 ### Jokes
 - Cheerio.
@@ -454,16 +454,16 @@ Came out of early retirement because the garden wasn't taking his calls. Old-sch
 - Lovely stuff.
 
 ## Sophia
-Department: Customer Services
+Department: Finance
 
-Team lead, relentlessly sunny, runs the department on positivity, biscuits and a very firm hold button. Asks everyone to rate their experience, including her family. Keeps Keisha and Dan from finding out how much they have in common.
+Accounts team lead, relentlessly sunny, runs her ledgers on positivity, biscuits and a very firm budget. Asks everyone to rate their experience of their expense claim, including her family. Quentin still can't tell whether she's joking.
 
 ### Lines
-- Before you go, would you mind rating your experience of this conversation?
-- My mum asked how I was, so I logged it as a ticket and resolved it.
-- I run this team on positivity, biscuits and a very firm hold button.
+- Before you go, would you mind rating your experience of this expense claim?
+- My mum asked how I was, so I raised a purchase order and approved it.
+- I run this team on positivity, biscuits and a very firm budget.
 
 ### Jokes
 - Happy to help!
-- Escalated.
-- Glowing feedback.
+- Approved!
+- Balanced, beautifully.
