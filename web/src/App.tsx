@@ -28,7 +28,8 @@ export function App() {
 				<Notice>Opening the office…</Notice>
 			) : day === "missing" ? (
 				<Notice>
-					No puzzle today: the office is closed for a deep clean. Back soon.
+					No puzzle for that day: the office is closed for a deep clean. Back
+					soon.
 				</Notice>
 			) : day === "offline" ? (
 				<Notice>Couldn't reach the office, try again.</Notice>

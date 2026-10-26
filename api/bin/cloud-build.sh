@@ -5,6 +5,7 @@ set -eu
 
 # Built Weeks hold solutions, so they come from the private repo, never this one
 # (ADR 0002). Cloud's build has git but no ssh: HTTPS with a read-only token.
+rm -rf puzzles
 git clone --quiet --depth 1 \
 	"https://x-access-token:${PUZZLES_TOKEN}@github.com/caffeinated-systems/lurgy-puzzles.git" \
 	puzzles
@@ -12,5 +13,6 @@ git clone --quiet --depth 1 \
 rm -rf puzzles/.git
 
 cd ../web
-npm ci
+# vite and typescript are devDependencies, needed even if NODE_ENV=production.
+npm ci --include=dev
 npm run build

@@ -100,4 +100,5 @@ jobs:
       - name: Deploy to Laravel Cloud
         env:
           HOOK: ${{ secrets.LARAVEL_CLOUD_DEPLOY_HOOK }}
-        run: curl --fail --silent --show-error -X POST "$HOOK?commit_hash=$GITHUB_SHA"
+        # -o /dev/null: Cloud's reply would land in this public repo's log.
+        run: curl --fail --silent --show-error --max-time 60 -o /dev/null -X POST "$HOOK?commit_hash=$GITHUB_SHA"
