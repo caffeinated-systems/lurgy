@@ -1,8 +1,8 @@
 from datetime import date
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Literal
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
 from app.board import DESKS, Board, Desk
 from app.clues import BOARDS, Clue, State
@@ -10,6 +10,9 @@ from app.clues import BOARDS, Clue, State
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
+
+
+type Difficulty = Literal["Easy", "Medium", "Hard"]
 
 
 class _Model(BaseModel):
@@ -22,12 +25,20 @@ class Reveal(_Model):
 
     clue: Clue | None = None
     text: Annotated[str, Field(min_length=1)]
+    # The clue spelled out desk by desk; files built before #24 have none.
+    explanation: str | None = None
 
 
 class Day(_Model):
     date: date
     start: Desk
-    sick: frozenset[Desk]
+    # In desk order: a set's order changes with PYTHONHASHSEED, and the file mustn't.
+    sick: Annotated[
+        frozenset[Desk],
+        PlainSerializer(lambda s: sorted(s, key=DESKS.index), when_used="json"),
+    ]
+    # Files built before #24 have no difficulty.
+    difficulty: Difficulty | None = None
     reveals: Annotated[
         tuple[Reveal, ...], Field(min_length=len(DESKS), max_length=len(DESKS))
     ]
@@ -64,11 +75,20 @@ class Day(_Model):
         return True
 
 
+class Generator(_Model):
+    """What built a Week: rerunning this commit with this seed rebuilds it."""
+
+    commit: Annotated[str, Field(pattern=r"^[0-9a-f]{40}(-dirty)?$")]
+    seed: int  # from `secrets`; as secret as the solutions, so never logged
+
+
 class Week(_Model):
     """One built Week file: the same board all Week, and its days."""
 
     board: Board
     days: Annotated[tuple[Day, ...], Field(min_length=1)]
+    # Files built before #24 have no generator.
+    generator: Generator | None = None
 
 
 def load_days(directory: Path) -> dict[date, tuple[Board, Day]]:

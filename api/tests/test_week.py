@@ -5,7 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.board import DESKS
-from app.week import Day, load_days
+from app.week import Day, Reveal, load_days
 from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD, board_index
 
 if TYPE_CHECKING:
@@ -72,3 +72,24 @@ def test_a_right_and_a_wrong_unforced_guess_take_the_same_work(
 
     assert works[0] == works[1]
     assert works[0]
+
+
+def test_a_day_writes_its_sick_coworkers_in_desk_order() -> None:
+    # A set's order follows PYTHONHASHSEED; a rebuilt Week file must match exactly.
+    sick = frozenset({"D5", "B4", "A1", "C2", "D1", "A3", "C5"})
+    day = Day(
+        date=MONDAY,
+        start="A1",
+        sick=sick,
+        reveals=(Reveal(text="…"),) * len(DESKS),
+    )
+
+    assert day.model_dump(mode="json")["sick"] == [
+        "A1",
+        "D1",
+        "C2",
+        "A3",
+        "B4",
+        "C5",
+        "D5",
+    ]
