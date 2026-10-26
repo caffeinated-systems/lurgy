@@ -90,6 +90,7 @@ def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
     day = generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(2026))
     steps: list[tuple[Desk, State]] = []
     sizes = []
+    wides = []
     while len(steps) < len(DESKS) - 1:
         clues, coworker = hint(SAMPLE_BOARD, day, steps)
 
@@ -124,9 +125,11 @@ def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
             )
         assert coworker == _forces(tuple(clues), masks, alive, declared)[0]
         sizes.append(len(clues))
+        wides.append(wide)
         steps.append((coworker, day.state(coworker)))
 
     assert max(sizes) > 1, "the walk never needed more than one clue"
+    assert any(wides), "the walk never needed a whole-board clue"
     assert day.accepts(SAMPLE_BOARD, steps)
 
 

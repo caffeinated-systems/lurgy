@@ -279,7 +279,25 @@ test("a hint shows its clues, then on a second press its coworker", async () => 
 	expect(fetch).toHaveBeenCalledTimes(2);
 });
 
-test("no hint while a declaration is waiting, or once the office is cleared", async () => {
+test("no hint once the office is cleared", async () => {
+	localStorage.setItem(
+		"office-bug:2026-10-19",
+		JSON.stringify({
+			reveals: DESKS.map((desk) => sick(desk)),
+			mistakes: [],
+			startedAt: 0,
+			solvedAt: 1,
+		}),
+	);
+	await open();
+
+	expect(screen.getByRole("button", { name: "Hint" })).toHaveProperty(
+		"disabled",
+		true,
+	);
+});
+
+test("no hint while a declaration is waiting", async () => {
 	let respond = (_: Response) => {};
 	const waiting = new Promise<Response>((resolve) => {
 		respond = resolve;
