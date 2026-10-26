@@ -17,6 +17,7 @@ from app.board import (
     Group,
     Neighbours,
     Row,
+    cell,
 )
 
 if TYPE_CHECKING:
@@ -324,6 +325,46 @@ class Connected(_Model):
         return board.bits(self.group)
 
 
+type Way = Literal["above", "below", "left", "right"]
+_STEP: dict[Way, tuple[int, int]] = {
+    "above": (0, -1), "below": (0, 1), "left": (-1, 0), "right": (1, 0),
+}  # fmt: skip
+
+
+def next_desk(desk: Desk, direction: Way) -> Desk | None:
+    """The desk directly above, below, left or right of this one; None at the edge."""
+    (c, r), (dc, dr) = cell(desk), _STEP[direction]
+    if 0 <= c + dc < len(COLUMNS) and 0 <= r + dr < ROWS:
+        return DESKS[(r + dr) * len(COLUMNS) + c + dc]
+    return None
+
+
+class Directly(_Model):
+    """Everyone (None) / exactly n in a group has a sick (or well) coworker at the
+    next desk in one direction; someone at the edge has no one there."""
+
+    kind: Literal["directly"] = "directly"
+    group: Group
+    direction: Way
+    n: Annotated[int, Field(ge=0)] | None
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        members = _desks(board.bits(self.group))
+        hits = np.zeros(boards.shape, dtype=np.uint8)
+        for desk in members:
+            if there := next_desk(desk, self.direction):
+                hits += _is(there, self.state, boards)
+        return np.equal(hits, len(members) if self.n is None else self.n)
+
+    def bits(self, board: Board) -> int:
+        bits = board.bits(self.group)
+        for desk in _desks(bits):
+            if there := next_desk(desk, self.direction):
+                bits |= 1 << DESKS.index(there)
+        return bits
+
+
 def _desks(bits: int) -> list[Desk]:
     return [d for i, d in enumerate(DESKS) if bits >> i & 1]
 
@@ -342,7 +383,8 @@ type Clue = Annotated[
     | OnlyOneNeighbours
     | Overlap
     | AllIn
-    | Connected,
+    | Connected
+    | Directly,
     Field(discriminator="kind"),
 ]
 

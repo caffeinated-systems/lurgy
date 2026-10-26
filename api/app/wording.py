@@ -22,6 +22,7 @@ from app.clues import (
     Clue,
     Connected,
     Count,
+    Directly,
     Equal,
     Family,
     More,
@@ -36,6 +37,8 @@ from app.clues import (
     SickVsWell,
     State,
     Total,
+    Way,
+    next_desk,
 )
 
 NUMBERS = (
@@ -113,9 +116,20 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
             if n == 1:  # one person sits in one corner, on one edge
                 there = _ONE_OF_THEM.get(there, there)
             return f"{lead} {there}."
-        case Connected(group=group, n=n, state=state):  # pragma: no branch
+        case Connected(group=group, n=n, state=state):
             lead = f"Both {state} people" if n == 2 else f"All the {state} people"  # noqa: PLR2004
             return f"{lead} {_where(board, speaker, group)} are connected."
+        case Directly(
+            group=group, direction=way, n=n, state=state
+        ):  # pragma: no branch
+            where = _where(board, speaker, group)
+            near = f"a {state} coworker {_directly(way)}"
+            if n is None:
+                return f"Everyone {where} has {near}."
+            if n == 0:
+                return f"No one {where} has {near}."
+            people, have = ("person", "has") if n == 1 else ("people", "have")
+            return f"Exactly {NUMBERS[n]} {people} {where} {have} {near}."
 
 
 def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911, PLR0912 (a case per kind)
@@ -200,7 +214,7 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
                 f"{_members(board, speaker, a)}. {_members(board, speaker, b)}."
                 f" {found} too, so {_not(board, speaker, a, b)} {state}."
             )
-        case Connected(group=group, n=n, state=state):  # pragma: no branch
+        case Connected(group=group, n=n, state=state):
             members = _members(board, speaker, group)
             if n == 2:  # noqa: PLR2004
                 return (
@@ -212,6 +226,48 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
                 " sit side by side in one unbroken line, with no"
                 f" {_OTHER[state]} person between them."
             )
+        case Directly(
+            group=group, direction=way, n=n, state=state
+        ):  # pragma: no branch
+            count = (
+                f"all of them are {state}"
+                if n is None
+                else _of_them("exactly", n, state)
+            )
+            return f"{_directly_explained(board, speaker, group, way)}: {count}."
+
+
+def _directly(way: Way, *, us: bool = False) -> str:
+    """ "Directly below them", "directly to our left"."""
+    them, their = ("us", "our") if us else ("them", "their")
+    return {
+        "above": f"directly above {them}",
+        "below": f"directly below {them}",
+        "left": f"directly to {their} left",
+        "right": f"directly to {their} right",
+    }[way]
+
+
+def _directly_explained(board: Board, speaker: Desk, group: Group, way: Way) -> str:
+    """A group, who sits at the next desk from each, and who has no one there."""
+    bits = board.bits(group)
+    there = missing = 0
+    for i, desk in enumerate(DESKS):
+        if bits >> i & 1:
+            if nxt := next_desk(desk, way):
+                there |= 1 << DESKS.index(nxt)
+            else:
+                missing |= 1 << i
+    us = bool(bits >> DESKS.index(speaker) & 1)
+    text = (
+        f"{_members(board, speaker, group)}. {_capital(_directly(way, us=us))} are"
+        f" {_names(board, speaker, there)}"
+    )
+    if missing:
+        alone = missing.bit_count() == 1 and not missing >> DESKS.index(speaker) & 1
+        has = "has" if alone else "have"
+        text += f" ({_names(board, speaker, missing, me='I')} {has} no one there)"
+    return text
 
 
 def _family(board: Board, family: Family) -> str:

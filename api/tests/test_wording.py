@@ -16,6 +16,7 @@ from app.clues import (
     Clue,
     Connected,
     Count,
+    Directly,
     Equal,
     More,
     Most,
@@ -198,6 +199,27 @@ SPEAKER: Desk = "B3"
         (
             Connected(group=Between(a="A1", b="A5"), n=None),
             "All the sick people between Aisha and Quentin are connected.",
+        ),
+        (
+            Directly(group=Department(name="HR"), direction="below", n=None),
+            "Everyone in my department has a sick coworker directly below them.",
+        ),
+        (
+            Directly(
+                group=Department(name="Sales"), direction="left", n=0, state="well"
+            ),
+            "No one in Sales has a well coworker directly to their left.",
+        ),
+        (
+            Directly(group=Row(row=1), direction="below", n=2),
+            "Exactly two people in row 1 have a sick coworker directly below them.",
+        ),
+        (
+            Directly(group=Column(column="D"), direction="left", n=1),
+            (
+                "Exactly one person in column D has a sick coworker"
+                " directly to their left."
+            ),
         ),
     ],
 )
@@ -429,6 +451,34 @@ def test_wording(clue: Clue, said: str) -> None:
             (
                 "Column A is Aisha, Erin, Imogen, Mo and Quentin: exactly two of them"
                 " are well, and they sit next to each other."
+            ),
+        ),
+        (
+            Directly(group=Row(row=1), direction="below", n=2),
+            (
+                "Row 1 is Aisha, Barry, Carol and Dev. Directly below them are Erin,"
+                " Fergus, Gemma and Hamid: exactly two of them are sick."
+            ),
+        ),
+        (
+            Directly(group=Department(name="HR"), direction="above", n=0),
+            (
+                "My department is Carol, Steve and me. Directly above us are Fergus"
+                " and Ollie (Carol has no one there): none of them is sick."
+            ),
+        ),
+        (
+            Directly(group=Column(column="A"), direction="right", n=None, state="well"),
+            (
+                "Column A is Aisha, Erin, Imogen, Mo and Quentin. Directly to their"
+                " right are Barry, Fergus, Nadia, Rosa and me: all of them are well."
+            ),
+        ),
+        (
+            Directly(group=Row(row=3), direction="below", n=1),
+            (
+                "My row is Imogen, Kev, Linda and me. Directly below us are Mo, Nadia,"
+                " Ollie and Priya: exactly one of them is sick."
             ),
         ),
         (

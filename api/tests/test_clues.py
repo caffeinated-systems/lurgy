@@ -17,6 +17,7 @@ from app.clues import (
     Connected,
     ContradictionError,
     Count,
+    Directly,
     Equal,
     More,
     Most,
@@ -137,6 +138,27 @@ from tests.factories import SAMPLE_BOARD, board_index, desks
         (Connected(group=Row(row=1), n=2), {"A1", "C1"}, False),
         (Connected(group=Column(column="A"), n=None, state="well"), {"A3"}, False),
         (Connected(group=Column(column="A"), n=None, state="well"), {"A1"}, True),
+        # directly: the next desk only; a desk at the edge has no one there
+        (
+            Directly(group=Row(row=1), direction="below", n=None),
+            {"A2", "B2", "C2", "D2"},
+            True,
+        ),
+        (
+            Directly(group=Row(row=1), direction="below", n=None),
+            {"A2", "B2", "C2"},
+            False,
+        ),
+        (Directly(group=Row(row=1), direction="below", n=0), set(), True),
+        (Directly(group=Row(row=1), direction="below", n=0), {"B2"}, False),
+        (Directly(group=Row(row=1), direction="below", n=2), {"A2", "C2"}, True),
+        (Directly(group=Row(row=1), direction="below", n=2), {"A2"}, False),
+        (Directly(group=Row(row=5), direction="below", n=None), set(DESKS), False),
+        (
+            Directly(group=Column(column="A"), direction="right", n=5, state="well"),
+            set(),
+            True,
+        ),
         # about one coworker
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3", "A3"}, True),
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3"}, False),
@@ -198,6 +220,10 @@ ROW_3: set[Desk] = {"A3", "B3", "C3", "D3"}
             {"A1", "B1", "C1", "D1", "A5", "D5"},
         ),
         (Connected(group=Column(column="B"), n=None), {"B1", "B2", "B3", "B4", "B5"}),
+        (
+            Directly(group=Department(name="HR"), direction="left", n=1),
+            {"C1", "B3", "C5", "B1", "A3", "B5"},
+        ),
         (OnlyOne(family="rows", n=1), set(DESKS)),
         (Most(group=Row(row=3)), set(DESKS)),
     ],
@@ -262,6 +288,18 @@ def test_contradiction_raises() -> None:
         {"kind": "all_in", "a": {"kind": "corners"}, "b": {"kind": "edges"}, "n": 3},
         {"kind": "connected", "group": {"kind": "corners"}, "n": None},
         {"kind": "connected", "group": {"kind": "row", "row": 1}, "n": 3},
+        {
+            "kind": "directly",
+            "group": {"kind": "corners"},
+            "direction": "diagonal",
+            "n": 1,
+        },
+        {
+            "kind": "directly",
+            "group": {"kind": "corners"},
+            "direction": "left",
+            "n": -1,
+        },
         {"kind": "riddle"},
     ],
 )
