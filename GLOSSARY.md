@@ -20,6 +20,10 @@ _Avoid_: episode, season
 The tale a week's flavour tells, from Monday's setup to Friday's finale. The story never says or suggests whether a coworker on the board is sick or well.
 _Avoid_: plot, arc, lore
 
+**Quiet week**:
+A Week with no story: the build picks who's in from the cast, and coworkers say only their general lines.
+_Avoid_: filler week, empty week
+
 **Sick**:
 Has caught the bug. Every coworker on the board is either sick or well, never both, and never unknown to the puzzle, only to the player.
 _Avoid_: infected, contagious, criminal

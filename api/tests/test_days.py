@@ -32,6 +32,7 @@ def test_a_day_shows_the_board_and_the_starting_clue() -> None:
         "kind": "clue",
         "text": "My row has more sick people than the sick people to my right. "
         "I've logged it. Formally.",
+        "joke": None,
     }
 
 

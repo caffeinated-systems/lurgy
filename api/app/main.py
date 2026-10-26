@@ -99,6 +99,13 @@ class RevealedCoworker(BaseModel):
             examples=["Two people in my column are sick."],
         ),
     ]
+    joke: Annotated[
+        str | None,
+        Field(
+            description="A short joke after a clue; never part of the logic.",
+            examples=["Not that I'm counting."],
+        ),
+    ] = None
 
     @classmethod
     def at(cls, day: Day, desk: Desk) -> Self:
@@ -108,6 +115,7 @@ class RevealedCoworker(BaseModel):
             state=day.state(desk),
             kind="flavour" if reveal.clue is None else "clue",
             text=reveal.text,
+            joke=reveal.joke,
         )
 
 

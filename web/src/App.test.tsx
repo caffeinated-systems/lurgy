@@ -232,6 +232,20 @@ test("flavour says it carries no clue", async () => {
 	expect(await screen.findByText("Flavour: no clue.")).toBeDefined();
 });
 
+test("a joke follows its clue", async () => {
+	await open({
+		desk: "B1",
+		state: "well",
+		kind: "clue",
+		text: "One in my row.",
+		joke: "Not that I'm counting.",
+	});
+
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 well" }));
+
+	expect(await screen.findByText("Not that I'm counting.")).toBeDefined();
+});
+
 test("the timer ticks, stops on the solve and stays stopped after a reload", async () => {
 	vi.useFakeTimers({ shouldAdvanceTime: true, now: 0 });
 	const answers = DESKS.slice(1).map((desk) => sick(desk));

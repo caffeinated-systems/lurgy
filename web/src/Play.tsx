@@ -170,6 +170,7 @@ export function Play({ day }: { day: Day }) {
 							{nameOf(r.desk)} · {r.desk} · {r.state}
 						</span>
 						<span>{r.text}</span>
+						{r.joke && <span className="joke">{r.joke}</span>}
 						{r.kind === "flavour" && (
 							<span className="plain">Flavour: no clue.</span>
 						)}

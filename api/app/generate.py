@@ -4,7 +4,7 @@ import argparse
 import random
 import secrets
 import subprocess
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from itertools import combinations
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -19,6 +19,7 @@ from app.board import (
     Board,
     Column,
     Corners,
+    Coworker,
     Department,
     Desk,
     Direction,
@@ -28,15 +29,16 @@ from app.board import (
     Row,
     cell,
 )
-from app.cast import STUB_BOARD
+from app.cast import iso_monday, load_cast, load_story, quiet_week, story_path
 from app.clues import BOARDS, EVERYONE, Clue, Count, NoMoreThan, State, Total, settled
 from app.grade import Grade, Step, grade, next_step
 from app.week import Day, Difficulty, Generator, Reveal, Week
 from app.wording import explanation, wording
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Sequence
+    from collections.abc import Iterator, Mapping, Sequence
 
+    from app.cast import Cast, Member, Story
     from app.clues import Boards, Mask
 
 # Sick coworkers in a solution: never a near-empty or near-full office.
@@ -45,6 +47,10 @@ FEWEST_SICK, MOST_SICK = 6, 12
 CANDIDATES = 12
 # ponytail: a fixed cap; Easy is the rarest tier, so raise it if Easy runs out.
 ATTEMPTS = 2_000
+# Coworkers who say a general line in place of a clue on each quiet day.
+QUIET_LINES = 2
+# Clues that get a joke after them on each day: one or two.
+JOKES = (1, 2)
 FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
     "rows", "columns", "departments",
 )  # fmt: skip
@@ -54,16 +60,25 @@ class GenerationError(Exception):
     """No day at the asked difficulty within the attempts allowed."""
 
 
-def generate_day(
+def generate_day(  # noqa: PLR0913
     board: Board,
     day: date,
     difficulty: Difficulty,
     rng: random.Random,
     attempts: int = ATTEMPTS,
+    *,
+    flavour: Mapping[Desk, str] | None = None,
+    jokes: Mapping[Desk, Sequence[str]] | None = None,
 ) -> Day:
-    """A day at this difficulty, replayed from scratch before it's returned."""
+    """A day at this difficulty, replayed from scratch before it's returned.
+
+    Coworkers with flavour say it in place of a clue; never the starting one, who
+    has to give the office manager something to go on. Jokes are each coworker's
+    pool, for one or two clues.
+    """
+    flavour = flavour or {}
     for _ in range(attempts):
-        if (built := _attempt(board, day, difficulty, rng)) is None:
+        if (built := _attempt(board, day, difficulty, rng, flavour)) is None:
             continue
         puzzle, order, graded = built
         if graded.difficulty != difficulty:
@@ -74,13 +89,22 @@ def generate_day(
         ):  # pragma: no cover
             msg = "a generated day failed its replay"
             raise AssertionError(msg)
-        return puzzle.model_copy(update={"difficulty": difficulty})
+        return puzzle.model_copy(
+            update={
+                "difficulty": difficulty,
+                "reveals": _joke(puzzle.reveals, jokes or {}, rng),
+            }
+        )
     msg = f"no {difficulty} day for {day} in {attempts} attempts"
     raise GenerationError(msg)
 
 
 def _attempt(
-    board: Board, day: date, difficulty: Difficulty, rng: random.Random
+    board: Board,
+    day: date,
+    difficulty: Difficulty,
+    rng: random.Random,
+    flavour: Mapping[Desk, str],
 ) -> tuple[Day, list[tuple[Desk, State]], Grade] | None:
     """One try: reveal coworkers in order until everyone is declared, or stuck."""
     sick = frozenset(rng.sample(DESKS, rng.randint(FEWEST_SICK, MOST_SICK)))
@@ -89,7 +113,7 @@ def _attempt(
     if difficulty == "Easy":  # a whole-board clue is Hard whenever it's needed
         catalogue = [c for c in catalogue if isinstance(c, Count)]
 
-    start = rng.choice(DESKS)
+    start = rng.choice([d for d in DESKS if d not in flavour])
     declared: dict[Desk, bool] = {start: start in sick}
     known = _keep(BOARDS, start, solution)  # fits the declarations alone
     alive = known  # fits the clues too
@@ -101,7 +125,7 @@ def _attempt(
     # Rounds as the grader plays them: everyone just declared speaks, then the
     # fewest clues that force anyone decide who's declared next.
     while True:
-        for desk in new:
+        for desk in (d for d in new if d not in flavour):
             clues[desk] = clue = _choose(
                 board,
                 rng.sample(catalogue, CANDIDATES),
@@ -129,7 +153,9 @@ def _attempt(
             order.append((d, "sick" if d in sick else "well"))
             known = _keep(known, d, solution)
     reveals = tuple(
-        Reveal(
+        Reveal(text=flavour[d])
+        if d in flavour
+        else Reveal(
             clue=clues[d],
             text=wording(board, d, clues[d]),
             explanation=explanation(board, d, clues[d]),
@@ -244,21 +270,67 @@ def _groups(board: Board) -> list[Group]:
     return [g for g in groups if board.bits(g).bit_count() > 1]
 
 
+def _joke(
+    reveals: tuple[Reveal, ...], jokes: Mapping[Desk, Sequence[str]], rng: random.Random
+) -> tuple[Reveal, ...]:
+    """The reveals, with a joke after one or two clues from their speakers' pools."""
+    funny = [d for d, r in zip(DESKS, reveals, strict=True) if r.clue and jokes.get(d)]
+    chosen = rng.sample(funny, min(rng.choice(JOKES), len(funny)))
+    return tuple(
+        r.model_copy(update={"joke": rng.choice(jokes[d])}) if d in chosen else r
+        for d, r in zip(DESKS, reveals, strict=True)
+    )
+
+
 # Monday to Friday.
 SCHEDULE: tuple[Difficulty, ...] = ("Easy", "Medium", "Medium", "Hard", "Hard")
 
 
-def generate_week(board: Board, monday: date, seed: int, commit: str) -> Week:
-    """A Week's five days, each from its own generator seeded by the Week's seed."""
-    days = [monday + timedelta(days=i) for i in range(len(SCHEDULE))]
+def seat(who: Sequence[Member]) -> Board:
+    """The booking system seats everyone alphabetically, row by row."""
+    return Board(
+        coworkers=tuple(
+            Coworker(name=m.name, department=m.department)
+            for m in sorted(who, key=lambda m: m.name.casefold())
+        )
+    )
+
+
+def generate_week(
+    cast: Cast, monday: date, seed: int, commit: str, story: Story | None = None
+) -> Week:
+    """A Week's five days, each from its own generator seeded by the Week's seed.
+
+    A story says who's in and who speaks; a quiet week picks both.
+    """
+    # ponytail: random, not secrets: the seed is the secret, and it must replay.
+    rngs = [random.Random(f"{seed}:{i}") for i in range(len(SCHEDULE))]  # noqa: S311
+    who = story.who if story else quiet_week(cast, random.Random(f"{seed}:who"))  # noqa: S311
+    board = seat(who)
+    desk = {c.name: d for d, c in zip(DESKS, board.coworkers, strict=True)}
+    days = []
+    for i, difficulty in enumerate(SCHEDULE):
+        rng = rngs[i]
+        if story:
+            said = story.days[i]
+        else:
+            chatty = [m for m in who if m.lines]
+            said = {
+                m.name: rng.choice(m.lines)
+                for m in rng.sample(chatty, min(QUIET_LINES, len(chatty)))
+            }
+        days.append(
+            generate_day(
+                board,
+                monday + timedelta(days=i),
+                difficulty,
+                rng,
+                flavour={desk[name]: line for name, line in said.items()},
+                jokes={desk[m.name]: m.jokes for m in who},
+            )
+        )
     return Week(
-        board=board,
-        days=tuple(
-            # ponytail: random, not secrets: the seed is the secret, and it must replay.
-            generate_day(board, day, difficulty, random.Random(f"{seed}:{day}"))  # noqa: S311
-            for day, difficulty in zip(days, SCHEDULE, strict=True)
-        ),
-        generator=Generator(commit=commit, seed=seed),
+        board=board, days=tuple(days), generator=Generator(commit=commit, seed=seed)
     )
 
 
@@ -267,19 +339,26 @@ def main(argv: Sequence[str] | None = None) -> None:
         prog="python -m app.generate",
         description="Build a Week file. Prints only where it went and how hard.",
     )
-    parser.add_argument("week", type=_monday, help="the ISO week, e.g. 2026-W45")
+    parser.add_argument("week", type=iso_monday, help="the ISO week, e.g. 2026-W45")
     parser.add_argument("-o", "--out", type=Path, required=True, help="the file")
+    parser.add_argument(
+        "--stories", type=Path, default=Path("../stories"), help="cast and stories"
+    )
     args = parser.parse_args(argv)
 
+    cast = load_cast(args.stories / "cast.md")
+    path = story_path(args.stories, args.week)
+    story = load_story(path, cast) if path.exists() else None
     # A dirty tree, untracked files included, can't rebuild the Week from its commit.
     commit = _git("rev-parse", "HEAD") + (
         "-dirty" if _git("status", "--porcelain") else ""
     )
-    week = generate_week(STUB_BOARD, args.week, secrets.randbits(128), commit)
+    week = generate_week(cast, args.week, secrets.randbits(128), commit, story)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(week.model_dump_json(indent=2) + "\n")
     tiers = ", ".join(str(d.difficulty) for d in week.days)
-    print(f"wrote {args.out} ({tiers})")  # noqa: T201 (the CLI's one line)
+    quiet = "" if story else ", a quiet week"
+    print(f"wrote {args.out} ({tiers}{quiet})")  # noqa: T201 (the CLI's one line)
 
 
 def _git(*args: str) -> str:
@@ -289,11 +368,6 @@ def _git(*args: str) -> str:
         text=True,
         check=True,
     ).stdout.strip()
-
-
-def _monday(week: str) -> date:
-    """The Monday of an ISO week such as 2026-W45."""
-    return datetime.strptime(f"{week}-1", "%G-W%V-%u").date()  # noqa: DTZ007 (a date)
 
 
 if __name__ == "__main__":  # pragma: no cover

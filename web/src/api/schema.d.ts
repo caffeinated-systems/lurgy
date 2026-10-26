@@ -198,6 +198,12 @@ export interface components {
              * @example Two people in my column are sick.
              */
             text: string;
+            /**
+             * Joke
+             * @description A short joke after a clue; never part of the logic.
+             * @example Not that I'm counting.
+             */
+            joke?: string | null;
         };
         /** SeatedCoworker */
         SeatedCoworker: {
