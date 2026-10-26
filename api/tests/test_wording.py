@@ -502,3 +502,28 @@ def test_wording(clue: Clue, said: str) -> None:
 )
 def test_explanation(clue: Clue, explained: str) -> None:
     assert explanation(SAMPLE_BOARD, SPEAKER, clue) == explained
+
+
+def test_directly_says_who_has_no_one_there() -> None:
+    clue = Directly(group=Row(row=1), direction="left", n=0)
+
+    assert explanation(SAMPLE_BOARD, "A1", clue) == (
+        "My row is Barry, Carol, Dev and me. Directly to our left are Barry, Carol"
+        " and me (I have no one there): none of them is sick."
+    )
+    assert explanation(
+        SAMPLE_BOARD, SPEAKER, Directly(group=Corners(), direction="below", n=1)
+    ) == (
+        "The corners are Aisha, Dev, Quentin and Tariq. Directly below them are Erin"
+        " and Hamid (Quentin and Tariq have no one there): exactly one of them is sick."
+    )
+
+
+def test_connected_explains_a_line_between_two_coworkers() -> None:
+    clue = Connected(group=Between(a="A1", b="A5"), n=None)
+
+    assert explanation(SAMPLE_BOARD, SPEAKER, clue) == (
+        "The people between Aisha and Quentin are Erin, Imogen and Mo: at least one"
+        " of them is sick, and the sick ones sit side by side in one unbroken line,"
+        " with no well person between them."
+    )

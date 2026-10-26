@@ -7,7 +7,17 @@ import pytest
 
 from app.board import DESKS, Row
 from app.cast import fits, load_cast, load_story
-from app.clues import BOARDS, WIDE, Clue, Count, Overlap, Parity
+from app.clues import (
+    BOARDS,
+    WIDE,
+    Clue,
+    Connected,
+    Count,
+    Directly,
+    Overlap,
+    Parity,
+    next_desk,
+)
 from app.generate import (
     FEWEST_SICK,
     FORMS,
@@ -17,6 +27,8 @@ from app.generate import (
     GenerationError,
     _candidates,
     _choose,
+    _connections,
+    _directions,
     _form,
     _how_many,
     _overlaps,
@@ -27,7 +39,7 @@ from app.generate import (
 )
 from app.grade import grade
 from app.week import Week, load_days
-from tests.factories import MONDAY, SAMPLE_BOARD, STORIES, board_index
+from tests.factories import MONDAY, SAMPLE_BOARD, STORIES, board_index, desks
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -189,3 +201,23 @@ def test_overlaps_never_give_a_coworker_away_or_hide_a_count() -> None:
         else:
             # never "the only sick person in row 2 is in column B"
             assert (a & b).bit_count() > 1, clue
+
+
+def test_connected_and_directional_clues_keep_to_their_rules() -> None:
+    solution = board_index({"A1", "B1", "B3", "C3", "D2", "A5", "B5", "C4"})
+
+    for clue in _connections(SAMPLE_BOARD, solution):
+        assert isinstance(clue, Connected)
+        bits = SAMPLE_BOARD.bits(clue.group)
+        n = _how_many(bits, solution, clue.state)
+        assert bits.bit_count() >= 3, clue  # noqa: PLR2004 (a line of three or more)
+        assert n >= 2, clue  # noqa: PLR2004 (two or more to connect)
+        assert clue.n == (2 if n == 2 else None), clue  # noqa: PLR2004
+    for clue in _directions(SAMPLE_BOARD, solution):
+        assert isinstance(clue, Directly)
+        there = [
+            nxt
+            for d in desks(SAMPLE_BOARD.bits(clue.group))
+            if (nxt := next_desk(d, clue.direction))
+        ]
+        assert len(there) >= 2, clue  # noqa: PLR2004 (one desk there would name them)
