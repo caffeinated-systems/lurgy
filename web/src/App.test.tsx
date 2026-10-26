@@ -10,9 +10,9 @@ import {
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { App, localToday } from "./App.tsx";
 import { DAY, DESKS } from "./fixture.ts";
-import type { Reveal } from "./game.ts";
+import type { Hint, Reveal } from "./game.ts";
 
-type Answer = Reveal | "rejected" | "down" | Promise<Response>;
+type Answer = Reveal | Hint | "rejected" | "down" | Promise<Response>;
 
 /** Stubs fetch: the day comes back as given, each declaration takes the next answer. */
 function serve(day: Response | Error, ...answers: Answer[]) {
@@ -23,6 +23,8 @@ function serve(day: Response | Error, ...answers: Answer[]) {
 		if (answer instanceof Promise) return answer;
 		if (answer === "down")
 			return Promise.resolve(new Response(null, { status: 500 }));
+		if (typeof answer === "object" && "coworker" in answer)
+			return Promise.resolve(Response.json(answer));
 		return Promise.resolve(
 			Response.json(
 				answer === "rejected"
@@ -244,6 +246,79 @@ test("a joke follows its clue", async () => {
 	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 well" }));
 
 	expect(await screen.findByText("Not that I'm counting.")).toBeDefined();
+});
+
+test("a hint shows its clues, then on a second press its coworker", async () => {
+	const fetch = await open({ clues: ["A1"], coworker: "B3" });
+
+	fireEvent.click(screen.getByRole("button", { name: "Hint" }));
+
+	expect(await screen.findByText(/Look at what NameA1 said\.$/)).toBeDefined();
+	expect(JSON.parse(fetch.mock.calls[1]?.[1]?.body as string)).toEqual({
+		date: "2026-10-19",
+		declared: [],
+	});
+	expect(tile("A1").getAttribute("aria-label")).toContain("hinted clue");
+	expect(screen.getByText("Two in my row.").closest("li")?.className).toBe(
+		"hinted",
+	);
+	expect(tile("B3").getAttribute("aria-label")).toContain("one hint");
+	expect(tile("B3").textContent).toContain("🟡");
+
+	fireEvent.click(screen.getByRole("button", { name: "Who do they settle?" }));
+
+	expect(await screen.findByText(/Those clues settle NameB3\.$/)).toBeDefined();
+	expect(tile("B3").getAttribute("aria-label")).toMatch(
+		/two hints, the hint is about them$/,
+	);
+	expect(tile("B3").getAttribute("aria-selected")).toBe("true");
+	expect(document.activeElement).toBe(tile("B3"));
+	expect(
+		screen.getByRole("button", { name: "Who do they settle?" }),
+	).toHaveProperty("disabled", true);
+	expect(fetch).toHaveBeenCalledTimes(2);
+});
+
+test("no hint once the office is cleared", async () => {
+	localStorage.setItem(
+		"office-bug:2026-10-19",
+		JSON.stringify({
+			reveals: DESKS.map((desk) => sick(desk)),
+			mistakes: [],
+			startedAt: 0,
+			solvedAt: 1,
+		}),
+	);
+	await open();
+
+	expect(screen.getByRole("button", { name: "Hint" })).toHaveProperty(
+		"disabled",
+		true,
+	);
+});
+
+test("no hint while a declaration is waiting", async () => {
+	let respond = (_: Response) => {};
+	const waiting = new Promise<Response>((resolve) => {
+		respond = resolve;
+	});
+	await open(waiting);
+	const button = () => screen.getByRole("button", { name: "Hint" });
+
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 sick" }));
+	expect(button()).toHaveProperty("disabled", true);
+	respond(Response.json({ accepted: false }));
+	await waitFor(() => expect(button()).toHaveProperty("disabled", false));
+});
+
+test("a hint that can't reach the office says so", async () => {
+	await open("down");
+
+	fireEvent.click(screen.getByRole("button", { name: "Hint" }));
+
+	expect(
+		await screen.findByText("Couldn't reach the office, try again."),
+	).toBeDefined();
 });
 
 test("the timer ticks, stops on the solve and stays stopped after a reload", async () => {

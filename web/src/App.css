@@ -33,6 +33,7 @@
 	--well: #cfe6ee;
 	--well-ink: #1c6882;
 	--mistake: #e0a91c;
+	--hint: #c75a12;
 	--accent: #2b4c7e;
 	color-scheme: light;
 }
@@ -48,6 +49,7 @@
 		--well: #173a47;
 		--well-ink: #7cc6de;
 		--mistake: #d9a521;
+		--hint: #f0883e;
 		--accent: #8fb3ff;
 		color-scheme: dark;
 	}
@@ -63,6 +65,7 @@
 	--well: #173a47;
 	--well-ink: #7cc6de;
 	--mistake: #d9a521;
+	--hint: #f0883e;
 	--accent: #8fb3ff;
 	color-scheme: dark;
 }
@@ -218,6 +221,37 @@ footer a {
 	background: var(--mistake);
 	border: 1px solid var(--ink);
 	border-radius: 2px;
+}
+
+.hint-clue {
+	outline: 2px dashed var(--accent);
+	outline-offset: 1px;
+}
+.tile.hint-named {
+	outline: 3px solid var(--hint);
+	outline-offset: 1px;
+}
+.mark {
+	position: absolute;
+	top: 2px;
+	left: 4px;
+	font-size: 0.7rem;
+}
+.log li.hinted {
+	border: 2px dashed var(--accent);
+}
+.btn-hint {
+	min-height: 44px;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	background: transparent;
+	color: inherit;
+	font-weight: 600;
+	cursor: pointer;
+}
+.btn-hint:disabled {
+	opacity: 0.45;
+	cursor: default;
 }
 
 .log-title {

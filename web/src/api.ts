@@ -1,5 +1,5 @@
 import type { components } from "./api/schema";
-import type { Day, Reveal } from "./game.ts";
+import type { Day, Hint, Reveal } from "./game.ts";
 
 type Schemas = components["schemas"];
 
@@ -30,4 +30,15 @@ export async function declare(
 		await ok(response)
 	).json();
 	return result.accepted ? result.reveal : undefined;
+}
+
+/** The fewest clues that force a coworker, and that coworker. */
+export async function hint(request: Schemas["HintRequest"]): Promise<Hint> {
+	const response = await fetch("/api/hints", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(request),
+		signal: AbortSignal.timeout(10_000),
+	});
+	return (await ok(response)).json();
 }

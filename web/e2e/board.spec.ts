@@ -79,3 +79,27 @@ test("solves the fixture day by keyboard and keeps it after a reload", async ({
 	}
 	await expect(tile(page, "A3")).toHaveAttribute("aria-label", /one mistake/);
 });
+
+test("a hint shows Jas's clue, then that it settles Imogen", async ({
+	page,
+}) => {
+	await page.goto("/?day=2026-10-19");
+	const status = page.getByRole("status");
+
+	await page.getByRole("button", { name: "Hint" }).click();
+	await expect(status).toContainText("Look at what Jas said.");
+	await expect(tile(page, "B3")).toHaveAttribute("aria-label", /hinted clue/);
+	await expect(tile(page, "A3")).toHaveAttribute("aria-label", /one hint/);
+
+	await page.getByRole("button", { name: "Who do they settle?" }).click();
+	await expect(status).toContainText("Those clues settle Imogen.");
+	await expect(tile(page, "A3")).toHaveAttribute(
+		"aria-label",
+		/two hints, the hint is about them$/,
+	);
+
+	await page.getByRole("button", { name: "Declare Imogen sick" }).click();
+	await expect(status).toContainText("Imogen is sick.");
+	await expect(tile(page, "A3")).toHaveAttribute("aria-label", /two hints/);
+	await expect(page.getByRole("button", { name: "Hint" })).toBeEnabled();
+});

@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from app.board import DESKS, Board, Desk
 from app.clues import State
+from app.grade import hint
 from app.week import Day, load_days
 
 if TYPE_CHECKING:
@@ -159,6 +160,35 @@ class DeclarationRequest(BaseModel):
     declaration: Annotated[Declaration, Field(description="The new declaration.")]
 
 
+class HintRequest(BaseModel):
+    date: Annotated[
+        date, Field(description="The puzzle's day.", examples=["2026-10-19"])
+    ]
+    declared: Annotated[
+        list[Declaration],
+        Field(
+            description="Every declaration accepted so far, in order, "
+            "not counting the starting coworker.",
+            examples=[[{"desk": "A3", "state": "sick"}]],
+            max_length=len(DESKS) - 1,
+        ),
+    ]
+
+
+class Hint(BaseModel):
+    clues: Annotated[
+        list[Desk],
+        Field(
+            description="Who said the fewest clues that, together, force someone.",
+            examples=[["B3", "A3"]],
+        ),
+    ]
+    coworker: Annotated[
+        Desk,
+        Field(description="The first coworker those clues force.", examples=["A4"]),
+    ]
+
+
 class Accepted(BaseModel):
     accepted: Annotated[
         Literal[True], Field(description="The declaration was accepted.")
@@ -211,6 +241,30 @@ def declare(
     if not puzzle.accepts(board, steps):
         return Rejected()
     return Accepted(reveal=RevealedCoworker.at(puzzle, request.declaration.desk))
+
+
+@app.post(
+    "/api/hints",
+    responses={
+        **NOT_FOUND,
+        HTTPStatus.BAD_REQUEST: {"description": "Not enough evidence."},
+        HTTPStatus.CONFLICT: {"description": "Everyone is already declared."},
+    },
+)
+def get_hint(request: HintRequest, days: Days, today: Today) -> Hint:
+    """The fewest revealed clues that force some coworker, and that coworker.
+
+    400 with the same body as any rejection if the declarations sent aren't all
+    accepted, so a hint can't probe the solution.
+    """
+    board, puzzle = find(request.date, days, today)
+    steps = [(d.desk, d.state) for d in request.declared]
+    if not puzzle.accepts(board, steps):
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Not enough evidence.")
+    if len(steps) == len(DESKS) - 1:
+        raise HTTPException(HTTPStatus.CONFLICT, "Everyone is already declared.")
+    clues, coworker = hint(board, puzzle, steps)
+    return Hint(clues=clues, coworker=coworker)
 
 
 # ponytail: fixed repo-relative path; make it configurable if the deploy (#34) needs.
