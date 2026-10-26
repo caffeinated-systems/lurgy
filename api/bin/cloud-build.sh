@@ -11,6 +11,8 @@ git clone --quiet --depth 1 \
 	puzzles
 # The clone's .git/config holds the token; nothing needs it after this.
 rm -rf puzzles/.git
+# The clone is quiet; this shows in the build log which Weeks shipped.
+ls puzzles
 
 cd ../web
 # vite and typescript are devDependencies, needed even if NODE_ENV=production.
