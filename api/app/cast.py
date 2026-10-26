@@ -5,6 +5,7 @@ for writers. Errors name the file and line, since story files are public.
 """
 
 import argparse
+import random
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -172,6 +173,33 @@ def _speakers(
     return said
 
 
+def quiet_week(cast: Cast, rng: random.Random, attempts: int = 2_000) -> list[Member]:
+    """Who's in when no story says: departments first, then people from each.
+
+    A random 20 from a cast of 30 across 10 departments almost never fits.
+    """
+    teams: dict[str, list[Member]] = {}
+    for m in cast.values():
+        teams.setdefault(m.department, []).append(m)
+    big_enough = sorted(
+        d for d, team in teams.items() if len(team) >= PER_DEPARTMENT[0]
+    )
+    for _ in range(attempts):
+        chosen = rng.sample(big_enough, min(rng.choice(DEPARTMENTS), len(big_enough)))
+        sizes = [
+            rng.randint(PER_DEPARTMENT[0], min(PER_DEPARTMENT[-1], len(teams[d])))
+            for d in chosen
+        ]
+        if sum(sizes) == len(DESKS) and len(chosen) in DEPARTMENTS:
+            return [
+                m
+                for d, n in zip(chosen, sizes, strict=True)
+                for m in rng.sample(teams[d], n)
+            ]
+    msg = f"no {len(DESKS)} of the cast make a board"
+    raise ValueError(msg)
+
+
 def story_path(stories: Path, monday: date) -> Path:
     year, week, _ = monday.isocalendar()
     return stories / f"{year}-W{week:02d}.md"
@@ -189,27 +217,46 @@ def main(argv: Sequence[str] | None = None, today: date | None = None) -> None:
     )
     parser.add_argument("command", choices=["check"])
     parser.add_argument("--stories", type=Path, default=Path("../stories"))
+    parser.add_argument(
+        "--strict", action="store_true", help="fail, not warn, if stories run short"
+    )
     args = parser.parse_args(argv)
 
+    cast_path = args.stories / "cast.md"
     try:
-        cast = load_cast(args.stories / "cast.md")
-        for path in sorted(args.stories.glob("*-W*.md")):
-            try:
-                iso_monday(path.stem)
-            except ValueError:
-                raise StoryError(path, 1, "not named for an ISO week") from None
-            load_story(path, cast)
+        cast = load_cast(cast_path)
+        try:
+            quiet_week(cast, random.Random(0))  # noqa: S311 (any pick will do)
+        except ValueError as e:
+            raise StoryError(cast_path, 1, f"{e} for a quiet week") from None
+        for path in sorted(args.stories.glob("*.md")):
+            if path != cast_path:
+                load_story(_named_for_a_week(path), cast)
     except StoryError as e:
         parser.exit(1, f"{e}\n")
     today = today or date.today()  # noqa: DTZ011 (a calendar day is close enough)
     this_monday = today - timedelta(days=today.weekday())
+    short = False
     for ahead in (1, 2):
         if not (
             path := story_path(args.stories, this_monday + timedelta(weeks=ahead))
         ).exists():
-            # A GitHub Actions annotation: a quiet week is allowed, so never a failure.
+            short = True
+            # A GitHub Actions annotation: a quiet week is allowed.
             print(f"::warning::no story for {path.stem}: it will be a quiet week")  # noqa: T201
     print(f"checked {len(cast)} cast members")  # noqa: T201
+    if short and args.strict:
+        parser.exit(1, "stories run short\n")
+
+
+def _named_for_a_week(path: Path) -> Path:
+    """The path, if the generator would find it for its week: 2026-W45.md."""
+    try:
+        if story_path(path.parent, iso_monday(path.stem)) == path:
+            return path
+    except ValueError:
+        pass
+    raise StoryError(path, 1, "not named for an ISO week, like 2026-W45.md")
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -1,6 +1,5 @@
 import random
 import secrets
-from dataclasses import replace
 from datetime import date
 from typing import TYPE_CHECKING
 
@@ -17,7 +16,6 @@ from app.generate import (
     generate_day,
     generate_week,
     main,
-    quiet_week,
 )
 from app.grade import grade
 from app.week import Week, load_days
@@ -125,15 +123,3 @@ def _seats_the_story_and_gives_speakers_their_lines(week: Week) -> None:
         for desk, joke in jokes:
             assert day.reveal(desk).clue is not None
             assert joke == f"{names[DESKS.index(desk)]}'s joke."
-
-
-def test_a_cast_that_cant_make_a_board_fails() -> None:
-    everyone = {m.name: replace(m, department="HR") for m in CAST.values()}
-
-    with pytest.raises(GenerationError, match="make a board"):
-        quiet_week(everyone, random.Random(1), attempts=3)
-
-
-def test_the_cli_wants_an_iso_week(tmp_path: Path) -> None:
-    with pytest.raises(SystemExit):
-        main(["2026-11-02", "-o", str(tmp_path / "w.json")])

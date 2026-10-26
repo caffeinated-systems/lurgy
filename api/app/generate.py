@@ -29,7 +29,7 @@ from app.board import (
     Row,
     cell,
 )
-from app.cast import fits, iso_monday, load_cast, load_story, story_path
+from app.cast import iso_monday, load_cast, load_story, quiet_week, story_path
 from app.clues import BOARDS, EVERYONE, Clue, Count, NoMoreThan, State, Total, settled
 from app.grade import Grade, Step, grade, next_step
 from app.week import Day, Difficulty, Generator, Reveal, Week
@@ -294,17 +294,6 @@ def seat(who: Sequence[Member]) -> Board:
             for m in sorted(who, key=lambda m: m.name.casefold())
         )
     )
-
-
-def quiet_week(
-    cast: Cast, rng: random.Random, attempts: int = ATTEMPTS
-) -> list[Member]:
-    """Who's in when no story says: anyone, as long as they make a board."""
-    for _ in range(attempts):
-        if fits(who := rng.sample(list(cast.values()), len(DESKS))):
-            return who
-    msg = f"no {len(DESKS)} of the cast make a board"
-    raise GenerationError(msg)
 
 
 def generate_week(

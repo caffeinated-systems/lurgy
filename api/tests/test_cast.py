@@ -1,9 +1,11 @@
+import random
+from dataclasses import replace
 from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
 
-from app.cast import StoryError, load_cast, load_story, main
+from app.cast import Member, StoryError, fits, load_cast, load_story, main, quiet_week
 from tests.factories import STORIES
 
 if TYPE_CHECKING:
@@ -84,6 +86,23 @@ def test_a_broken_story_names_the_line(
         load_story(path, CAST)
 
 
+def test_a_quiet_week_fits_a_big_cast_of_small_departments() -> None:
+    # 30 people in 10 departments of 3: a random 20 almost never fits.
+    cast = {f"P{i}": Member(f"P{i}", f"D{i % 10}") for i in range(30)}
+
+    for seed in range(20):
+        who = quiet_week(cast, random.Random(seed))
+        assert len(who) == len(set(who)) == 20  # noqa: PLR2004
+        assert fits(who)
+
+
+def test_a_cast_that_cant_make_a_board_fails() -> None:
+    everyone = {m.name: replace(m, department="HR") for m in CAST.values()}
+
+    with pytest.raises(ValueError, match="make a board"):
+        quiet_week(everyone, random.Random(1), attempts=3)
+
+
 def _stories(tmp_path: Path, **weeks: str) -> Path:
     (tmp_path / "cast.md").write_text((STORIES / "cast.md").read_text())
     for week, text in weeks.items():
@@ -110,6 +129,8 @@ def test_check_passes_and_warns_of_quiet_weeks(
     [
         ({"2026-W45": STORY.replace("Aisha, Barry", "Aisha, Zed")}, "Zed isn't"),
         ({"2026-W99": STORY}, "2026-W99.md:1: not named for an ISO week"),
+        ({"2026-W5": STORY}, "2026-W5.md:1: not named for an ISO week"),
+        ({"notes": STORY}, "notes.md:1: not named for an ISO week"),
     ],
 )
 def test_check_fails_on_a_broken_story(
@@ -125,3 +146,26 @@ def test_check_fails_on_a_broken_story(
 
     assert exit_.value.code == 1
     assert error in capsys.readouterr().err
+
+
+def test_check_fails_on_a_cast_too_small_for_a_quiet_week(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "cast.md").write_text("## Aisha\nDepartment: HR\n")
+
+    with pytest.raises(SystemExit):
+        main(["check", "--stories", str(tmp_path)], today=date(2026, 10, 28))
+
+    assert "cast.md:1: no 20 of the cast make a board" in capsys.readouterr().err
+
+
+def test_strict_check_fails_when_stories_run_short(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    stories = _stories(tmp_path, **{"2026-W45": STORY})
+
+    with pytest.raises(SystemExit) as exit_:
+        main(["check", "--strict", "--stories", str(stories)], today=date(2026, 10, 28))
+
+    assert exit_.value.code == 1
+    assert capsys.readouterr().err == "stories run short\n"
