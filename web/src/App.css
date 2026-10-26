@@ -1,4 +1,27 @@
-/* Layout B from prototype/mobile-board (#20). System fonts until #16 picks a look. */
+/* Layout B from prototype/mobile-board (#20); the Office Lurgy look from #16 and #48. */
+@font-face {
+	font-family: Poppins;
+	src: url("./fonts/Poppins-Regular.woff2") format("woff2");
+	font-weight: 400;
+	font-display: swap;
+}
+@font-face {
+	font-family: Poppins;
+	src: url("./fonts/Poppins-SemiBold.woff2") format("woff2");
+	font-weight: 600;
+	font-display: swap;
+}
+@font-face {
+	font-family: Poppins;
+	src: url("./fonts/Poppins-Bold.woff2") format("woff2");
+	font-weight: 700;
+	font-display: swap;
+}
+@font-face {
+	font-family: DSEG7;
+	src: url("./fonts/DSEG7Classic-Italic.woff2") format("woff2");
+	font-display: swap;
+}
 :root {
 	--bg: #eef1ef;
 	--surface: #ffffff;
@@ -15,11 +38,11 @@
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme="light"]) {
-		--bg: #12171c;
-		--surface: #1b232b;
-		--ink: #e6ecef;
+		--bg: #0e1626;
+		--surface: #14203a;
+		--ink: #eaf1fb;
 		--muted: #9aa7b2;
-		--line: #2c3740;
+		--line: #26334f;
 		--sick: #4a5210;
 		--sick-ink: #d6e05a;
 		--well: #173a47;
@@ -30,11 +53,11 @@
 	}
 }
 :root[data-theme="dark"] {
-	--bg: #12171c;
-	--surface: #1b232b;
-	--ink: #e6ecef;
+	--bg: #0e1626;
+	--surface: #14203a;
+	--ink: #eaf1fb;
 	--muted: #9aa7b2;
-	--line: #2c3740;
+	--line: #26334f;
 	--sick: #4a5210;
 	--sick-ink: #d6e05a;
 	--well: #173a47;
@@ -52,13 +75,14 @@ body {
 	background: var(--bg);
 	color: var(--ink);
 	font:
-		16px / 1.45 system-ui,
+		16px / 1.45 Poppins,
+		system-ui,
 		sans-serif;
 	padding: 12px max(16px, env(safe-area-inset-right)) 0
 		max(16px, env(safe-area-inset-left));
 }
 main,
-.notice {
+footer {
 	max-width: 30rem;
 	margin: 0 auto;
 }
@@ -81,14 +105,42 @@ button {
 header {
 	display: flex;
 	justify-content: space-between;
-	align-items: baseline;
+	align-items: center;
 }
-header h1 {
+.logo {
 	margin: 0;
-	font-size: 1.4rem;
+	line-height: 0;
+}
+.logo img {
+	width: 140px;
+	height: auto;
+}
+.today {
+	text-align: right;
+}
+.date {
+	margin: 0;
+	font-weight: 700;
+	font-size: 1.1rem;
+}
+main.notice {
+	grid-template-rows: none;
+	align-content: start;
+	justify-items: center;
+	min-height: auto;
+	padding-top: 20vh;
+}
+footer {
+	padding: 24px 0 32px;
+	text-align: center;
+	font-size: 0.85rem;
+	color: var(--muted);
+}
+footer a {
+	color: inherit;
 }
 [role="timer"] {
-	font-variant-numeric: tabular-nums;
+	font-family: DSEG7, ui-monospace, monospace;
 	color: var(--muted);
 }
 

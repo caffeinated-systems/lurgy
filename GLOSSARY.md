@@ -1,4 +1,4 @@
-# Office bug
+# Office Lurgy
 
 A daily deduction puzzle: a bug is doing the rounds of an open-plan office, and the player works out who has caught it using only what the coworkers already found have said.
 

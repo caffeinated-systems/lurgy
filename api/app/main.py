@@ -34,9 +34,9 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 # ponytail: version mirrors pyproject.toml (the project isn't installed, so
-# importlib.metadata can't read it); title is a placeholder until #16 names the game.
+# importlib.metadata can't read it).
 app = FastAPI(
-    title="Office bug API",
+    title="Office Lurgy API",
     version="0.1.0",
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
