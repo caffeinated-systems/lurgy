@@ -79,7 +79,9 @@ test("with no ?day it asks for the player's local today", async () => {
 	expect(
 		screen.getByRole("heading", { level: 1, name: "Office Lurgy" }),
 	).toBeDefined();
-	expect(await screen.findByText("No puzzle for that day yet.")).toBeDefined();
+	expect(
+		await screen.findByText(/^No puzzle today: the office is closed/),
+	).toBeDefined();
 	expect(fetch).toHaveBeenCalledWith(`/api/days/${localToday()}`);
 });
 
@@ -87,7 +89,9 @@ test("a day that isn't a date has no puzzle", async () => {
 	serve(new Response(null, { status: 422 }));
 	render(<App />);
 
-	expect(await screen.findByText("No puzzle for that day yet.")).toBeDefined();
+	expect(
+		await screen.findByText(/^No puzzle today: the office is closed/),
+	).toBeDefined();
 });
 
 test.each([

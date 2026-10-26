@@ -4,6 +4,8 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
 	plugins: [react()],
+	// Into api/: Laravel Cloud ships only the app's root directory (#34).
+	build: { outDir: "../api/static", emptyOutDir: true },
 	server: {
 		proxy: { "/api": "http://localhost:8000" },
 		// Test output, rewritten on every run: watching it reloads the open page.
