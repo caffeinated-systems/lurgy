@@ -107,3 +107,28 @@ test("a hint shows Jas's clue, then that it settles Imogen", async ({
 	await expect(tile(page, "A3")).toHaveAttribute("aria-label", /two hints/);
 	await expect(page.getByRole("button", { name: "Hint" })).toBeEnabled();
 });
+
+test("reading Jas's hinted clue outlines its desks; a dim survives a reload", async ({
+	page,
+}) => {
+	// A phone: on a short desktop window the sticky board and thumb bar cover the log.
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto("/?day=2026-10-19");
+	await page.getByRole("button", { name: "Hint" }).click();
+
+	await page.getByRole("button", { name: /^Jas · B3/ }).click();
+	await expect(tile(page, "B3")).toHaveAttribute(
+		"aria-label",
+		/said the clue you're reading/,
+	);
+	await expect(
+		page
+			.locator(`[data-desk][aria-label*="in the clue you're reading"]`)
+			.first(),
+	).toBeVisible();
+
+	const dim = page.getByRole("button", { name: "Dim Jas's clue" });
+	await dim.click();
+	await page.reload();
+	await expect(dim).toHaveAttribute("aria-pressed", "true");
+});
