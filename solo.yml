@@ -7,9 +7,10 @@ processes:
     auto_start: true
     auto_restart: true
     restart_when_changed: []
-    # ponytail: the fixture Week until the puzzles repo exists (#31/#34).
+    # Weeks built by hand: `uv run python -m app.generate <ISO week> -o out/<week>.json`.
+    # out/ is gitignored, so a fresh clone has none: build one first, or use tests/fixtures/puzzles.
     env:
-      PUZZLES_DIR: tests/fixtures/puzzles
+      PUZZLES_DIR: out
   npm:dev:
     command: npm run dev
     working_dir: web
