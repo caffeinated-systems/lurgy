@@ -211,7 +211,7 @@ footer a {
 .mask {
 	position: absolute;
 	top: 2px;
-	right: 4px;
+	left: 4px;
 	font-size: 0.7rem;
 }
 
@@ -226,7 +226,7 @@ footer a {
 .mark {
 	position: absolute;
 	top: 2px;
-	left: 4px;
+	right: 4px;
 	font-size: 0.7rem;
 }
 .log li.hinted {

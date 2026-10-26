@@ -400,6 +400,11 @@ test("the timer ticks, stops on the solve and stays stopped after a reload", asy
 	expect(screen.getByRole("status").textContent).toMatch(
 		/Office cleared in 01:0[56]\.$/,
 	);
+	await waitFor(() =>
+		expect(document.activeElement).toBe(
+			screen.getByRole("button", { name: "Share" }),
+		),
+	);
 	const stopped = timer.textContent;
 	await act(() => vi.advanceTimersByTimeAsync(10_000));
 	expect(timer.textContent).toBe(stopped);
@@ -407,6 +412,7 @@ test("the timer ticks, stops on the solve and stays stopped after a reload", asy
 	cleanup();
 	await open();
 	expect(screen.getByRole("timer").textContent).toBe(stopped);
+	expect(document.activeElement).toBe(document.body);
 });
 
 test("a reload rebuilds the board from the browser", async () => {

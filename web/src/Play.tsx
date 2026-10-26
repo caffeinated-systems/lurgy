@@ -1,4 +1,10 @@
-import { type KeyboardEvent, useEffect, useReducer, useState } from "react";
+import {
+	type KeyboardEvent,
+	useEffect,
+	useReducer,
+	useRef,
+	useState,
+} from "react";
 import { hint as askForHint, declare as post } from "./api.ts";
 import {
 	type Day,
@@ -61,6 +67,16 @@ export function Play({ day }: { day: Day }) {
 
 	useEffect(() => save(day.date, progress), [day.date, progress]);
 
+	// The solving move unmounts the Sick/Well buttons; hand focus to Share so it
+	// isn't dropped. Not on reloading a solved day.
+	const shareButton = useRef<HTMLButtonElement>(null);
+	const wasSolved = useRef(progress.solvedAt !== undefined);
+	useEffect(() => {
+		if (progress.solvedAt === undefined || wasSolved.current) return;
+		wasSolved.current = true;
+		shareButton.current?.focus();
+	}, [progress.solvedAt]);
+
 	async function declare(desk: Desk, state: State) {
 		if (revealOf(progress, desk)) return dispatch({ type: "already" });
 		if (game.pending) return;
@@ -111,6 +127,8 @@ export function Play({ day }: { day: Day }) {
 				return await navigator.share({ text });
 			} catch (error) {
 				// Closing the share sheet isn't a failure; anything else falls back to copying.
+				// ponytail: Safari may refuse the copy once the share has failed; show the
+				// text to copy by hand if players hit it.
 				if (error instanceof DOMException && error.name === "AbortError")
 					return;
 			}
@@ -244,7 +262,12 @@ export function Play({ day }: { day: Day }) {
 				{progress.solvedAt !== undefined ? (
 					<div className="result">
 						<p className="verdict">{verdict(progress, day.date)}</p>
-						<button type="button" className="btn-share" onClick={share}>
+						<button
+							type="button"
+							className="btn-share"
+							ref={shareButton}
+							onClick={share}
+						>
 							Share
 						</button>
 					</div>

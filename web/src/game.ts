@@ -255,13 +255,8 @@ export function reducer(game: Game, action: Action): Game {
 				? progress.masks
 				: [...progress.masks, desk];
 			// Only what the player did goes into the hash, never whether it was wrong.
-			const remark = pick(
-				REMARKS,
-				game.day.date,
-				desk,
-				state,
-				progress.reveals.length,
-			);
+			// `said` moves on with every move, so trying again gets a new remark.
+			const remark = pick(REMARKS, game.day.date, desk, state, game.said);
 			return answer(
 				{ ...game, progress: { ...progress, masks } },
 				`Not enough evidence. ${nameOf(game, desk)} says: “${remark}”`,

@@ -217,17 +217,19 @@ test("the last reveal solves the day and stops the timer", () => {
 });
 
 test("a rejection masks the coworker once and they answer back", () => {
+	const remark = (said: number) =>
+		`Not enough evidence. NameB1 says: “${pick(REMARKS, DAY.date, "B1", "well", said)}”`;
 	let game = reducer(start(DAY, 0), {
 		type: "rejected",
 		desk: "B1",
 		state: "well",
 	});
+	expect(game.message).toBe(remark(0));
+	// Trying again gets a new remark, but still one mask.
 	game = reducer(game, { type: "rejected", desk: "B1", state: "well" });
 
 	expect(game.progress.masks).toEqual(["B1"]);
-	expect(game.message).toBe(
-		`Not enough evidence. NameB1 says: “${pick(REMARKS, DAY.date, "B1", "well", 1)}”`,
-	);
+	expect(game.message).toBe(remark(1));
 	expect(game.said).toBe(2);
 });
 
