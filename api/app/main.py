@@ -275,8 +275,8 @@ def get_hint(request: HintRequest, days: Days, today: Today) -> Hint:
     return Hint(clues=clues, coworker=coworker)
 
 
-# ponytail: fixed repo-relative path; make it configurable if the deploy (#34) needs.
-WEB_DIST = Path(__file__).parents[2] / "web" / "dist"
+# Vite builds web/ into here, inside api/, the only directory Laravel Cloud ships.
+WEB_DIST = Path(__file__).parents[1] / "static"
 
 # Mounted last so /api routes win; check_dir=False lets the API run unbuilt web/.
 app.mount("/", StaticFiles(directory=WEB_DIST, html=True, check_dir=False))

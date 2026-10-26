@@ -9,4 +9,6 @@ coverage/
 test-results/
 # Built Weeks hold solutions: never commit them to this public repo.
 out/
+api/puzzles/
+api/static/
 playwright-report/

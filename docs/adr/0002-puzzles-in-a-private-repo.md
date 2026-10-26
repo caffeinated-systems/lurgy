@@ -1,6 +1,6 @@
 # Built puzzles live in a private repo
 
-This repo is public, so committing built puzzles here would publish every solution. Each Week's puzzles are built ahead of time by a scheduled GitHub Action and pushed as one JSON file to a separate private puzzles repo, which the server pulls when it starts; after each build, a redeploy picks up the new Week. A private repo keeps the files versioned and diffable with no database or object storage, and works wherever the app is hosted. Encrypting the files into this repo was the alternative; it moves the secret to a key and makes debugging harder.
+This repo is public, so committing built puzzles here would publish every solution. Each Week's puzzles are built ahead of time by a scheduled GitHub Action and pushed as one JSON file to a separate private puzzles repo, which each deploy pulls when it builds; after each puzzle build, a redeploy picks up the new Week. A private repo keeps the files versioned and diffable with no database or object storage, and works wherever the app is hosted. Encrypting the files into this repo was the alternative; it moves the secret to a key and makes debugging harder.
 
 ## Consequences
 
@@ -9,4 +9,4 @@ This repo is public, so committing built puzzles here would publish every soluti
 - **A Week never changes once it starts**, at the first Monday midnight anywhere (UTC+14): players' saved progress depends on it. The build skips Weeks already built, so a generator fix reaches only unbuilt Weeks unless one is deliberately rebuilt before it starts. This is enforced by the build, not by the private repo, whose write key could force-push.
 - **Old files are never migrated.** The file is validated by Pydantic models the API reuses, so model changes must stay backward compatible with every Week the server may still serve.
 - **The browser gets only the board and the starting coworker's clue.** Every other clue or flavour line arrives only with an accepted declaration, and the API never serves a day before it has started somewhere on Earth, so nobody plays Friday on Monday.
-- **The server needs `git`, `ssh` and a read-only deploy key** at startup; no personal access tokens anywhere.
+- **The deploy reads the puzzles repo with one narrow token.** Laravel Cloud's build has `git` but no `ssh`, so a read-only deploy key can't be used there (#34). The build clones over HTTPS with a fine-grained personal access token that can only read the puzzles repo, kept as a Cloud secret, and removes the clone's `.git` so the token doesn't ship. The token expires and must be renewed; a GitHub App installation token is the upgrade if that becomes a chore. The weekly build's write side keeps its deploy key, since Actions runners have `ssh`.

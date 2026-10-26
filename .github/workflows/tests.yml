@@ -3,6 +3,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Redeploys main, e.g. after a Week is pushed by hand to the puzzles repo.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -87,3 +89,16 @@ jobs:
         with:
           name: playwright-traces
           path: web/test-results
+
+  deploy:
+    needs: [api, web, e2e]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # Limited to main; holds the Laravel Cloud deploy hook, whose URL is the credential.
+    environment: production
+    steps:
+      - name: Deploy to Laravel Cloud
+        env:
+          HOOK: ${{ secrets.LARAVEL_CLOUD_DEPLOY_HOOK }}
+        # -o /dev/null: Cloud's reply would land in this public repo's log.
+        run: curl --fail --silent --show-error --max-time 60 -o /dev/null -X POST "$HOOK?commit_hash=$GITHUB_SHA"
