@@ -15,7 +15,6 @@ from app.clues import (
     Clue,
     Count,
     Equal,
-    Is,
     More,
     Most,
     NoMoreThan,
@@ -130,8 +129,6 @@ SPEAKER: Desk = "B3"
         (Most(group=Column(column="D")), "Column D has the most sick people."),
         (Most(group=Row(row=3), state="well"), "My row has the most well people."),
         (Most(group=Department(name="Sales")), "Sales has the most sick people."),
-        (Is(desk="C3"), "Kev is sick."),
-        (Is(desk="B3", state="well"), "I am well."),
         (
             OneOf(desk="C3", group=Row(row=3), n=3),
             "Kev is one of three sick people in my row.",
@@ -277,8 +274,6 @@ def test_wording(clue: Clue, said: str) -> None:
             Most(group=Department(name="Sales"), state="well"),
             "Sales has more well people than any other department.",
         ),
-        (Is(desk="C3"), "This is only about Kev, who is sick."),
-        (Is(desk="B3", state="well"), "This is only about me: I am well."),
         (
             OneOf(desk="C3", group=Row(row=3), n=3),
             (

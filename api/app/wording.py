@@ -21,7 +21,6 @@ from app.clues import (
     Clue,
     Count,
     Equal,
-    Is,
     More,
     Most,
     NoMoreThan,
@@ -78,8 +77,6 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
             return f"More people {where} are {more} than {_OTHER[more]}."
         case Most(group=group, state=state):
             return f"{_noun(board, speaker, group)[0]} has the most {state} people."
-        case Is(desk=desk, state=state):
-            return f"{_subject(board, speaker, desk)} {state}."
         case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
             count = "the" if n is None else NUMBERS[n]
             return (
@@ -137,13 +134,6 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
         case Most(group=group, state=state):
             noun = _noun(board, speaker, group)[0]
             return f"{noun} has more {state} people than any other {group.kind}."
-        case Is(desk=desk, state=state):
-            who = (
-                "me: I am"
-                if desk == speaker
-                else f"{_who(board, speaker, desk)}, who is"
-            )
-            return f"This is only about {who} {state}."
         case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
             return (
                 f"{_members(board, speaker, group)}:"

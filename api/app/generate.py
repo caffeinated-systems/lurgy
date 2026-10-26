@@ -37,7 +37,6 @@ from app.clues import (
     Clue,
     Count,
     Equal,
-    Is,
     More,
     Most,
     NoMoreThan,
@@ -80,7 +79,7 @@ FORMS = {
     "counts": ("count",),
     "parity": ("parity",),
     "comparisons": ("more", "sick_vs_well", "most"),
-    "one coworker": ("is", "one_of"),
+    "one coworker": ("one_of",),
 }
 STATES: tuple[State, ...] = ("sick", "well")
 
@@ -345,10 +344,9 @@ def _comparisons(board: Board, solution: int) -> Iterator[Clue]:
 
 
 def _one_coworker(board: Board, solution: int) -> Iterator[Clue]:
-    """Each coworker's state, and each one of two or more in a group."""
+    """Each coworker as one of two or more in a group they're in."""
     for i, desk in enumerate(DESKS):
         state: State = "sick" if solution >> i & 1 else "well"
-        yield Is(desk=desk, state=state)
         for group in _groups(board):
             if board.bits(group) >> i & 1:
                 n = _how_many(board.bits(group), solution, state)

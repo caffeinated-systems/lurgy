@@ -193,20 +193,6 @@ def _is(desk: Desk, state: State, boards: Boards) -> Mask:
     return sick if state == "sick" else ~sick
 
 
-class Is(_Model):
-    """One coworker is sick (or well)."""
-
-    kind: Literal["is"] = "is"
-    desk: Desk
-    state: State = "sick"
-
-    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:  # noqa: ARG002 (same signature as every clue)
-        return _is(self.desk, self.state, boards)
-
-    def bits(self, board: Board) -> int:  # noqa: ARG002 (same signature as every clue)
-        return 1 << DESKS.index(self.desk)
-
-
 class OneOf(_Model):
     """A coworker is one of n sick (or well) in their group, or (None) of 2+."""
 
@@ -226,7 +212,7 @@ class OneOf(_Model):
 
 
 type Clue = Annotated[
-    Count | Total | NoMoreThan | Parity | More | Equal | SickVsWell | Most | Is | OneOf,
+    Count | Total | NoMoreThan | Parity | More | Equal | SickVsWell | Most | OneOf,
     Field(discriminator="kind"),
 ]
 

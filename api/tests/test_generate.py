@@ -7,7 +7,7 @@ import pytest
 
 from app.board import DESKS, Row
 from app.cast import fits, load_cast, load_story
-from app.clues import BOARDS, WIDE, Clue, Is, Parity
+from app.clues import BOARDS, WIDE, Clue, Count, Parity
 from app.generate import (
     FEWEST_SICK,
     FORMS,
@@ -158,7 +158,7 @@ def test_every_form_gets_drawn() -> None:
 
 def test_a_clue_that_tells_nothing_new_is_never_chosen() -> None:
     known = BOARDS[(BOARDS & 1) == 1]  # Aisha (A1) is declared sick
-    said = Is(desk="A1")
+    said = Count(group=Row(row=1), op="at_least", n=0)  # true of every board
     news = Parity(group=Row(row=2), parity="odd")
 
     for seed in range(20):

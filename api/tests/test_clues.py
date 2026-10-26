@@ -16,7 +16,6 @@ from app.clues import (
     ContradictionError,
     Count,
     Equal,
-    Is,
     More,
     Most,
     NoMoreThan,
@@ -92,9 +91,6 @@ from tests.factories import SAMPLE_BOARD, board_index, desks
         (Most(group=Department(name="Sales"), state="well"), set(), False),  # IT
         (Most(group=Department(name="Sales"), state="well"), {"A2"}, True),
         # about one coworker
-        (Is(desk="C3"), {"C3"}, True),
-        (Is(desk="C3"), {"A3"}, False),
-        (Is(desk="C3", state="well"), {"A3"}, True),
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3", "A3"}, True),
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3"}, False),
         (OneOf(desk="C3", group=Row(row=3), n=2), {"A3", "B3"}, False),
@@ -140,7 +136,6 @@ ROW_3: set[Desk] = {"A3", "B3", "C3", "D3"}
         # the rest are about the whole office
         (Total(n=1), set(DESKS)),
         (NoMoreThan(family="rows", n=1), set(DESKS)),
-        (Is(desk="C3"), {"C3"}),
         (OneOf(desk="C3", group=Row(row=3), n=None), ROW_3),
         (Most(group=Row(row=3)), set(DESKS)),
     ],
