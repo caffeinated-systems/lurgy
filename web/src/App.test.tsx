@@ -143,16 +143,18 @@ test("an accepted declaration reveals the coworker and posts what came before", 
 	]);
 });
 
-test("a rejected declaration marks a mistake", async () => {
+test("a rejected declaration masks the coworker", async () => {
 	await open("rejected");
 
 	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 well" }));
 
-	expect(await screen.findByText("Not enough evidence.")).toBeDefined();
+	expect(
+		await screen.findByText(/^Not enough evidence\. NameB1 says: “.+”$/),
+	).toBeDefined();
 	expect(tile("B1").getAttribute("aria-label")).toBe(
-		"B1, NameB1, HR, unknown, one mistake",
+		"B1, NameB1, HR, unknown, wearing a mask",
 	);
-	expect(tile("B1").className).toContain("mistake");
+	expect(tile("B1").textContent).toContain("😷");
 });
 
 test("a failed declaration says so and marks nothing", async () => {
@@ -163,7 +165,7 @@ test("a failed declaration says so and marks nothing", async () => {
 	expect(
 		await screen.findByText("Couldn't reach the office, try again."),
 	).toBeDefined();
-	expect(tile("B1").className).not.toContain("mistake");
+	expect(tile("B1").textContent).not.toContain("😷");
 });
 
 test("a revealed coworker can't be declared again", async () => {
@@ -219,7 +221,7 @@ test("S and W declare the selected coworker; modified keys don't", async () => {
 	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
 	fireEvent.keyDown(tile("B1"), { key: "ArrowRight" });
 	fireEvent.keyDown(tile("C1"), { key: "w" });
-	await screen.findByText("Not enough evidence.");
+	await screen.findByText(/^Not enough evidence\./);
 
 	expect(
 		JSON.parse(fetch.mock.calls[2]?.[1]?.body as string).declaration,
@@ -284,7 +286,7 @@ test("no hint once the office is cleared", async () => {
 		"office-bug:2026-10-19",
 		JSON.stringify({
 			reveals: DESKS.map((desk) => sick(desk)),
-			mistakes: [],
+			masks: [],
 			startedAt: 0,
 			solvedAt: 1,
 		}),
@@ -381,7 +383,7 @@ test("a second declaration waits for the first one's answer", async () => {
 	reply(Response.json({ accepted: true, reveal: sick("B1") }));
 	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
 	fireEvent.keyDown(tile("C1"), { key: "w" });
-	await screen.findByText("Not enough evidence.");
+	await screen.findByText(/^Not enough evidence\./);
 
 	expect(JSON.parse(fetch.mock.calls[2]?.[1]?.body as string).declared).toEqual(
 		[{ desk: "B1", state: "sick" }],

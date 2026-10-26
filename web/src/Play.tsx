@@ -71,7 +71,7 @@ export function Play({ day }: { day: Day }) {
 			dispatch(
 				reveal
 					? { type: "accepted", reveal, at: Date.now() }
-					: { type: "rejected", desk },
+					: { type: "rejected", desk, state },
 			);
 		} catch {
 			dispatch({ type: "failed" });
@@ -152,7 +152,7 @@ export function Play({ day }: { day: Day }) {
 					<div role="row" className="row" key={row[0]?.desk}>
 						{row.map((c) => {
 							const reveal = revealOf(progress, c.desk);
-							const mistake = progress.mistakes.includes(c.desk);
+							const masked = progress.masks.includes(c.desk);
 							const hints = progress.hints[c.desk];
 							const lit = game.hint?.clues.includes(c.desk);
 							const named =
@@ -162,7 +162,7 @@ export function Play({ day }: { day: Day }) {
 								c.name,
 								c.department,
 								reveal?.state ?? "unknown",
-								...(mistake ? ["one mistake"] : []),
+								...(masked ? ["wearing a mask"] : []),
 								...(hints ? [hints === 1 ? "one hint" : "two hints"] : []),
 								...(lit ? ["hinted clue"] : []),
 								...(named ? ["the hint is about them"] : []),
@@ -174,7 +174,7 @@ export function Play({ day }: { day: Day }) {
 									type="button"
 									key={c.desk}
 									data-desk={c.desk}
-									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${mistake ? "mistake" : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""}`}
+									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""}`}
 									tabIndex={c.desk === selected ? 0 : -1}
 									role="gridcell"
 									aria-keyshortcuts="S W"
@@ -185,6 +185,11 @@ export function Play({ day }: { day: Day }) {
 									<span className="coord">{c.desk}</span>
 									<span className="nm">{c.name}</span>
 									{reveal && <span className="state">{reveal.state}</span>}
+									{masked && (
+										<span className="mask" aria-hidden="true">
+											😷
+										</span>
+									)}
 									{hints && (
 										<span className="mark" aria-hidden="true">
 											{hints === 1 ? "🟡" : "🟠"}

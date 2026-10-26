@@ -7,6 +7,7 @@ import {
 	HINT_TAUNTS,
 	load,
 	pick,
+	REMARKS,
 	reducer,
 	save,
 	start,
@@ -22,7 +23,7 @@ test("a new day starts with the starting coworker and selects the first hidden d
 
 	expect(game.progress).toEqual({
 		reveals: [DAY.start],
-		mistakes: [],
+		masks: [],
 		hints: {},
 		startedAt: 1000,
 	});
@@ -32,7 +33,7 @@ test("a new day starts with the starting coworker and selects the first hidden d
 test("a saved day resumes where it left off", () => {
 	const progress = {
 		reveals: [DAY.start, reveal("B1")],
-		mistakes: ["C1" as const],
+		masks: ["C1" as const],
 		hints: {},
 		startedAt: 5,
 	};
@@ -47,7 +48,7 @@ test("a saved day resumes where it left off", () => {
 test("a solved day resumes with the starting coworker selected", () => {
 	save(DAY.date, {
 		reveals: [DAY.start, ...DESKS.slice(1).map(reveal)],
-		mistakes: [],
+		masks: [],
 		hints: {},
 		startedAt: 0,
 		solvedAt: 9,
@@ -62,11 +63,11 @@ test("broken or foreign storage starts the day afresh", () => {
 
 	for (const saved of [
 		{ reveals: 3 },
-		{ reveals: [], mistakes: [], startedAt: 0 },
-		{ reveals: [DAY.start], mistakes: 3, startedAt: 0 },
-		{ reveals: [DAY.start], mistakes: [] },
-		{ reveals: [DAY.start], mistakes: [], startedAt: 0, hints: "oops" },
-		{ reveals: [DAY.start], mistakes: [], startedAt: 0, hints: [] },
+		{ reveals: [], masks: [], startedAt: 0 },
+		{ reveals: [DAY.start], masks: 3, startedAt: 0 },
+		{ reveals: [DAY.start], masks: [] },
+		{ reveals: [DAY.start], masks: [], startedAt: 0, hints: "oops" },
+		{ reveals: [DAY.start], masks: [], startedAt: 0, hints: [] },
 	]) {
 		localStorage.setItem("office-bug:2026-10-19", JSON.stringify(saved));
 		expect(load(DAY)).toBeUndefined();
@@ -74,7 +75,7 @@ test("broken or foreign storage starts the day afresh", () => {
 });
 
 test("a day saved before hints existed loads with none taken", () => {
-	const saved = { reveals: [DAY.start], mistakes: [], startedAt: 0 };
+	const saved = { reveals: [DAY.start], masks: [], startedAt: 0 };
 	for (const hints of [undefined, null]) {
 		localStorage.setItem(
 			"office-bug:2026-10-19",
@@ -209,19 +210,43 @@ test("the last reveal solves the day and stops the timer", () => {
 	);
 });
 
-test("a rejection marks one mistake per coworker and repeats its message", () => {
-	let game = reducer(start(DAY, 0), { type: "rejected", desk: "B1" });
-	game = reducer(game, { type: "rejected", desk: "B1" });
+test("a rejection masks the coworker once and they answer back", () => {
+	let game = reducer(start(DAY, 0), {
+		type: "rejected",
+		desk: "B1",
+		state: "well",
+	});
+	game = reducer(game, { type: "rejected", desk: "B1", state: "well" });
 
-	expect(game.progress.mistakes).toEqual(["B1"]);
-	expect(game.message).toBe("Not enough evidence.");
+	expect(game.progress.masks).toEqual(["B1"]);
+	expect(game.message).toBe(
+		`Not enough evidence. NameB1 says: “${pick(REMARKS, DAY.date, "B1", "well", 1)}”`,
+	);
 	expect(game.said).toBe(2);
 });
 
-test("a network failure says so without a mistake", () => {
+test("a remark depends only on what the player did, so it can't tell wrong from unforced", () => {
+	const remark = (desk: "B1" | "C1", state: "sick" | "well") =>
+		reducer(start(DAY, 0), { type: "rejected", desk, state }).message;
+
+	// The same declaration at the same point always gets the same remark, and the
+	// action carries nothing about whether it was wrong.
+	expect(remark("B1", "sick")).toBe(remark("B1", "sick"));
+	const said = new Set(
+		(["B1", "C1"] as const).flatMap((d) =>
+			(["sick", "well"] as const).map((s) => remark(d, s)),
+		),
+	);
+	expect(said.size).toBeGreaterThan(1);
+	for (const message of said) {
+		expect(REMARKS.some((r) => message.endsWith(`“${r}”`))).toBe(true);
+	}
+});
+
+test("a network failure says so without a mask", () => {
 	const game = reducer(start(DAY, 0), { type: "failed" });
 
-	expect(game.progress.mistakes).toEqual([]);
+	expect(game.progress.masks).toEqual([]);
 	expect(game.message).toBe("Couldn't reach the office, try again.");
 });
 
@@ -231,7 +256,7 @@ test("a declaration is pending until its answer", () => {
 
 	for (const action of [
 		{ type: "accepted", reveal: reveal("B1"), at: 1 },
-		{ type: "rejected", desk: "B1" },
+		{ type: "rejected", desk: "B1", state: "well" },
 		{ type: "failed" },
 	] as const) {
 		expect(reducer(sent, action).pending).toBe(false);

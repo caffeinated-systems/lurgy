@@ -11,7 +11,7 @@ export type Hint = Schemas["Hint"];
 /** What the browser keeps for a day: enough to rebuild the board and the timer. */
 export type Progress = {
 	reveals: Reveal[];
-	mistakes: Desk[];
+	masks: Desk[];
 	// How many times each hinted coworker's hint was pressed: 🟡 once, 🟠 twice.
 	hints: Partial<Record<Desk, 1 | 2>>;
 	startedAt: number;
@@ -35,7 +35,7 @@ export type Action =
 	| { type: "selected"; desk: Desk }
 	| { type: "sent" }
 	| { type: "accepted"; reveal: Reveal; at: number }
-	| { type: "rejected"; desk: Desk }
+	| { type: "rejected"; desk: Desk; state: State }
 	| { type: "hinted"; hint: Hint }
 	| { type: "hinted-again" }
 	| { type: "failed" }
@@ -51,7 +51,7 @@ export function load(day: Day): Progress | undefined {
 		// ponytail: shape check only; a full schema check if Progress ever changes shape.
 		const fits =
 			saved?.reveals?.[0]?.desk === day.start.desk &&
-			Array.isArray(saved.mistakes) &&
+			Array.isArray(saved.masks) &&
 			typeof saved.startedAt === "number" &&
 			typeof hints === "object" &&
 			!Array.isArray(hints);
@@ -74,7 +74,7 @@ export function save(date: string, progress: Progress): void {
 export function start(day: Day, now: number): Game {
 	const progress = load(day) ?? {
 		reveals: [day.start],
-		mistakes: [],
+		masks: [],
 		hints: {},
 		startedAt: now,
 	};
@@ -118,6 +118,24 @@ export const HINT_TAUNTS = [
 	"Even Gary the plant got this one.",
 	"Help is on its way. Slowly, and with a sigh.",
 	"Have you tried turning your brain off and on again?",
+];
+
+// What a coworker says back when they get a mask. Never a hint of sick or well,
+// since a wrong declaration and an unforced one must sound the same.
+// Drafted with AI, edited by a human.
+export const REMARKS = [
+	"What are you basing that on?!",
+	"Evidence. Look it up.",
+	"I'd like that in writing, please.",
+	"Is this about the stapler?",
+	"Fine. Mask on. Under protest.",
+	"You can't just say things.",
+	"I'll be speaking to my union rep.",
+	"Have you even read what people said?",
+	"Great, now I look like a dentist.",
+	"Wow. In front of everyone.",
+	"Noted. Passive-aggressively.",
+	"I'll remember this at my leaving do.",
 ];
 
 /** A line from the list, the same one for the same game state on every reload. */
@@ -165,12 +183,21 @@ export function reducer(game: Game, action: Action): Game {
 			);
 		}
 		case "rejected": {
-			const mistakes = progress.mistakes.includes(action.desk)
-				? progress.mistakes
-				: [...progress.mistakes, action.desk];
+			const { desk, state } = action;
+			const masks = progress.masks.includes(desk)
+				? progress.masks
+				: [...progress.masks, desk];
+			// Only what the player did goes into the hash, never whether it was wrong.
+			const remark = pick(
+				REMARKS,
+				game.day.date,
+				desk,
+				state,
+				progress.reveals.length,
+			);
 			return answer(
-				{ ...game, progress: { ...progress, mistakes } },
-				"Not enough evidence.",
+				{ ...game, progress: { ...progress, masks } },
+				`Not enough evidence. ${nameOf(game, desk)} says: “${remark}”`,
 			);
 		}
 		case "hinted": {
