@@ -5,16 +5,19 @@ from typing import TYPE_CHECKING, get_args
 
 import pytest
 
-from app.board import DESKS
+from app.board import DESKS, Row
 from app.cast import fits, load_cast, load_story
-from app.clues import Clue
+from app.clues import BOARDS, WIDE, Clue, Is, Parity
 from app.generate import (
     FEWEST_SICK,
+    FORMS,
     MOST_SICK,
     QUIET_LINES,
     SCHEDULE,
-    WEIGHTS,
     GenerationError,
+    _candidates,
+    _choose,
+    _form,
     _true_clues,
     generate_day,
     generate_week,
@@ -38,6 +41,8 @@ def test_a_day_grades_at_the_difficulty_asked(difficulty: Difficulty) -> None:
     day = generate_day(SAMPLE_BOARD, MONDAY, difficulty, random.Random(2026))
 
     assert grade(SAMPLE_BOARD, day).difficulty == difficulty
+    if difficulty == "Easy":  # a whole-board clue would make it Hard
+        assert not any(isinstance(r.clue, WIDE) for r in day.reveals)
 
 
 def test_every_coworker_says_a_true_clue_in_words() -> None:
@@ -133,9 +138,37 @@ def test_every_kind_of_clue_is_generated_and_true() -> None:
 
     catalogue = _true_clues(SAMPLE_BOARD, solution, random.Random(3))
 
-    assert set(catalogue) == set(WEIGHTS)
+    assert set(catalogue) == {x for xs in FORMS.values() for x in xs}
     clues = [c for family in catalogue.values() for c in family]
     kinds = get_args(get_args(Clue.__value__)[0])
     assert {c.kind for c in clues} == {k.model_fields["kind"].default for k in kinds}
     for clue in clues:
         assert clue.mask(SAMPLE_BOARD)[solution], clue
+
+
+def test_every_form_gets_drawn() -> None:
+    solution = board_index({"D1", "D2", "D3", "A5", "B5"})  # column D has the most
+    catalogue = _true_clues(SAMPLE_BOARD, solution, random.Random(3))
+    rng = random.Random(4)
+
+    drawn = {_form(c) for _ in range(100) for c in _candidates(catalogue, rng)}
+
+    assert drawn == set(catalogue)
+
+
+def test_a_clue_that_tells_nothing_new_is_never_chosen() -> None:
+    known = BOARDS[(BOARDS & 1) == 1]  # Aisha (A1) is declared sick
+    said = Is(desk="A1")
+    news = Parity(group=Row(row=2), parity="odd")
+
+    for seed in range(20):
+        chosen = _choose(
+            SAMPLE_BOARD,
+            [said, news],
+            known=known,
+            alive=known,
+            declared={"A1": True},
+            rng=random.Random(seed),
+            easy=True,
+        )
+        assert chosen == news

@@ -125,7 +125,7 @@ SPEAKER: Desk = "B3"
         ),
         (
             SickVsWell(group=Row(row=1), more=None),
-            "As many people in row 1 are sick as well.",
+            "Half the people in row 1 are sick.",
         ),
         (Most(group=Column(column="D")), "Column D has the most sick people."),
         (Most(group=Row(row=3), state="well"), "My row has the most well people."),
@@ -260,7 +260,10 @@ def test_wording(clue: Clue, said: str) -> None:
         ),
         (
             SickVsWell(group=Row(row=1), more=None),
-            "Row 1 is Aisha, Barry, Carol and Dev: as many of them are sick as well.",
+            (
+                "Row 1 is Aisha, Barry, Carol and Dev:"
+                " half of them (two) are sick, and half are well."
+            ),
         ),
         (
             Most(group=Column(column="D")),
@@ -274,8 +277,8 @@ def test_wording(clue: Clue, said: str) -> None:
             Most(group=Department(name="Sales"), state="well"),
             "Sales has more well people than any other department.",
         ),
-        (Is(desk="C3"), "That's Kev alone: they are sick."),
-        (Is(desk="B3", state="well"), "That's me alone: I am well."),
+        (Is(desk="C3"), "This is only about Kev, who is sick."),
+        (Is(desk="B3", state="well"), "This is only about me: I am well."),
         (
             OneOf(desk="C3", group=Row(row=3), n=3),
             (

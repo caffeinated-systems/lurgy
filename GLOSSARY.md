@@ -49,7 +49,7 @@ The coworkers at the desks touching a coworker's desk, diagonals included: up to
 _Avoid_: adjacent, nearby
 
 **Clue**:
-A true statement a revealed coworker makes about how many coworkers are sick or well in one or more groups. Every clue is true, whoever says it. A clue names coworkers in the first person when they are the speaker ("my neighbours", "I").
+A true statement a revealed coworker makes about who is sick or well: one coworker, or how many in one or more groups. Every clue is true, whoever says it. A clue names coworkers in the first person when they are the speaker ("my neighbours", "I").
 _Avoid_: hint, statement, evidence
 
 **Flavour**:

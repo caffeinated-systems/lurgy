@@ -74,7 +74,7 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
         case SickVsWell(group=group, more=more):
             where = _where(board, speaker, group)
             if more is None:
-                return f"As many people {where} are sick as well."
+                return f"Half the people {where} are sick."
             return f"More people {where} are {more} than {_OTHER[more]}."
         case Most(group=group, state=state):
             return f"{_noun(board, speaker, group)[0]} has the most {state} people."
@@ -131,14 +131,19 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
         case SickVsWell(group=group, more=more):
             members = _members(board, speaker, group)
             if more is None:
-                return f"{members}: as many of them are sick as well."
+                half = NUMBERS[board.bits(group).bit_count() // 2]
+                return f"{members}: half of them ({half}) are sick, and half are well."
             return f"{members}: more of them are {more} than {_OTHER[more]}."
         case Most(group=group, state=state):
             noun = _noun(board, speaker, group)[0]
             return f"{noun} has more {state} people than any other {group.kind}."
         case Is(desk=desk, state=state):
-            they = "I am" if desk == speaker else "they are"
-            return f"That's {_who(board, speaker, desk)} alone: {they} {state}."
+            who = (
+                "me: I am"
+                if desk == speaker
+                else f"{_who(board, speaker, desk)}, who is"
+            )
+            return f"This is only about {who} {state}."
         case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
             return (
                 f"{_members(board, speaker, group)}:"

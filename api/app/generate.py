@@ -5,7 +5,7 @@ import random
 import secrets
 import subprocess
 from datetime import date, timedelta
-from itertools import combinations
+from itertools import chain, combinations
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -74,6 +74,14 @@ FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
 # How often each clue family is drawn for a candidate.
 # ponytail: guessed weights; retune after reading a few generated weeks.
 WEIGHTS = {"counts": 4, "parity": 1, "comparisons": 1, "one coworker": 1}
+# Each family's forms, drawn evenly once the family is chosen, so a form with a
+# handful of clues (the most) isn't crowded out by one with hundreds (pairs).
+FORMS = {
+    "counts": ("count",),
+    "parity": ("parity",),
+    "comparisons": ("more", "sick_vs_well", "most"),
+    "one coworker": ("is", "one_of"),
+}
 STATES: tuple[State, ...] = ("sick", "well")
 
 type Catalogue = dict[str, list[Clue]]
@@ -162,9 +170,7 @@ def _attempt(
                 easy=difficulty == "Easy",
             )
             said.append(clue)
-            for family in catalogue.values():  # no one says it twice
-                if clue in family:
-                    family.remove(clue)
+            catalogue[_form(clue)].remove(clue)  # no one says it twice
             alive = alive[clue.mask(board, alive)]
         if len(declared) == len(DESKS):
             break
@@ -219,6 +225,8 @@ def _choose(  # noqa: PLR0913
         # settled after the clue is new.
         return bool(settled(boards[clue.mask(board, boards)], declared))
 
+    # A clue true on every board the declarations allow tells the player nothing.
+    candidates = [c for c in candidates if not c.mask(board, known).all()] or candidates
     # Declarations alone never settle anyone undeclared.
     alone = [c for c in candidates if forces(c, known)]
     if easy:
@@ -238,20 +246,33 @@ def _keep(boards: Boards, desk: Desk, solution: int) -> Boards:
 
 
 def _candidates(catalogue: Catalogue, rng: random.Random) -> list[Clue]:
-    """Clues to weigh: each from a family drawn by WEIGHTS, repeats dropped."""
-    families = [f for f, clues in catalogue.items() if clues]
+    """Clues to weigh: a family drawn by WEIGHTS, then a form; repeats dropped."""
+    forms = {f: [x for x in xs if catalogue[x]] for f, xs in FORMS.items()}
+    families = [f for f, xs in forms.items() if xs]
     drawn = rng.choices(families, [WEIGHTS[f] for f in families], k=CANDIDATES)
-    return list(dict.fromkeys(rng.choice(catalogue[f]) for f in drawn))
+    return list(
+        dict.fromkeys(rng.choice(catalogue[rng.choice(forms[f])]) for f in drawn)
+    )
+
+
+def _form(clue: Clue) -> str:
+    """Which of FORMS a clue is: every count is one, as are equal and more."""
+    return {"total": "count", "no_more_than": "count", "equal": "more"}.get(
+        clue.kind, clue.kind
+    )
 
 
 def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
-    """Every clue true of the solution, by family."""
-    return {
-        "counts": list(_counts(board, solution, rng)),
-        "parity": list(_parities(board, solution)),
-        "comparisons": list(_comparisons(board, solution)),
-        "one coworker": list(_one_coworker(board, solution)),
-    }
+    """Every clue true of the solution, by form."""
+    catalogue: Catalogue = {x: [] for xs in FORMS.values() for x in xs}
+    for clue in chain(
+        _counts(board, solution, rng),
+        _parities(board, solution),
+        _comparisons(board, solution),
+        _one_coworker(board, solution),
+    ):
+        catalogue[_form(clue)].append(clue)
+    return catalogue
 
 
 def _counts(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
@@ -287,7 +308,8 @@ def _counts(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
 
 
 def _parities(board: Board, solution: int) -> Iterator[Clue]:
-    for group in _groups(board):
+    """Odd / even in groups of three or more: in two, it's just a count."""
+    for group in (g for g in _groups(board) if board.bits(g).bit_count() > 2):  # noqa: PLR2004
         for state in STATES:
             odd = _how_many(board.bits(group), solution, state) % 2
             yield Parity(group=group, parity="odd" if odd else "even", state=state)
