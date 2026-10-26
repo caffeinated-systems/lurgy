@@ -186,16 +186,18 @@ def quiet_week(cast: Cast, rng: random.Random, attempts: int = 2_000) -> list[Me
     )
     for _ in range(attempts):
         chosen = rng.sample(big_enough, min(rng.choice(DEPARTMENTS), len(big_enough)))
-        sizes = [
-            rng.randint(PER_DEPARTMENT[0], min(PER_DEPARTMENT[-1], len(teams[d])))
-            for d in chosen
+        caps = [min(PER_DEPARTMENT[-1], len(teams[d])) for d in chosen]
+        sizes = [PER_DEPARTMENT[0]] * len(chosen)
+        if len(chosen) not in DEPARTMENTS or not sum(sizes) <= len(DESKS) <= sum(caps):
+            continue
+        # Grow departments one person at a time until there are 20.
+        for _ in range(len(DESKS) - sum(sizes)):
+            sizes[rng.choice([i for i, n in enumerate(sizes) if n < caps[i]])] += 1
+        return [
+            m
+            for d, n in zip(chosen, sizes, strict=True)
+            for m in rng.sample(teams[d], n)
         ]
-        if sum(sizes) == len(DESKS) and len(chosen) in DEPARTMENTS:
-            return [
-                m
-                for d, n in zip(chosen, sizes, strict=True)
-                for m in rng.sample(teams[d], n)
-            ]
     msg = f"no {len(DESKS)} of the cast make a board"
     raise ValueError(msg)
 

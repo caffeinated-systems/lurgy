@@ -96,6 +96,19 @@ def test_a_quiet_week_fits_a_big_cast_of_small_departments() -> None:
         assert fits(who)
 
 
+def test_a_quiet_week_fits_a_cast_of_mostly_pairs() -> None:
+    # Four departments of 4 and twenty of 2: few picks of departments can make 20.
+    sizes = [4] * 4 + [2] * 20
+    cast = {
+        f"P{d}-{i}": Member(f"P{d}-{i}", f"D{d}")
+        for d, n in enumerate(sizes)
+        for i in range(n)
+    }
+
+    for seed in range(50):
+        assert fits(quiet_week(cast, random.Random(seed)))
+
+
 def test_a_cast_that_cant_make_a_board_fails() -> None:
     everyone = {m.name: replace(m, department="HR") for m in CAST.values()}
 
