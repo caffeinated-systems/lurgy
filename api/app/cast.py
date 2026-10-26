@@ -70,7 +70,7 @@ def _lines(path: Path) -> list[_Line]:
 
 
 def _sections(lines: list[_Line], marker: str) -> list[_Section]:
-    """What's under each heading that starts with the marker; before the first, skipped."""
+    """What's under each heading that starts with the marker."""
     sections: list[_Section] = []
     for number, line in lines:
         if line.startswith(marker):
