@@ -36,6 +36,7 @@ from app.clues import (
     BOARDS,
     EVERYONE,
     WIDE,
+    AllIn,
     Clue,
     Count,
     Equal,
@@ -45,6 +46,7 @@ from app.clues import (
     OneOf,
     OnlyOne,
     OnlyOneNeighbours,
+    Overlap,
     Parity,
     SickVsWell,
     State,
@@ -78,7 +80,12 @@ FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
 # How often each clue family is drawn for a candidate.
 # ponytail: guessed weights; retune after reading a few generated weeks.
 WEIGHTS = {
-    "counts": 4, "parity": 1, "comparisons": 1, "one coworker": 1, "uniqueness": 1,
+    "counts": 4,
+    "parity": 1,
+    "comparisons": 1,
+    "one coworker": 1,
+    "uniqueness": 1,
+    "overlaps": 1,
 }  # fmt: skip
 # Each family's forms, drawn evenly once the family is chosen, so a form with a
 # handful of clues (the most) isn't crowded out by one with hundreds (pairs).
@@ -88,6 +95,7 @@ FORMS = {
     "comparisons": ("more", "sick_vs_well", "most"),
     "one coworker": ("one_of",),
     "uniqueness": ("only_one", "only_one_neighbours"),
+    "overlaps": ("overlap", "all_in"),
 }
 STATES: tuple[State, ...] = ("sick", "well")
 
@@ -278,6 +286,7 @@ def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
         _comparisons(board, solution),
         _one_coworker(board, solution),
         _uniqueness(board, solution),
+        _overlaps(board, solution),
     ):
         catalogue[_form(clue)].append(clue)
     return catalogue
@@ -379,6 +388,34 @@ def _uniqueness(board: Board, solution: int) -> Iterator[Clue]:
             )
             for n in (n for n, k in counts.items() if k == 1):
                 yield OnlyOneNeighbours(group=group, n=n, state=state)
+
+
+def _overlaps(board: Board, solution: int) -> Iterator[Clue]:
+    """How the sick (or well) in one group sit in another that it overlaps."""
+    for a, b in _overlapping(board):
+        a_bits, b_bits = board.bits(a), board.bits(b)
+        for state in STATES:
+            n = _how_many(a_bits & b_bits, solution, state)
+            if n >= 2:  # noqa: PLR2004 ("one of the" means two or more)
+                yield Overlap(a=a, b=b, n=n, state=state)
+            total = _how_many(a_bits, solution, state)
+            if total and not _how_many(a_bits & ~b_bits, solution, state):
+                yield AllIn(a=a, b=b, n=total if total <= 2 else None, state=state)  # noqa: PLR2004
+
+
+@cache
+def _overlapping(board: Board) -> list[tuple[Group, Group]]:
+    """Any group against a row, column, department, neighbours, corners or edges
+    that shares some of its desks, but not all."""
+    targets = ("row", "column", "department", "neighbours", "corners", "edges")
+    return [
+        (a, b)
+        for a in _groups(board)
+        for b in _groups(board)
+        if b.kind in targets
+        and board.bits(a) & board.bits(b)
+        and board.bits(a) & ~board.bits(b)
+    ]
 
 
 def _pairs(board: Board) -> Iterator[tuple[Group, Group]]:

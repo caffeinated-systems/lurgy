@@ -12,6 +12,7 @@ from app.board import (
     Row,
 )
 from app.clues import (
+    AllIn,
     Clue,
     ContradictionError,
     Count,
@@ -22,6 +23,7 @@ from app.clues import (
     OneOf,
     OnlyOne,
     OnlyOneNeighbours,
+    Overlap,
     Parity,
     SickVsWell,
     Total,
@@ -103,6 +105,27 @@ from tests.factories import SAMPLE_BOARD, board_index, desks
         (OnlyOneNeighbours(group=Corners(), n=0), {"B2"}, False),
         (OnlyOneNeighbours(group=Corners(), n=1), {"B2", "C4"}, False),
         (OnlyOneNeighbours(group=Corners(), n=2, state="well"), {"B2"}, True),
+        # overlaps: row 3 meets Fergus's (B2) neighbours at A3, B3 and C3
+        (Overlap(a=Row(row=3), b=Neighbours(of="B2"), n=2), {"A3", "B3"}, True),
+        (Overlap(a=Row(row=3), b=Neighbours(of="B2"), n=2), {"A3", "D3"}, False),
+        (
+            Overlap(a=Row(row=3), b=Neighbours(of="B2"), n=2),
+            {"A3", "B3", "C3"},
+            False,
+        ),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=1), {"A3"}, True),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=1), {"D3"}, False),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=1), {"A3", "B3"}, False),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=2), {"A3", "B3"}, True),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=2), {"A3", "D3"}, False),
+        # "all" means at least one
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None), {"A3", "B3", "C3"}, True),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None), set(), False),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None, state="well"),
+            {"D3"},
+            True,
+        ),
         # about one coworker
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3", "A3"}, True),
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3"}, False),
@@ -154,6 +177,14 @@ ROW_3: set[Desk] = {"A3", "B3", "C3", "D3"}
         (
             OnlyOneNeighbours(group=Direction(of="B2", direction="above"), n=1),
             {"B1", "A1", "C1", "A2", "B2", "C2"},
+        ),
+        (
+            Overlap(a=Column(column="A"), b=Row(row=1), n=2),
+            {"A1", "B1", "C1", "D1", "A2", "A3", "A4", "A5"},
+        ),
+        (
+            AllIn(a=Row(row=1), b=Corners(), n=None),
+            {"A1", "B1", "C1", "D1", "A5", "D5"},
         ),
         (OnlyOne(family="rows", n=1), set(DESKS)),
         (Most(group=Row(row=3)), set(DESKS)),
@@ -215,6 +246,8 @@ def test_contradiction_raises() -> None:
         {"kind": "is", "desk": "E9"},
         {"kind": "only_one", "family": "desks", "n": 1},
         {"kind": "only_one_neighbours", "group": {"kind": "corners"}, "n": -1},
+        {"kind": "overlap", "a": {"kind": "corners"}, "b": {"kind": "edges"}, "n": 1},
+        {"kind": "all_in", "a": {"kind": "corners"}, "b": {"kind": "edges"}, "n": 3},
         {"kind": "riddle"},
     ],
 )

@@ -18,6 +18,7 @@ from app.board import (
     cell,
 )
 from app.clues import (
+    AllIn,
     Clue,
     Count,
     Equal,
@@ -29,6 +30,7 @@ from app.clues import (
     OnlyOne,
     OnlyOneNeighbours,
     Op,
+    Overlap,
     Parity,
     SickVsWell,
     State,
@@ -88,11 +90,24 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
             )
         case OnlyOne(family=family, n=n, state=state):
             return f"Only one {family.removesuffix('s')} has {_exactly(n, state)}."
-        case OnlyOneNeighbours(group=group, n=n, state=state):  # pragma: no branch
+        case OnlyOneNeighbours(group=group, n=n, state=state):
             return (
                 f"Only one person {_where(board, speaker, group)}"
                 f" has {_neighbours(n, state)}."
             )
+        case Overlap(a=a, b=b, n=n, state=state):
+            return _capital(
+                f"{NUMBERS[n]} of the {state} people {_where(board, speaker, a)}"
+                f" are {_where(board, speaker, b)}."
+            )
+        case AllIn(a=a, b=b, n=n, state=state):  # pragma: no branch
+            where = _where(board, speaker, a)
+            lead = {
+                1: f"The only {state} person {where} is",
+                2: f"Both {state} people {where} are",
+                None: f"All the {state} people {where} are",
+            }[n]
+            return f"{lead} {_where(board, speaker, b)}."
 
 
 def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911, PLR0912 (a case per kind)
@@ -151,11 +166,31 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
                 f"Of {_family(board, family)}, exactly one has {_exactly(n, state)};"
                 f" every other {family.removesuffix('s')} has {others}."
             )
-        case OnlyOneNeighbours(group=group, n=n, state=state):  # pragma: no branch
+        case OnlyOneNeighbours(group=group, n=n, state=state):
             us = "us" if board.bits(group) >> DESKS.index(speaker) & 1 else "them"
             return (
                 f"{_members(board, speaker, group)}: just one of {us} has"
                 f" {_neighbours(n, state)}, counting diagonals."
+            )
+        case Overlap(a=a, b=b, n=n, state=state):
+            both = _names(board, speaker, board.bits(a) & board.bits(b))
+            return (
+                f"{_members(board, speaker, a)}. {_members(board, speaker, b)}."
+                f" The people in both are {both}:"
+                f" exactly {NUMBERS[n]} of them are {state}."
+            )
+        case AllIn(a=a, b=b, n=n, state=state):  # pragma: no branch
+            found = {
+                1: f"Exactly one of the first is {state}, and they're in the second",
+                2: f"Exactly two of the first are {state}, both in the second",
+                None: (
+                    f"At least one of the first is {state}, and all of them are in"
+                    " the second"
+                ),
+            }[n]
+            return (
+                f"{_members(board, speaker, a)}. {_members(board, speaker, b)}."
+                f" {found} too, so {_not(board, speaker, a, b)} {state}."
             )
 
 
@@ -209,6 +244,14 @@ def _others(n: int | None) -> str:
     if n == 2:  # noqa: PLR2004 (this coworker and one other)
         return "so is exactly one other"
     return f"so are exactly {NUMBERS[n - 1]} others"
+
+
+def _not(board: Board, speaker: Desk, a: Group, b: Group) -> str:
+    """Everyone in a but not in b, and their "is not": "Linda is not", "I am not"."""
+    rest = board.bits(a) & ~board.bits(b)
+    if rest.bit_count() == 1:
+        return f"{_subject(board, speaker, DESKS[rest.bit_length() - 1])} not"
+    return f"{_names(board, speaker, rest)} are not"
 
 
 def _subject(board: Board, speaker: Desk, desk: Desk) -> str:
