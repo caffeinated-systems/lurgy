@@ -1,14 +1,22 @@
+import random
 from http import HTTPStatus
-from typing import Any
+from itertools import combinations
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from app.board import DESKS
-from app.clues import BOARDS, settled
+from app.clues import BOARDS, NoMoreThan, Total, settled
+from app.generate import generate_day
+from app.grade import MOST, hint
 from app.main import app
 from app.week import load_days
-from tests.factories import FIXTURES, MONDAY
+from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD
 from tests.test_declarations import PERFECT, REJECTED, client, declare
+
+if TYPE_CHECKING:
+    from app.board import Desk
+    from app.clues import Boards, Mask, State
 
 BOARD, DAY = load_days(FIXTURES)[MONDAY]
 
@@ -65,3 +73,62 @@ def test_a_day_that_hasnt_started_has_no_hint() -> None:
 
 def test_hints_are_in_the_schema() -> None:
     assert "/api/hints" in app.openapi()["paths"]
+
+
+def _forces(
+    subset: tuple[Desk, ...],
+    masks: dict[Desk, Mask],
+    alive: Boards,
+    declared: set[Desk],
+) -> list[Desk]:
+    """Who these clues settle, in desk order."""
+    kept = np.logical_and.reduce([masks[d] for d in subset])
+    return sorted(settled(alive[kept], declared), key=DESKS.index)
+
+
+def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
+    day = generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(2026))
+    steps: list[tuple[Desk, State]] = []
+    sizes = []
+    while len(steps) < len(DESKS) - 1:
+        clues, coworker = hint(SAMPLE_BOARD, day, steps)
+
+        declared = {day.start, *(d for d, _ in steps)}
+        alive = BOARDS[
+            np.logical_and.reduce(
+                [
+                    (BOARDS >> DESKS.index(d) & 1).astype(bool) == (d in day.sick)
+                    for d in declared
+                ]
+            )
+        ]
+        speakers = [d for d in DESKS if d in declared and day.reveal(d).clue]
+        masks = {d: day.reveal(d).clue.mask(SAMPLE_BOARD, alive) for d in speakers}  # type: ignore[union-attr]
+
+        wide = any(isinstance(day.reveal(d).clue, Total | NoMoreThan) for d in clues)
+        fewer = range(1, min(len(clues), MOST + 1) if len(clues) > MOST else len(clues))
+        assert not any(
+            _forces(s, masks, alive, declared)
+            for k in fewer
+            for s in combinations(speakers, k)
+        )
+        if wide:  # no local-only subset of the same size would do
+            local = [
+                d
+                for d in speakers
+                if not isinstance(day.reveal(d).clue, Total | NoMoreThan)
+            ]
+            assert not any(
+                _forces(s, masks, alive, declared)
+                for s in combinations(local, len(clues))
+            )
+        assert coworker == _forces(tuple(clues), masks, alive, declared)[0]
+        sizes.append(len(clues))
+        steps.append((coworker, day.state(coworker)))
+
+    assert max(sizes) > 1, "the walk never needed more than one clue"
+    assert day.accepts(SAMPLE_BOARD, steps)
+
+
+def test_more_declarations_than_desks_is_invalid() -> None:
+    assert ask(PERFECT + PERFECT[:1])[0] == HTTPStatus.UNPROCESSABLE_ENTITY

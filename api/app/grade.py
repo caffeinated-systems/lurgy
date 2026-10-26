@@ -72,28 +72,33 @@ def next_step(
     boards: Boards,
     declared: Container[Desk],
 ) -> tuple[Step, set[Desk]]:
-    found = _forcing(clues, masks, boards, declared)
-    if (first := next(found, None)) is None:
+    # Everyone forced at the first size and reach that forces anyone, not just by
+    # the first subset there; the search stops at the end of that level.
+    level: tuple[int, bool] | None = None
+    forced: set[Desk] = set()
+    for k, whole_board, _, more in _subsets(clues, masks, boards, declared):
+        if level and level != (k, whole_board):
+            break
+        if more:
+            level = k, whole_board
+            forced |= more
+    if level is None:
         msg = "no clue forces anyone: the day can't be solved without guessing"
         raise ValueError(msg)
-    k, whole_board, _, forced = first
-    # Everyone forced at the same size and reach, not just by the first subset.
-    for size, wide, _, more in found:
-        if (size, wide) != (k, whole_board):
-            break
-        forced |= more
+    k, whole_board = level
     return Step(min(k, MOST), len(forced), whole_board), forced
 
 
-def _forcing(
+def _subsets(
     clues: list[Clue],
     masks: list[Mask],
     boards: Boards,
     declared: Container[Desk],
 ) -> Iterator[tuple[int, bool, tuple[int, ...], set[Desk]]]:
-    """Each subset of clues that forces someone, fewest clues first, local first.
+    """Every subset of clues the way a person tries them, and whom it forces.
 
-    Lazy, so a caller that wants only the first subset stops searching there.
+    Fewest clues first, local before whole-board. Lazy, so a caller stops the
+    search where it likes; a subset that forces no one yields an empty set.
     """
     wide = [isinstance(c, Total | NoMoreThan) for c in clues]
     sizes = [*range(1, min(MOST, len(clues)) + 1)]
@@ -105,8 +110,7 @@ def _forcing(
                 if any(wide[i] for i in subset) != whole_board:
                     continue
                 alive = np.logical_and.reduce([masks[i] for i in subset])
-                if forced := set(settled(boards[alive], declared)):
-                    yield k, whole_board, subset, forced
+                yield k, whole_board, subset, set(settled(boards[alive], declared))
 
 
 def hint(
@@ -120,11 +124,16 @@ def hint(
     speakers = [d for d in DESKS if d in declared and day.reveal(d).clue]
     alive = BOARDS[(BOARDS & np.uint32(_bits(declared))) == _bits(declared & day.sick)]
     clues = [c for d in speakers if (c := day.reveal(d).clue)]
-    found = _forcing(clues, [c.mask(board, alive) for c in clues], alive, declared)
+    masks = [c.mask(board, alive) for c in clues]
+    found = (
+        (subset, forced)
+        for _, _, subset, forced in _subsets(clues, masks, alive, declared)
+        if forced
+    )
     if (first := next(found, None)) is None:  # pragma: no cover (a solvable day)
         msg = "no clue forces anyone"
         raise ValueError(msg)
-    _, _, subset, forced = first
+    subset, forced = first
     return [speakers[i] for i in subset], min(forced, key=DESKS.index)
 
 
