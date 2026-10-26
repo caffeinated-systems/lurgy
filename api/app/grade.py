@@ -10,9 +10,9 @@ from app.board import DESKS, Board, Desk
 from app.clues import BOARDS, NoMoreThan, Total, settled
 
 if TYPE_CHECKING:
-    from collections.abc import Container
+    from collections.abc import Container, Iterator, Sequence
 
-    from app.clues import Boards, Clue, Mask
+    from app.clues import Boards, Clue, Mask, State
     from app.week import Day, Difficulty
 
 # Combining more than this many clues counts as one "3+" step.
@@ -72,22 +72,60 @@ def next_step(
     boards: Boards,
     declared: Container[Desk],
 ) -> tuple[Step, set[Desk]]:
+    found = _forcing(clues, masks, boards, declared)
+    if (first := next(found, None)) is None:
+        msg = "no clue forces anyone: the day can't be solved without guessing"
+        raise ValueError(msg)
+    k, whole_board, _, forced = first
+    # Everyone forced at the same size and reach, not just by the first subset.
+    for size, wide, _, more in found:
+        if (size, wide) != (k, whole_board):
+            break
+        forced |= more
+    return Step(min(k, MOST), len(forced), whole_board), forced
+
+
+def _forcing(
+    clues: list[Clue],
+    masks: list[Mask],
+    boards: Boards,
+    declared: Container[Desk],
+) -> Iterator[tuple[int, bool, tuple[int, ...], set[Desk]]]:
+    """Each subset of clues that forces someone, fewest clues first, local first.
+
+    Lazy, so a caller that wants only the first subset stops searching there.
+    """
     wide = [isinstance(c, Total | NoMoreThan) for c in clues]
     sizes = [*range(1, min(MOST, len(clues)) + 1)]
     if len(clues) > MOST:
         sizes.append(len(clues))  # past MOST, everything at once
     for k in sizes:
         for whole_board in (False, True):
-            forced: set[Desk] = set()
             for subset in combinations(range(len(clues)), k):
                 if any(wide[i] for i in subset) != whole_board:
                     continue
                 alive = np.logical_and.reduce([masks[i] for i in subset])
-                forced |= settled(boards[alive], declared).keys()
-            if forced:
-                return Step(min(k, MOST), len(forced), whole_board), forced
-    msg = "no clue forces anyone: the day can't be solved without guessing"
-    raise ValueError(msg)
+                if forced := set(settled(boards[alive], declared)):
+                    yield k, whole_board, subset, forced
+
+
+def hint(
+    board: Board, day: Day, steps: Sequence[tuple[Desk, State]]
+) -> tuple[list[Desk], Desk]:
+    """The fewest revealed clues that force someone, and the first they force.
+
+    `steps` must already be accepted: the hint is computed from the solution.
+    """
+    declared = {day.start, *(desk for desk, _ in steps)}
+    speakers = [d for d in DESKS if d in declared and day.reveal(d).clue]
+    alive = BOARDS[(BOARDS & np.uint32(_bits(declared))) == _bits(declared & day.sick)]
+    clues = [c for d in speakers if (c := day.reveal(d).clue)]
+    found = _forcing(clues, [c.mask(board, alive) for c in clues], alive, declared)
+    if (first := next(found, None)) is None:  # pragma: no cover (a solvable day)
+        msg = "no clue forces anyone"
+        raise ValueError(msg)
+    _, _, subset, forced = first
+    return [speakers[i] for i in subset], min(forced, key=DESKS.index)
 
 
 def _bits(desks: set[Desk] | frozenset[Desk]) -> int:
