@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from app.board import DESKS, Board, Desk
-from app.clues import BOARDS, NoMoreThan, Total, settled
+from app.clues import BOARDS, WIDE, settled
 
 if TYPE_CHECKING:
     from collections.abc import Container, Iterator, Sequence
@@ -100,7 +100,7 @@ def _subsets(
     Fewest clues first, local before whole-board. Lazy, so a caller stops the
     search where it likes; a subset that forces no one yields an empty set.
     """
-    wide = [isinstance(c, Total | NoMoreThan) for c in clues]
+    wide = [isinstance(c, WIDE) for c in clues]
     sizes = [*range(1, min(MOST, len(clues)) + 1)]
     if len(clues) > MOST:
         sizes.append(len(clues))  # past MOST, everything at once

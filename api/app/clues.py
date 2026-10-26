@@ -100,6 +100,9 @@ class More(_Model):
 
 type Clue = Annotated[Count | Total | NoMoreThan | More, Field(discriminator="kind")]
 
+# Clues about the whole office: a step that needs one makes the day Hard.
+WIDE = (Total, NoMoreThan)
+
 
 class ContradictionError(Exception):
     """The clues and declarations contradict each other."""

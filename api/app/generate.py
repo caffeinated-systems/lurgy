@@ -30,7 +30,17 @@ from app.board import (
     cell,
 )
 from app.cast import iso_monday, load_cast, load_story, quiet_week, story_path
-from app.clues import BOARDS, EVERYONE, Clue, Count, NoMoreThan, State, Total, settled
+from app.clues import (
+    BOARDS,
+    EVERYONE,
+    WIDE,
+    Clue,
+    Count,
+    NoMoreThan,
+    State,
+    Total,
+    settled,
+)
 from app.grade import Grade, Step, grade, next_step
 from app.week import Day, Difficulty, Generator, Reveal, Week
 from app.wording import explanation, wording
@@ -54,6 +64,11 @@ JOKES = (1, 2)
 FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
     "rows", "columns", "departments",
 )  # fmt: skip
+# How often each clue family is drawn for a candidate.
+# ponytail: guessed weights; retune after reading a few generated weeks.
+WEIGHTS = {"counts": 4}
+
+type Catalogue = dict[str, list[Clue]]
 
 
 class GenerationError(Exception):
@@ -109,9 +124,12 @@ def _attempt(
     """One try: reveal coworkers in order until everyone is declared, or stuck."""
     sick = frozenset(rng.sample(DESKS, rng.randint(FEWEST_SICK, MOST_SICK)))
     solution = sum(1 << DESKS.index(d) for d in sick)
-    catalogue = list(_true_clues(board, solution, rng))
+    catalogue = _true_clues(board, solution, rng)
     if difficulty == "Easy":  # a whole-board clue is Hard whenever it's needed
-        catalogue = [c for c in catalogue if isinstance(c, Count)]
+        catalogue = {
+            f: [c for c in clues if not isinstance(c, WIDE)]
+            for f, clues in catalogue.items()
+        }
 
     start = rng.choice([d for d in DESKS if d not in flavour])
     declared: dict[Desk, bool] = {start: start in sick}
@@ -128,7 +146,7 @@ def _attempt(
         for desk in (d for d in new if d not in flavour):
             clues[desk] = clue = _choose(
                 board,
-                rng.sample(catalogue, CANDIDATES),
+                _candidates(catalogue, rng),
                 known=known,
                 alive=alive,
                 declared=declared,
@@ -136,7 +154,9 @@ def _attempt(
                 easy=difficulty == "Easy",
             )
             said.append(clue)
-            catalogue.remove(clue)  # no one says it twice
+            for family in catalogue.values():  # no one says it twice
+                if clue in family:
+                    family.remove(clue)
             alive = alive[clue.mask(board, alive)]
         if len(declared) == len(DESKS):
             break
@@ -209,7 +229,19 @@ def _keep(boards: Boards, desk: Desk, solution: int) -> Boards:
     return boards[same]
 
 
-def _true_clues(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
+def _candidates(catalogue: Catalogue, rng: random.Random) -> list[Clue]:
+    """Clues to weigh: each from a family drawn by WEIGHTS, repeats dropped."""
+    families = [f for f, clues in catalogue.items() if clues]
+    drawn = rng.choices(families, [WEIGHTS[f] for f in families], k=CANDIDATES)
+    return list(dict.fromkeys(rng.choice(catalogue[f]) for f in drawn))
+
+
+def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
+    """Every clue true of the solution, by family."""
+    return {"counts": list(_counts(board, solution, rng))}
+
+
+def _counts(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
     """Every count clue true of the solution; "at least" ones at a random strength."""
     states: tuple[State, ...] = ("sick", "well")
     for group in _groups(board):
