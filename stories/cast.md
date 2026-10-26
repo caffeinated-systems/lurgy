@@ -468,3 +468,18 @@ Came out of early retirement because the garden wasn't taking his calls. Old-sch
 - Cheerio.
 - Right you are.
 - Lovely stuff.
+
+## Sophia
+Department: Customer Services
+
+Team lead, relentlessly sunny, runs the department on positivity, biscuits and a very firm hold button. Asks everyone to rate their experience, including her family. Keeps Keisha and Dan from finding out how much they have in common.
+
+### Lines
+- Before you go, would you mind rating your experience of this conversation?
+- My mum asked how I was, so I logged it as a ticket and resolved it.
+- I run this team on positivity, biscuits and a very firm hold button.
+
+### Jokes
+- Happy to help!
+- Escalated.
+- Glowing feedback.
