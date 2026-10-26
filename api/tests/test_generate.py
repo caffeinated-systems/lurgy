@@ -7,7 +7,7 @@ import pytest
 
 from app.board import DESKS, Row
 from app.cast import fits, load_cast, load_story
-from app.clues import BOARDS, WIDE, Clue, Count, Parity
+from app.clues import BOARDS, WIDE, Clue, Count, Overlap, Parity
 from app.generate import (
     FEWEST_SICK,
     FORMS,
@@ -18,6 +18,8 @@ from app.generate import (
     _candidates,
     _choose,
     _form,
+    _how_many,
+    _overlaps,
     _true_clues,
     generate_day,
     generate_week,
@@ -172,3 +174,18 @@ def test_a_clue_that_tells_nothing_new_is_never_chosen() -> None:
             easy=True,
         )
         assert chosen == news
+
+
+def test_overlaps_never_give_a_coworker_away_or_hide_a_count() -> None:
+    solution = board_index({"A1", "B3", "C3", "D2", "A5", "B5", "C4"})
+
+    for clue in _overlaps(SAMPLE_BOARD, solution):
+        a, b = SAMPLE_BOARD.bits(clue.a), SAMPLE_BOARD.bits(clue.b)  # type: ignore[union-attr]
+        if isinstance(clue, Overlap):
+            # "two of the" is short of all of them, and b isn't inside a
+            total = _how_many(a, solution, clue.state)
+            assert clue.n < total, clue
+            assert b & ~a, clue
+        else:
+            # never "the only sick person in row 2 is in column B"
+            assert (a & b).bit_count() > 1, clue

@@ -12,6 +12,7 @@ from app.board import (
     Row,
 )
 from app.clues import (
+    AllIn,
     Clue,
     Count,
     Equal,
@@ -19,6 +20,9 @@ from app.clues import (
     Most,
     NoMoreThan,
     OneOf,
+    OnlyOne,
+    OnlyOneNeighbours,
+    Overlap,
     Parity,
     SickVsWell,
     Total,
@@ -136,6 +140,51 @@ SPEAKER: Desk = "B3"
         (
             OneOf(desk="B3", group=Department(name="HR"), n=None, state="well"),
             "I am one of the well people in my department.",
+        ),
+        (
+            OnlyOne(family="columns", n=1),
+            "Only one column has exactly one sick person.",
+        ),
+        (OnlyOne(family="rows", n=0), "Only one row has no sick people."),
+        (
+            OnlyOne(family="departments", n=3, state="well"),
+            "Only one department has exactly three well people.",
+        ),
+        (
+            OnlyOneNeighbours(group=Row(row=3), n=4),
+            "Only one person in my row has exactly four sick neighbours.",
+        ),
+        (
+            OnlyOneNeighbours(group=Corners(), n=1, state="well"),
+            "Only one person in the corners has exactly one well neighbour.",
+        ),
+        (
+            OnlyOneNeighbours(group=Column(column="A"), n=0),
+            "Only one person in column A has no sick neighbours.",
+        ),
+        (
+            Overlap(a=Row(row=3), b=Neighbours(of="B2"), n=2),
+            "Two of the sick people in my row are among Fergus's neighbours.",
+        ),
+        (
+            Overlap(a=Department(name="Sales"), b=Row(row=4), n=2, state="well"),
+            "Two of the well people in Sales are in row 4.",
+        ),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=1),
+            "The only sick person in my row is among Fergus's neighbours.",
+        ),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=2),
+            "Both sick people in my row are among Fergus's neighbours.",
+        ),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None, state="well"),
+            "All the well people in my row are among Fergus's neighbours.",
+        ),
+        (
+            AllIn(a=Row(row=5), b=Corners(), n=1),
+            "The only sick person in row 5 is in a corner.",
         ),
     ],
 )
@@ -293,6 +342,82 @@ def test_wording(clue: Clue, said: str) -> None:
             (
                 "My department is Carol, Steve and me:"
                 " I am sick, and so is at least one other."
+            ),
+        ),
+        (
+            OnlyOne(family="columns", n=1),
+            (
+                "Of columns A to D, exactly one has exactly one sick person;"
+                " every other column has more or fewer."
+            ),
+        ),
+        (
+            OnlyOne(family="rows", n=0),
+            (
+                "Of rows 1 to 5, exactly one has no sick people;"
+                " every other row has more."
+            ),
+        ),
+        (
+            OnlyOne(family="departments", n=3, state="well"),
+            (
+                "Of Facilities, Finance, HR, IT, Marketing and Sales, exactly one has"
+                " exactly three well people; every other department has more or fewer."
+            ),
+        ),
+        (
+            OnlyOneNeighbours(group=Row(row=3), n=4),
+            (
+                "My row is Imogen, Kev, Linda and me: just one of us has exactly"
+                " four sick neighbours, counting diagonals."
+            ),
+        ),
+        (
+            OnlyOneNeighbours(group=Corners(), n=1),
+            (
+                "The corners are Aisha, Dev, Quentin and Tariq: just one of them has"
+                " exactly one sick neighbour, counting diagonals."
+            ),
+        ),
+        (
+            Overlap(a=Row(row=3), b=Neighbours(of="B2"), n=2),
+            (
+                "My row is Imogen, Kev, Linda and me. Fergus's neighbours are Aisha,"
+                " Barry, Carol, Erin, Gemma, Imogen, Kev and me. The people in both"
+                " are Imogen, Kev and me: exactly two of them are sick."
+            ),
+        ),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=1),
+            (
+                "My row is Imogen, Kev, Linda and me. Fergus's neighbours are Aisha,"
+                " Barry, Carol, Erin, Gemma, Imogen, Kev and me. Exactly one of the"
+                " first is sick, and they're in the second too, so Linda is not sick."
+            ),
+        ),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="D2"), n=2),
+            (
+                "My row is Imogen, Kev, Linda and me. Hamid's neighbours are Carol,"
+                " Dev, Gemma, Kev and Linda. Exactly two of the first are sick, both"
+                " in the second too, so Imogen and I are not sick."
+            ),
+        ),
+        (
+            AllIn(a=Row(row=1), b=Corners(), n=2),
+            (
+                "Row 1 is Aisha, Barry, Carol and Dev. The corners are Aisha, Dev,"
+                " Quentin and Tariq. Exactly two of the first are sick, both in the"
+                " second too, so Barry and Carol are not sick."
+            ),
+        ),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None, state="well"),
+            (
+                "My row is Imogen, Kev, Linda and me. Fergus's neighbours are Aisha,"
+                " Barry, Carol, Erin, Gemma, Imogen, Kev and me. At least one of the"
+                " first is well, and all of them are in the second too, so Linda"
+                " is not well."
             ),
         ),
     ],

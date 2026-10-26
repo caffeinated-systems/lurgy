@@ -4,7 +4,9 @@ import argparse
 import random
 import secrets
 import subprocess
+from collections import Counter
 from datetime import date, timedelta
+from functools import cache
 from itertools import chain, combinations
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -34,6 +36,7 @@ from app.clues import (
     BOARDS,
     EVERYONE,
     WIDE,
+    AllIn,
     Clue,
     Count,
     Equal,
@@ -41,10 +44,14 @@ from app.clues import (
     Most,
     NoMoreThan,
     OneOf,
+    OnlyOne,
+    OnlyOneNeighbours,
+    Overlap,
     Parity,
     SickVsWell,
     State,
     Total,
+    family_groups,
     settled,
 )
 from app.grade import Grade, Step, grade, next_step
@@ -72,7 +79,14 @@ FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
 )  # fmt: skip
 # How often each clue family is drawn for a candidate.
 # ponytail: guessed weights; retune after reading a few generated weeks.
-WEIGHTS = {"counts": 4, "parity": 1, "comparisons": 1, "one coworker": 1}
+WEIGHTS = {
+    "counts": 4,
+    "parity": 1,
+    "comparisons": 1,
+    "one coworker": 1,
+    "uniqueness": 1,
+    "overlaps": 1,
+}  # fmt: skip
 # Each family's forms, drawn evenly once the family is chosen, so a form with a
 # handful of clues (the most) isn't crowded out by one with hundreds (pairs).
 FORMS = {
@@ -80,6 +94,8 @@ FORMS = {
     "parity": ("parity",),
     "comparisons": ("more", "sick_vs_well", "most"),
     "one coworker": ("one_of",),
+    "uniqueness": ("only_one", "only_one_neighbours"),
+    "overlaps": ("overlap", "all_in"),
 }
 STATES: tuple[State, ...] = ("sick", "well")
 
@@ -269,6 +285,8 @@ def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
         _parities(board, solution),
         _comparisons(board, solution),
         _one_coworker(board, solution),
+        _uniqueness(board, solution),
+        _overlaps(board, solution),
     ):
         catalogue[_form(clue)].append(clue)
     return catalogue
@@ -329,12 +347,8 @@ def _comparisons(board: Board, solution: int) -> Iterator[Clue]:
                     if na > nb
                     else More(a=b, b=a, state=state)
                 )
-        for group in (
-            *(Row(row=r) for r in range(1, ROWS + 1)),
-            *(Column(column=c) for c in COLUMNS),
-            *(Department(name=name) for name in board.departments),
-        ):
-            if (most := Most(group=group, state=state)).mask(board, one)[0]:
+        for whole in (g for f in FAMILIES for g in family_groups(board, f)):
+            if (most := Most(group=whole, state=state)).mask(board, one)[0]:
                 yield most
     for group in _groups(board):
         sick = _how_many(board.bits(group), solution, "sick")
@@ -345,14 +359,70 @@ def _comparisons(board: Board, solution: int) -> Iterator[Clue]:
 
 def _one_coworker(board: Board, solution: int) -> Iterator[Clue]:
     """Each coworker as one of two or more in a group they're in."""
-    for i, desk in enumerate(DESKS):
-        state: State = "sick" if solution >> i & 1 else "well"
-        for group in _groups(board):
-            if board.bits(group) >> i & 1:
-                n = _how_many(board.bits(group), solution, state)
+    for group in _groups(board):
+        bits = board.bits(group)
+        for i, desk in enumerate(DESKS):
+            if bits >> i & 1:
+                state: State = "sick" if solution >> i & 1 else "well"
+                n = _how_many(bits, solution, state)
                 if n >= 2:  # noqa: PLR2004 (one of one would just say they're sick)
                     yield OneOf(desk=desk, group=group, n=n, state=state)
                     yield OneOf(desk=desk, group=group, n=None, state=state)
+
+
+def _uniqueness(board: Board, solution: int) -> Iterator[Clue]:
+    """Counts only one row, column or department has, or one person in a group."""
+    for state in STATES:
+        for family in FAMILIES:
+            counts = Counter(
+                _how_many(board.bits(g), solution, state)
+                for g in family_groups(board, family)
+            )
+            for n in (n for n, k in counts.items() if k == 1):
+                yield OnlyOne(family=family, n=n, state=state)
+        for group in _groups(board):
+            counts = Counter(
+                _how_many(board.bits(Neighbours(of=d)), solution, state)
+                for i, d in enumerate(DESKS)
+                if board.bits(group) >> i & 1
+            )
+            for n in (n for n, k in counts.items() if k == 1):
+                yield OnlyOneNeighbours(group=group, n=n, state=state)
+
+
+def _overlaps(board: Board, solution: int) -> Iterator[Clue]:
+    """How the sick (or well) in one group sit in another that it overlaps."""
+    for a, b in _overlapping(board):
+        a_bits, b_bits = board.bits(a), board.bits(b)
+        for state in STATES:
+            n = _how_many(a_bits & b_bits, solution, state)
+            total = _how_many(a_bits, solution, state)
+            # "Two of the" means two or more, short of them all (that's "both"), in
+            # groups that cross: when b is inside a, it's just a count of b.
+            if 2 <= n < total and b_bits & ~a_bits:  # noqa: PLR2004
+                yield Overlap(a=a, b=b, n=n, state=state)
+            # Over a single shared desk, "the only sick person" names who's sick.
+            if (
+                total
+                and not _how_many(a_bits & ~b_bits, solution, state)
+                and (a_bits & b_bits).bit_count() > 1
+            ):
+                yield AllIn(a=a, b=b, n=total if total <= 2 else None, state=state)  # noqa: PLR2004
+
+
+@cache
+def _overlapping(board: Board) -> tuple[tuple[Group, Group], ...]:
+    """Any group against a row, column, department, neighbours, corners or edges
+    that shares some of its desks, but not all."""
+    targets = ("row", "column", "department", "neighbours", "corners", "edges")
+    return tuple(
+        (a, b)
+        for a in _groups(board)
+        for b in _groups(board)
+        if b.kind in targets
+        and board.bits(a) & board.bits(b)
+        and board.bits(a) & ~board.bits(b)
+    )
 
 
 def _pairs(board: Board) -> Iterator[tuple[Group, Group]]:
@@ -375,8 +445,9 @@ def _how_many(bits: int, solution: int, state: State) -> int:
     return sick if state == "sick" else bits.bit_count() - sick
 
 
-def _groups(board: Board) -> list[Group]:
-    """Every group of two or more desks."""
+@cache
+def _groups(board: Board) -> tuple[Group, ...]:
+    """Every group of two or more desks, built once per board."""
     directions: tuple[Literal["above", "below", "left", "right"], ...] = (
         "above", "below", "left", "right",
     )  # fmt: skip
@@ -394,8 +465,8 @@ def _groups(board: Board) -> list[Group]:
             if cell(a)[0] == cell(b)[0] or cell(a)[1] == cell(b)[1]
         ),
     ]
-    # ponytail: one-desk groups are the "about one coworker" family, left for #29.
-    return [g for g in groups if board.bits(g).bit_count() > 1]
+    # One-desk groups would just say who's sick, which gives them away.
+    return tuple(g for g in groups if board.bits(g).bit_count() > 1)
 
 
 def _joke(

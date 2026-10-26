@@ -4,7 +4,18 @@ import numpy as np
 from numpy.typing import NDArray
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.board import COLUMNS, DESKS, ROWS, Board, Column, Department, Desk, Group, Row
+from app.board import (
+    COLUMNS,
+    DESKS,
+    ROWS,
+    Board,
+    Column,
+    Department,
+    Desk,
+    Group,
+    Neighbours,
+    Row,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Container, Iterable, Mapping
@@ -38,7 +49,7 @@ _FAMILY_OF: dict[str, Family] = {
 }  # fmt: skip
 
 
-def _family(board: Board, family: Family) -> list[Group]:
+def family_groups(board: Board, family: Family) -> list[Row | Column | Department]:
     match family:
         case "rows":
             return [Row(row=r) for r in range(1, ROWS + 1)]
@@ -95,7 +106,7 @@ class NoMoreThan(_Model):
 
     def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
         mask = np.ones(boards.shape, dtype=np.bool_)
-        for group in _family(board, self.family):
+        for group in family_groups(board, self.family):
             mask &= _count(board.bits(group), self.state, boards) <= self.n
         return mask
 
@@ -182,7 +193,7 @@ class Most(_Model):
         family = _FAMILY_OF[self.group.kind]
         mine = _count(board.bits(self.group), self.state, boards)
         mask = np.ones(boards.shape, dtype=np.bool_)
-        for group in _family(board, family):
+        for group in family_groups(board, family):
             if group != self.group:
                 mask &= mine > _count(board.bits(group), self.state, boards)
         return mask
@@ -211,13 +222,104 @@ class OneOf(_Model):
         return board.bits(self.group)
 
 
+class OnlyOne(_Model):
+    """Exactly one row / column / department has exactly n sick (or well)."""
+
+    kind: Literal["only_one"] = "only_one"
+    family: Family
+    n: Annotated[int, Field(ge=0)]
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        hits = np.zeros(boards.shape, dtype=np.uint8)
+        for group in family_groups(board, self.family):
+            hits += np.equal(_count(board.bits(group), self.state, boards), self.n)
+        return np.equal(hits, 1)
+
+
+class OnlyOneNeighbours(_Model):
+    """Exactly one person in a group has exactly n sick (or well) neighbours."""
+
+    kind: Literal["only_one_neighbours"] = "only_one_neighbours"
+    group: Group
+    n: Annotated[int, Field(ge=0)]
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        hits = np.zeros(boards.shape, dtype=np.uint8)
+        for desk in _desks(board.bits(self.group)):
+            near = board.bits(Neighbours(of=desk))
+            hits += np.equal(_count(near, self.state, boards), self.n)
+        return np.equal(hits, 1)
+
+    def bits(self, board: Board) -> int:
+        bits = board.bits(self.group)
+        for desk in _desks(bits):
+            bits |= board.bits(Neighbours(of=desk))
+        return bits
+
+
+class Overlap(_Model):
+    """Exactly n of the sick (or well) in group a are in group b too."""
+
+    kind: Literal["overlap"] = "overlap"
+    a: Group
+    b: Group
+    n: Annotated[int, Field(ge=2)]  # "one of the" would mean two or more in a
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        both = board.bits(self.a) & board.bits(self.b)
+        return np.equal(_count(both, self.state, boards), self.n)
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.a) | board.bits(self.b)
+
+
+class AllIn(_Model):
+    """Every sick (or well) person in group a is in group b: the only one (n=1),
+    both (n=2), or all (None, at least one)."""
+
+    kind: Literal["all_in"] = "all_in"
+    a: Group
+    b: Group
+    n: Literal[1, 2] | None
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        a = board.bits(self.a)
+        outside = np.equal(_count(a & ~board.bits(self.b), self.state, boards), 0)
+        counts = _count(a, self.state, boards)
+        enough = counts >= 1 if self.n is None else np.equal(counts, self.n)
+        return outside & enough
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.a) | board.bits(self.b)
+
+
+def _desks(bits: int) -> list[Desk]:
+    return [d for i, d in enumerate(DESKS) if bits >> i & 1]
+
+
 type Clue = Annotated[
-    Count | Total | NoMoreThan | Parity | More | Equal | SickVsWell | Most | OneOf,
+    Count
+    | Total
+    | NoMoreThan
+    | Parity
+    | More
+    | Equal
+    | SickVsWell
+    | Most
+    | OneOf
+    | OnlyOne
+    | OnlyOneNeighbours
+    | Overlap
+    | AllIn,
     Field(discriminator="kind"),
 ]
 
 # Clues about the whole office: a step that needs one makes the day Hard.
-WIDE = (Total, NoMoreThan, Most)
+WIDE = (Total, NoMoreThan, Most, OnlyOne)
 
 
 class ContradictionError(Exception):

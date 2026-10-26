@@ -18,14 +18,19 @@ from app.board import (
     cell,
 )
 from app.clues import (
+    AllIn,
     Clue,
     Count,
     Equal,
+    Family,
     More,
     Most,
     NoMoreThan,
     OneOf,
+    OnlyOne,
+    OnlyOneNeighbours,
     Op,
+    Overlap,
     Parity,
     SickVsWell,
     State,
@@ -41,9 +46,10 @@ NUMBERS = (
 _SIDES = {"left": "to the left of", "right": "to the right of"}
 _MY_SIDES = {"left": "to my left", "right": "to my right"}
 _OTHER: dict[State, State] = {"sick": "well", "well": "sick"}
+_ONE_OF_THEM = {"in the corners": "in a corner", "on the edges": "on an edge"}
 
 
-def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911 (a case per kind)
+def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911, PLR0912 (a case per kind)
     """The clue as the speaker says it: "Two of my neighbours are sick."."""
     match clue:
         case Count(group=group, op=op, n=n, state=state):
@@ -77,15 +83,38 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
             return f"More people {where} are {more} than {_OTHER[more]}."
         case Most(group=group, state=state):
             return f"{_noun(board, speaker, group)[0]} has the most {state} people."
-        case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
+        case OneOf(desk=desk, group=group, n=n, state=state):
             count = "the" if n is None else NUMBERS[n]
             return (
                 f"{_subject(board, speaker, desk)} one of {count} {state} people"
                 f" {_where(board, speaker, group)}."
             )
+        case OnlyOne(family=family, n=n, state=state):
+            return f"Only one {family.removesuffix('s')} has {_exactly(n, state)}."
+        case OnlyOneNeighbours(group=group, n=n, state=state):
+            return (
+                f"Only one person {_where(board, speaker, group)}"
+                f" has {_neighbours(n, state)}."
+            )
+        case Overlap(a=a, b=b, n=n, state=state):
+            return _capital(
+                f"{NUMBERS[n]} of the {state} people {_where(board, speaker, a)}"
+                f" are {_where(board, speaker, b)}."
+            )
+        case AllIn(a=a, b=b, n=n, state=state):  # pragma: no branch
+            where = _where(board, speaker, a)
+            lead = {
+                1: f"The only {state} person {where} is",
+                2: f"Both {state} people {where} are",
+                None: f"All the {state} people {where} are",
+            }[n]
+            there = _where(board, speaker, b)
+            if n == 1:  # one person sits in one corner, on one edge
+                there = _ONE_OF_THEM.get(there, there)
+            return f"{lead} {there}."
 
 
-def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911 (a case per kind)
+def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911, PLR0912 (a case per kind)
     """The clue spelled out desk by desk, with nothing left implied."""
     match clue:
         case Count(group=group, op=op, n=n, state=state):
@@ -96,11 +125,7 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
                 f"There are {everyone} people in the office: {_of_them(op, n, state)}."
             )
         case NoMoreThan(family=family, n=n, state=state):
-            groups = {
-                "rows": f"Rows 1 to {ROWS}",
-                "columns": f"Columns {COLUMNS[0]} to {COLUMNS[-1]}",
-                "departments": _list(board.departments),
-            }[family]
+            groups = _capital(_family(board, family))
             if n == 0:
                 return f"{groups} each have no {state} people."
             return f"{groups} each have at most {_people(n, state)}."
@@ -134,11 +159,62 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, 
         case Most(group=group, state=state):
             noun = _noun(board, speaker, group)[0]
             return f"{noun} has more {state} people than any other {group.kind}."
-        case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
+        case OneOf(desk=desk, group=group, n=n, state=state):
             return (
                 f"{_members(board, speaker, group)}:"
                 f" {_subject(board, speaker, desk)} {state}, and {_others(n)}."
             )
+        case OnlyOne(family=family, n=n, state=state):
+            others = "more" if n == 0 else "more or fewer"
+            return (
+                f"Of {_family(board, family)}, exactly one has {_exactly(n, state)};"
+                f" every other {family.removesuffix('s')} has {others}."
+            )
+        case OnlyOneNeighbours(group=group, n=n, state=state):
+            us = "us" if board.bits(group) >> DESKS.index(speaker) & 1 else "them"
+            return (
+                f"{_members(board, speaker, group)}: just one of {us} has"
+                f" {_neighbours(n, state)}, counting diagonals."
+            )
+        case Overlap(a=a, b=b, n=n, state=state):
+            both = _names(board, speaker, board.bits(a) & board.bits(b))
+            return (
+                f"{_members(board, speaker, a)}. {_members(board, speaker, b)}."
+                f" The people in both are {both}:"
+                f" exactly {NUMBERS[n]} of them are {state}."
+            )
+        case AllIn(a=a, b=b, n=n, state=state):  # pragma: no branch
+            found = {
+                1: f"Exactly one of the first is {state}, and they're in the second",
+                2: f"Exactly two of the first are {state}, both in the second",
+                None: (
+                    f"At least one of the first is {state}, and all of them are in"
+                    " the second"
+                ),
+            }[n]
+            return (
+                f"{_members(board, speaker, a)}. {_members(board, speaker, b)}."
+                f" {found} too, so {_not(board, speaker, a, b)} {state}."
+            )
+
+
+def _family(board: Board, family: Family) -> str:
+    """Every row, column or department, by name: "rows 1 to 5"."""
+    return {
+        "rows": f"rows 1 to {ROWS}",
+        "columns": f"columns {COLUMNS[0]} to {COLUMNS[-1]}",
+        "departments": _list(board.departments),
+    }[family]
+
+
+def _exactly(n: int, state: State) -> str:
+    return f"no {state} people" if n == 0 else f"exactly {_people(n, state)}"
+
+
+def _neighbours(n: int, state: State) -> str:
+    if n == 0:
+        return f"no {state} neighbours"
+    return f"exactly {NUMBERS[n]} {state} neighbour{'' if n == 1 else 's'}"
 
 
 def _sentence(op: Op, n: int, state: State, where: str) -> str:
@@ -172,6 +248,14 @@ def _others(n: int | None) -> str:
     if n == 2:  # noqa: PLR2004 (this coworker and one other)
         return "so is exactly one other"
     return f"so are exactly {NUMBERS[n - 1]} others"
+
+
+def _not(board: Board, speaker: Desk, a: Group, b: Group) -> str:
+    """Everyone in a but not in b, and their "is not": "Linda is not", "I am not"."""
+    rest = board.bits(a) & ~board.bits(b)
+    if rest.bit_count() == 1:
+        return f"{_subject(board, speaker, DESKS[rest.bit_length() - 1])} not"
+    return f"{_names(board, speaker, rest, me='I')} are not"
 
 
 def _subject(board: Board, speaker: Desk, desk: Desk) -> str:
@@ -233,11 +317,14 @@ def _members(board: Board, speaker: Desk, group: Group) -> str:
     return f"{noun} {'are' if plural else 'is'} {names}"
 
 
-def _names(board: Board, speaker: Desk, bits: int) -> str:
-    """Everyone in the desks, in desk order, but the speaker last: "…, Kev and me"."""
+def _names(board: Board, speaker: Desk, bits: int, me: str = "me") -> str:
+    """Everyone in the desks, in desk order, but the speaker last: "…, Kev and me".
+
+    As the subject of a sentence the speaker is "I": "Kev and I are not sick".
+    """
     desks = [d for i, d in enumerate(DESKS) if bits >> i & 1]
     desks.sort(key=lambda d: d == speaker)
-    return _list([_who(board, speaker, d) for d in desks])
+    return _list([me if d == speaker else _who(board, speaker, d) for d in desks])
 
 
 def _list(items: list[str], last: str = "and") -> str:

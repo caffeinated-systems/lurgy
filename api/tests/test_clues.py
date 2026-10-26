@@ -12,6 +12,7 @@ from app.board import (
     Row,
 )
 from app.clues import (
+    AllIn,
     Clue,
     ContradictionError,
     Count,
@@ -20,6 +21,9 @@ from app.clues import (
     Most,
     NoMoreThan,
     OneOf,
+    OnlyOne,
+    OnlyOneNeighbours,
+    Overlap,
     Parity,
     SickVsWell,
     Total,
@@ -90,6 +94,38 @@ from tests.factories import SAMPLE_BOARD, board_index, desks
         (Most(group=Row(row=3), state="well"), {"A1"}, False),  # rows 2-5 tie
         (Most(group=Department(name="Sales"), state="well"), set(), False),  # IT
         (Most(group=Department(name="Sales"), state="well"), {"A2"}, True),
+        # only one row / column / department has exactly n
+        (OnlyOne(family="columns", n=1), {"A1"}, True),
+        (OnlyOne(family="columns", n=1), {"A1", "B1"}, False),
+        (OnlyOne(family="columns", n=1), set(), False),
+        (OnlyOne(family="rows", n=0), {"A1", "A2", "A3", "A4"}, True),
+        (OnlyOne(family="departments", n=0, state="well"), {"C1", "B3", "C5"}, True),
+        # only one corner has exactly n sick neighbours; B2 neighbours A1 alone
+        (OnlyOneNeighbours(group=Corners(), n=1), {"B2"}, True),
+        (OnlyOneNeighbours(group=Corners(), n=0), {"B2"}, False),
+        (OnlyOneNeighbours(group=Corners(), n=1), {"B2", "C4"}, False),
+        (OnlyOneNeighbours(group=Corners(), n=2, state="well"), {"B2"}, True),
+        # overlaps: row 3 meets Fergus's (B2) neighbours at A3, B3 and C3
+        (Overlap(a=Row(row=3), b=Neighbours(of="B2"), n=2), {"A3", "B3"}, True),
+        (Overlap(a=Row(row=3), b=Neighbours(of="B2"), n=2), {"A3", "D3"}, False),
+        (
+            Overlap(a=Row(row=3), b=Neighbours(of="B2"), n=2),
+            {"A3", "B3", "C3"},
+            False,
+        ),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=1), {"A3"}, True),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=1), {"D3"}, False),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=1), {"A3", "B3"}, False),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=2), {"A3", "B3"}, True),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=2), {"A3", "D3"}, False),
+        # "all" means at least one
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None), {"A3", "B3", "C3"}, True),
+        (AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None), set(), False),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None, state="well"),
+            {"D3"},
+            True,
+        ),
         # about one coworker
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3", "A3"}, True),
         (OneOf(desk="C3", group=Row(row=3), n=2), {"C3"}, False),
@@ -137,6 +173,20 @@ ROW_3: set[Desk] = {"A3", "B3", "C3", "D3"}
         (Total(n=1), set(DESKS)),
         (NoMoreThan(family="rows", n=1), set(DESKS)),
         (OneOf(desk="C3", group=Row(row=3), n=None), ROW_3),
+        # the people in the group and their neighbours
+        (
+            OnlyOneNeighbours(group=Direction(of="B2", direction="above"), n=1),
+            {"B1", "A1", "C1", "A2", "B2", "C2"},
+        ),
+        (
+            Overlap(a=Column(column="A"), b=Row(row=1), n=2),
+            {"A1", "B1", "C1", "D1", "A2", "A3", "A4", "A5"},
+        ),
+        (
+            AllIn(a=Row(row=1), b=Corners(), n=None),
+            {"A1", "B1", "C1", "D1", "A5", "D5"},
+        ),
+        (OnlyOne(family="rows", n=1), set(DESKS)),
         (Most(group=Row(row=3)), set(DESKS)),
     ],
 )
@@ -194,6 +244,10 @@ def test_contradiction_raises() -> None:
         {"kind": "sick_vs_well", "group": {"kind": "corners"}, "more": "both"},
         {"kind": "one_of", "desk": "A1", "group": {"kind": "corners"}, "n": 1},
         {"kind": "is", "desk": "E9"},
+        {"kind": "only_one", "family": "desks", "n": 1},
+        {"kind": "only_one_neighbours", "group": {"kind": "corners"}, "n": -1},
+        {"kind": "overlap", "a": {"kind": "corners"}, "b": {"kind": "edges"}, "n": 1},
+        {"kind": "all_in", "a": {"kind": "corners"}, "b": {"kind": "edges"}, "n": 3},
         {"kind": "riddle"},
     ],
 )
