@@ -36,7 +36,12 @@ from app.clues import (
     WIDE,
     Clue,
     Count,
+    Equal,
+    More,
+    Most,
     NoMoreThan,
+    Parity,
+    SickVsWell,
     State,
     Total,
     settled,
@@ -66,7 +71,8 @@ FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
 )  # fmt: skip
 # How often each clue family is drawn for a candidate.
 # ponytail: guessed weights; retune after reading a few generated weeks.
-WEIGHTS = {"counts": 4}
+WEIGHTS = {"counts": 4, "parity": 1, "comparisons": 1}
+STATES: tuple[State, ...] = ("sick", "well")
 
 type Catalogue = dict[str, list[Clue]]
 
@@ -238,15 +244,18 @@ def _candidates(catalogue: Catalogue, rng: random.Random) -> list[Clue]:
 
 def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
     """Every clue true of the solution, by family."""
-    return {"counts": list(_counts(board, solution, rng))}
+    return {
+        "counts": list(_counts(board, solution, rng)),
+        "parity": list(_parities(board, solution)),
+        "comparisons": list(_comparisons(board, solution)),
+    }
 
 
 def _counts(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
     """Every count clue true of the solution; "at least" ones at a random strength."""
-    states: tuple[State, ...] = ("sick", "well")
     for group in _groups(board):
         bits = board.bits(group)
-        for state in states:
+        for state in STATES:
             n = _how_many(bits, solution, state)
             yield Count(group=group, n=n, state=state)
             # "At least" short of everyone: at least two of two reads as both.
@@ -255,7 +264,7 @@ def _counts(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
                 yield Count(
                     group=group, op="at_least", n=rng.randint(1, most), state=state
                 )
-    for state in states:
+    for state in STATES:
         n = _how_many(EVERYONE, solution, state)
         yield Total(n=n, state=state)
         yield Total(op="at_least", n=rng.randint(1, n), state=state)
@@ -272,6 +281,57 @@ def _counts(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
             )
             if not clue.mask(board, extreme)[0]:
                 yield clue
+
+
+def _parities(board: Board, solution: int) -> Iterator[Clue]:
+    for group in _groups(board):
+        for state in STATES:
+            odd = _how_many(board.bits(group), solution, state) % 2
+            yield Parity(group=group, parity="odd" if odd else "even", state=state)
+
+
+def _comparisons(board: Board, solution: int) -> Iterator[Clue]:
+    """Equal / more between like groups, sick against well, and the most."""
+    one = np.array([solution], dtype=np.uint32)
+    for state in STATES:
+        for a, b in _pairs(board):
+            na = _how_many(board.bits(a), solution, state)
+            nb = _how_many(board.bits(b), solution, state)
+            if na == nb:
+                yield Equal(a=a, b=b, state=state)
+            else:
+                yield (
+                    More(a=a, b=b, state=state)
+                    if na > nb
+                    else More(a=b, b=a, state=state)
+                )
+        for group in (
+            *(Row(row=r) for r in range(1, ROWS + 1)),
+            *(Column(column=c) for c in COLUMNS),
+            *(Department(name=name) for name in board.departments),
+        ):
+            if (most := Most(group=group, state=state)).mask(board, one)[0]:
+                yield most
+    for group in _groups(board):
+        sick = _how_many(board.bits(group), solution, "sick")
+        well = board.bits(group).bit_count() - sick
+        more: State | None = None if sick == well else "sick" if sick > well else "well"
+        yield SickVsWell(group=group, more=more)
+
+
+def _pairs(board: Board) -> Iterator[tuple[Group, Group]]:
+    """Groups worth comparing: two of a kind, or opposite sides of one coworker."""
+    # ponytail: like-for-like only; mixed pairs (my row vs to my right) if days
+    # feel samey.
+    groups = _groups(board)
+    for kind in ("row", "column", "department", "neighbours"):
+        yield from combinations([g for g in groups if g.kind == kind], 2)
+    for desk in DESKS:
+        for x, y in (("above", "below"), ("left", "right")):
+            a = Direction(of=desk, direction=x)
+            b = Direction(of=desk, direction=y)
+            if board.bits(a) and board.bits(b):
+                yield a, b
 
 
 def _how_many(bits: int, solution: int, state: State) -> int:

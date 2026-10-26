@@ -1,18 +1,21 @@
 import random
 import secrets
 from datetime import date
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, get_args
 
 import pytest
 
 from app.board import DESKS
 from app.cast import fits, load_cast, load_story
+from app.clues import Clue
 from app.generate import (
     FEWEST_SICK,
     MOST_SICK,
     QUIET_LINES,
     SCHEDULE,
+    WEIGHTS,
     GenerationError,
+    _true_clues,
     generate_day,
     generate_week,
     main,
@@ -123,3 +126,16 @@ def _seats_the_story_and_gives_speakers_their_lines(week: Week) -> None:
         for desk, joke in jokes:
             assert day.reveal(desk).clue is not None
             assert joke == f"{names[DESKS.index(desk)]}'s joke."
+
+
+def test_every_kind_of_clue_is_generated_and_true() -> None:
+    solution = board_index({"A1", "B3", "C3", "D2", "A5", "B5", "C4"})
+
+    catalogue = _true_clues(SAMPLE_BOARD, solution, random.Random(3))
+
+    assert set(catalogue) == set(WEIGHTS)
+    clues = [c for family in catalogue.values() for c in family]
+    kinds = get_args(get_args(Clue.__value__)[0])
+    assert {c.kind for c in clues} == {k.model_fields["kind"].default for k in kinds}
+    for clue in clues:
+        assert clue.mask(SAMPLE_BOARD)[solution], clue

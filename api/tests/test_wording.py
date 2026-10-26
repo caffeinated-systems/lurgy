@@ -11,7 +11,17 @@ from app.board import (
     Neighbours,
     Row,
 )
-from app.clues import Clue, Count, NoMoreThan, Total
+from app.clues import (
+    Clue,
+    Count,
+    Equal,
+    More,
+    Most,
+    NoMoreThan,
+    Parity,
+    SickVsWell,
+    Total,
+)
 from app.wording import explanation, wording
 from tests.factories import SAMPLE_BOARD
 
@@ -83,6 +93,41 @@ SPEAKER: Desk = "B3"
             "No department has more than one well person.",
         ),
         (NoMoreThan(family="columns", n=0), "No column has any sick people."),
+        (
+            Parity(group=Row(row=3), parity="odd"),
+            "An odd number of people in my row are sick.",
+        ),
+        (
+            Parity(group=Neighbours(of="A2"), parity="even", state="well"),
+            "An even number of people among Erin's neighbours are well.",
+        ),
+        (
+            Equal(a=Row(row=1), b=Row(row=3)),
+            "There are as many sick people in row 1 as sick people in my row.",
+        ),
+        (
+            More(a=Row(row=3), b=Direction(of="B3", direction="right")),
+            "There are more sick people in my row than sick people to my right.",
+        ),
+        (
+            More(a=Department(name="IT"), b=Department(name="HR"), state="well"),
+            "There are more well people in IT than well people in my department.",
+        ),
+        (
+            SickVsWell(group=Neighbours(of="B3"), more="sick"),
+            "More people among my neighbours are sick than well.",
+        ),
+        (
+            SickVsWell(group=Column(column="A"), more="well"),
+            "More people in column A are well than sick.",
+        ),
+        (
+            SickVsWell(group=Row(row=1), more=None),
+            "As many people in row 1 are sick as well.",
+        ),
+        (Most(group=Column(column="D")), "Column D has the most sick people."),
+        (Most(group=Row(row=3), state="well"), "My row has the most well people."),
+        (Most(group=Department(name="Sales")), "Sales has the most sick people."),
     ],
 )
 def test_wording(clue: Clue, said: str) -> None:
@@ -163,6 +208,59 @@ def test_wording(clue: Clue, said: str) -> None:
                 "Facilities, Finance, HR, IT, Marketing and Sales each have at most"
                 " three sick people."
             ),
+        ),
+        (
+            Parity(group=Row(row=3), parity="odd"),
+            (
+                "My row is Imogen, Kev, Linda and me:"
+                " an odd number of them (one or three) are sick."
+            ),
+        ),
+        (
+            Parity(group=Department(name="HR"), parity="even", state="well"),
+            (
+                "My department is Carol, Steve and me:"
+                " an even number of them (zero or two) are well."
+            ),
+        ),
+        (
+            Equal(a=Row(row=1), b=Row(row=3)),
+            (
+                "Row 1 is Aisha, Barry, Carol and Dev. My row is Imogen, Kev, Linda"
+                " and me. As many of the first are sick as of the second, and that"
+                " can be none."
+            ),
+        ),
+        (
+            More(a=Row(row=3), b=Direction(of="B3", direction="right")),
+            (
+                "My row is Imogen, Kev, Linda and me. The people to my right are Kev"
+                " and Linda. More of the first are sick than of the second, which can"
+                " have none."
+            ),
+        ),
+        (
+            SickVsWell(group=Neighbours(of="A2"), more="sick"),
+            (
+                "Erin's neighbours are Aisha, Barry, Fergus, Imogen and me:"
+                " more of them are sick than well."
+            ),
+        ),
+        (
+            SickVsWell(group=Row(row=1), more=None),
+            "Row 1 is Aisha, Barry, Carol and Dev: as many of them are sick as well.",
+        ),
+        (
+            Most(group=Column(column="D")),
+            "Column D has more sick people than any other column.",
+        ),
+        (
+            Most(group=Row(row=3)),
+            "My row has more sick people than any other row.",
+        ),
+        (
+            Most(group=Department(name="Sales"), state="well"),
+            "Sales has more well people than any other department.",
         ),
     ],
 )

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from app.board import DESKS
-from app.clues import BOARDS, EVERYONE, WIDE, Count, settled
+from app.clues import BOARDS, WIDE, settled
 from app.generate import generate_day
 from app.grade import MOST, hint
 from app.main import ExplainedClue, app
@@ -142,13 +142,9 @@ def test_a_hint_spells_out_each_of_its_clues() -> None:
 def test_an_explained_clue_names_its_desks() -> None:
     day = generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(2027))
     for desk, reveal in zip(DESKS, day.reveals, strict=True):
-        match reveal.clue:
-            case None:
-                continue
-            case Count(group=group):
-                bits = SAMPLE_BOARD.bits(group)
-            case _:
-                bits = EVERYONE
+        if reveal.clue is None:
+            continue
+        bits = reveal.clue.bits(SAMPLE_BOARD)
         explained = ExplainedClue.at(SAMPLE_BOARD, day, desk)
 
         assert explained.explanation == reveal.explanation

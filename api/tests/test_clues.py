@@ -1,9 +1,30 @@
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from app.board import Corners, Department, Desk, Direction, Neighbours, Row
-from app.clues import Clue, ContradictionError, Count, More, NoMoreThan, Total, forced
-from tests.factories import SAMPLE_BOARD, board_index
+from app.board import (
+    DESKS,
+    Column,
+    Corners,
+    Department,
+    Desk,
+    Direction,
+    Neighbours,
+    Row,
+)
+from app.clues import (
+    Clue,
+    ContradictionError,
+    Count,
+    Equal,
+    More,
+    Most,
+    NoMoreThan,
+    Parity,
+    SickVsWell,
+    Total,
+    forced,
+)
+from tests.factories import SAMPLE_BOARD, board_index, desks
 
 
 @pytest.mark.parametrize(
@@ -46,6 +67,28 @@ from tests.factories import SAMPLE_BOARD, board_index
             True,
         ),
         (NoMoreThan(family="rows", n=3, state="well"), {"A1"}, False),
+        # odd / even, and even includes zero
+        (Parity(group=Row(row=1), parity="odd"), {"A1"}, True),
+        (Parity(group=Row(row=1), parity="odd"), {"A1", "B1"}, False),
+        (Parity(group=Row(row=1), parity="even"), set(), True),
+        (Parity(group=Row(row=1), parity="odd", state="well"), {"A1"}, True),
+        # as many sick in row 1 as in row 3, none included
+        (Equal(a=Row(row=1), b=Row(row=3)), {"A1", "C3"}, True),
+        (Equal(a=Row(row=1), b=Row(row=3)), {"A1"}, False),
+        (Equal(a=Row(row=1), b=Row(row=3)), set(), True),
+        # more sick than well in row 1, the reverse, and as many
+        (SickVsWell(group=Row(row=1), more="sick"), {"A1", "B1", "C1"}, True),
+        (SickVsWell(group=Row(row=1), more="sick"), {"A1", "B1"}, False),
+        (SickVsWell(group=Row(row=1), more="well"), {"A1"}, True),
+        (SickVsWell(group=Row(row=1), more=None), {"A1", "B1"}, True),
+        (SickVsWell(group=Row(row=1), more=None), {"A1"}, False),
+        # the most means more than every other: a tie isn't the most
+        (Most(group=Column(column="D")), {"D1"}, True),
+        (Most(group=Column(column="D")), {"D1", "A1"}, False),
+        (Most(group=Column(column="D")), set(), False),
+        (Most(group=Row(row=3), state="well"), {"A1"}, False),  # rows 2-5 tie
+        (Most(group=Department(name="Sales"), state="well"), set(), False),  # IT
+        (Most(group=Department(name="Sales"), state="well"), {"A2"}, True),
         # more sick in row 3 than to the right of B3
         (More(a=Row(row=3), b=Direction(of="B3", direction="right")), {"A3"}, True),
         (More(a=Row(row=3), b=Direction(of="B3", direction="right")), {"C3"}, False),
@@ -59,6 +102,36 @@ from tests.factories import SAMPLE_BOARD, board_index
 )
 def test_mask(clue: Clue, sick: set[Desk], expected: bool) -> None:  # noqa: FBT001
     assert clue.mask(SAMPLE_BOARD)[board_index(sick)] == expected
+
+
+ROW_3: set[Desk] = {"A3", "B3", "C3", "D3"}
+
+
+@pytest.mark.parametrize(
+    ("clue", "covered"),
+    [
+        (Count(group=Row(row=3), n=1), ROW_3),
+        (
+            Parity(group=Direction(of="B3", direction="below"), parity="odd"),
+            {"B4", "B5"},
+        ),
+        (SickVsWell(group=Row(row=3), more=None), ROW_3),
+        (More(a=Direction(of="B3", direction="right"), b=Row(row=3)), ROW_3),
+        (
+            Equal(
+                a=Direction(of="B3", direction="above"),
+                b=Direction(of="B3", direction="below"),
+            ),
+            {"B1", "B2", "B4", "B5"},
+        ),
+        # the rest are about the whole office
+        (Total(n=1), set(DESKS)),
+        (NoMoreThan(family="rows", n=1), set(DESKS)),
+        (Most(group=Row(row=3)), set(DESKS)),
+    ],
+)
+def test_a_clue_covers_its_desks(clue: Clue, covered: set[Desk]) -> None:
+    assert desks(clue.bits(SAMPLE_BOARD)) == covered
 
 
 def test_clues_round_trip_as_json() -> None:
@@ -106,6 +179,9 @@ def test_contradiction_raises() -> None:
         {"kind": "no_more_than", "family": "rows", "n": -1},
         {"kind": "no_more_than", "family": "desks", "n": 1},
         {"kind": "count", "group": {"kind": "corners"}, "n": 1, "op": "at_most"},
+        {"kind": "parity", "group": {"kind": "corners"}, "parity": "prime"},
+        {"kind": "most", "group": {"kind": "corners"}},
+        {"kind": "sick_vs_well", "group": {"kind": "corners"}, "more": "both"},
         {"kind": "riddle"},
     ],
 )
