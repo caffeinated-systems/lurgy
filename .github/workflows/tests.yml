@@ -80,7 +80,7 @@ jobs:
         run: uv sync --locked
         working-directory: api
       - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --only-shell chromium
       - name: Browser tests
         run: npm run test:e2e
       - name: Upload traces
