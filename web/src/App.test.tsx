@@ -140,7 +140,9 @@ test("an accepted declaration reveals the coworker and posts what came before", 
 		declared: [{ desk: "B1", state: "sick" }],
 		declaration: { desk: "C1", state: "well" },
 	});
-	const log = screen.getAllByRole("listitem").map((li) => li.textContent);
+	const log = screen
+		.getAllByRole("listitem")
+		.map((li) => li.querySelector(".entry")?.textContent);
 	expect(log).toEqual([
 		"NameC1 · C1 · sickBye.",
 		"NameB1 · B1 · sickHi.",
@@ -298,6 +300,75 @@ test("a hint shows its clues, then on a second press its coworker", async () => 
 });
 
 /** Opens a day that was already solved, with B1 masked. */
+test("reading a clue marks who said it; only a hinted one is spelled out", async () => {
+	await open({
+		clues: ["A1"],
+		coworker: "B3",
+		explanations: [
+			{
+				desk: "A1",
+				explanation: "Row 1 is NameA1 and NameB1: two are sick.",
+				desks: ["A1", "B1"],
+			},
+		],
+	});
+	const entry = screen.getByRole("button", { name: /Two in my row\./ });
+
+	fireEvent.click(entry);
+
+	expect(entry.getAttribute("aria-pressed")).toBe("true");
+	expect(tile("A1").getAttribute("aria-label")).toContain(
+		"said the clue you're reading",
+	);
+	expect(screen.queryByText(/^Row 1 is/)).toBeNull();
+	expect(tile("B1").getAttribute("aria-label")).not.toContain("in the clue");
+
+	fireEvent.click(screen.getByRole("button", { name: "Hint" }));
+
+	expect(await screen.findByText(/^Row 1 is/)).toBeDefined();
+	expect(tile("B1").getAttribute("aria-label")).toContain(
+		"in the clue you're reading",
+	);
+	expect(tile("C1").getAttribute("aria-label")).not.toContain("in the clue");
+
+	fireEvent.click(entry);
+
+	expect(entry.getAttribute("aria-pressed")).toBe("false");
+	expect(screen.queryByText(/^Row 1 is/)).toBeNull();
+	expect(tile("A1").getAttribute("aria-label")).not.toContain("reading");
+});
+
+test("a dimmed clue stays dimmed after a reload, and undims", async () => {
+	await open();
+	const dim = () => screen.getByRole("button", { name: "Dim NameA1's clue" });
+
+	fireEvent.click(dim());
+
+	expect(dim().getAttribute("aria-pressed")).toBe("true");
+	expect(dim().closest("li")?.className).toBe("dimmed");
+
+	document.body.innerHTML = "";
+	await open();
+
+	expect(dim().closest("li")?.className).toBe("dimmed");
+	fireEvent.click(dim());
+	expect(dim().closest("li")?.className).toBe("");
+});
+
+test("flavour can be read but not dimmed", async () => {
+	await open({ ...sick("B1", "Nice weather."), kind: "flavour" });
+	fireEvent.keyDown(tile("B1"), { key: "s" });
+	await screen.findByText("Flavour: no clue.");
+
+	expect(
+		screen.queryByRole("button", { name: "Dim NameB1's clue" }),
+	).toBeNull();
+	fireEvent.click(screen.getByRole("button", { name: /Nice weather\./ }));
+	expect(tile("B1").getAttribute("aria-label")).toContain(
+		"said the clue you're reading",
+	);
+});
+
 async function openSolved() {
 	localStorage.setItem(
 		"office-bug:2026-10-19",

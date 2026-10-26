@@ -162,6 +162,10 @@ export function Play({ day }: { day: Day }) {
 		coworkers.slice(r * COLUMNS, (r + 1) * COLUMNS),
 	);
 	const nameOf = (desk: Desk) => coworkers.find((c) => c.desk === desk)?.name;
+	// Only a clue the open hint points to is spelled out, with its desks outlined.
+	const explained = game.hint?.explanations.find(
+		(e) => e.desk === game.reading,
+	);
 
 	return (
 		<main>
@@ -191,6 +195,8 @@ export function Play({ day }: { day: Day }) {
 							const lit = game.hint?.clues.includes(c.desk);
 							const named =
 								game.hint?.presses === 2 && game.hint.coworker === c.desk;
+							const speaker = game.reading === c.desk;
+							const inClue = explained?.desks.includes(c.desk);
 							const label = [
 								c.desk,
 								c.name,
@@ -200,6 +206,8 @@ export function Play({ day }: { day: Day }) {
 								...(hints ? [hints === 1 ? "one hint" : "two hints"] : []),
 								...(lit ? ["hinted clue"] : []),
 								...(named ? ["the hint is about them"] : []),
+								...(speaker ? ["said the clue you're reading"] : []),
+								...(inClue ? ["in the clue you're reading"] : []),
 								...(reveal ? [`says: ${reveal.text}`] : []),
 							].join(", ");
 							return (
@@ -208,7 +216,7 @@ export function Play({ day }: { day: Day }) {
 									type="button"
 									key={c.desk}
 									data-desk={c.desk}
-									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""}`}
+									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""} ${speaker ? "speaker" : ""} ${inClue ? "in-clue" : ""}`}
 									tabIndex={c.desk === selected ? 0 : -1}
 									role="gridcell"
 									aria-keyshortcuts="S W"
@@ -238,21 +246,47 @@ export function Play({ day }: { day: Day }) {
 
 			<h2 className="log-title">Clues, newest first</h2>
 			<ul className="log">
-				{progress.reveals.toReversed().map((r) => (
-					<li
-						key={r.desk}
-						className={game.hint?.clues.includes(r.desk) ? "hinted" : undefined}
-					>
-						<span className="who">
-							{nameOf(r.desk)} · {r.desk} · {r.state}
-						</span>
-						<span>{r.text}</span>
-						{r.joke && <span className="joke">{r.joke}</span>}
-						{r.kind === "flavour" && (
-							<span className="plain">Flavour: no clue.</span>
-						)}
-					</li>
-				))}
+				{progress.reveals.toReversed().map((r) => {
+					const dimmed = progress.dimmed.includes(r.desk);
+					const classes = [
+						game.hint?.clues.includes(r.desk) && "hinted",
+						game.reading === r.desk && "reading",
+						dimmed && "dimmed",
+					].filter(Boolean);
+					return (
+						<li key={r.desk} className={classes.join(" ") || undefined}>
+							<button
+								type="button"
+								className="entry"
+								aria-pressed={game.reading === r.desk}
+								onClick={() => dispatch({ type: "read", desk: r.desk })}
+							>
+								<span className="who">
+									{nameOf(r.desk)} · {r.desk} · {r.state}
+								</span>
+								<span>{r.text}</span>
+								{r.joke && <span className="joke">{r.joke}</span>}
+								{r.kind === "flavour" && (
+									<span className="plain">Flavour: no clue.</span>
+								)}
+							</button>
+							{r.kind === "clue" && (
+								<button
+									type="button"
+									className="dim"
+									aria-pressed={dimmed}
+									aria-label={`Dim ${nameOf(r.desk)}'s clue`}
+									onClick={() => dispatch({ type: "dimmed", desk: r.desk })}
+								>
+									Dim
+								</button>
+							)}
+							{explained?.desk === r.desk && explained.explanation && (
+								<p className="explain">{explained.explanation}</p>
+							)}
+						</li>
+					);
+				})}
 			</ul>
 
 			<div className="thumb">

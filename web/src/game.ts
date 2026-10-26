@@ -14,6 +14,8 @@ export type Progress = {
 	masks: Desk[];
 	// How many times each hinted coworker's hint was pressed: 🟡 once, 🟠 twice.
 	hints: Partial<Record<Desk, 1 | 2>>;
+	// Clues the player has dimmed, by who said them.
+	dimmed: Desk[];
 	startedAt: number;
 	solvedAt?: number;
 };
@@ -29,6 +31,8 @@ export type Game = {
 	pending: boolean;
 	// The open hint: it stays on its coworker until they're declared.
 	hint?: Hint & { presses: 1 | 2 };
+	// The log entry being read, by who said it: their tile is highlighted.
+	reading?: Desk;
 };
 
 export type Action =
@@ -38,6 +42,8 @@ export type Action =
 	| { type: "rejected"; desk: Desk; state: State }
 	| { type: "hinted"; hint: Hint }
 	| { type: "hinted-again" }
+	| { type: "read"; desk: Desk }
+	| { type: "dimmed"; desk: Desk }
 	| { type: "failed" }
 	| { type: "already" }
 	| { type: "shared"; copied: boolean };
@@ -47,16 +53,18 @@ const key = (date: string) => `office-bug:${date}`;
 export function load(day: Day): Progress | undefined {
 	try {
 		const saved = JSON.parse(localStorage.getItem(key(day.date)) ?? "null");
-		// Saved before hints existed: none were taken.
+		// Saved before hints or dimming existed: none were taken, none dimmed.
 		const hints = saved?.hints ?? {};
+		const dimmed = saved?.dimmed ?? [];
 		// ponytail: shape check only; a full schema check if Progress ever changes shape.
 		const fits =
 			saved?.reveals?.[0]?.desk === day.start.desk &&
 			Array.isArray(saved.masks) &&
 			typeof saved.startedAt === "number" &&
 			typeof hints === "object" &&
-			!Array.isArray(hints);
-		return fits ? { ...saved, hints } : undefined;
+			!Array.isArray(hints) &&
+			Array.isArray(dimmed);
+		return fits ? { ...saved, hints, dimmed } : undefined;
 	} catch {
 		return undefined;
 	}
@@ -77,6 +85,7 @@ export function start(day: Day, now: number): Game {
 		reveals: [day.start],
 		masks: [],
 		hints: {},
+		dimmed: [],
 		startedAt: now,
 	};
 	const hidden = day.coworkers.find((c) => !revealOf(progress, c.desk));
@@ -228,6 +237,18 @@ export function reducer(game: Game, action: Action): Game {
 	switch (action.type) {
 		case "selected":
 			return { ...game, selected: action.desk };
+		case "read":
+			return {
+				...game,
+				reading: game.reading === action.desk ? undefined : action.desk,
+			};
+		case "dimmed": {
+			const { desk } = action;
+			const dimmed = progress.dimmed.includes(desk)
+				? progress.dimmed.filter((d) => d !== desk)
+				: [...progress.dimmed, desk];
+			return { ...game, progress: { ...progress, dimmed } };
+		}
 		case "sent":
 			return { ...game, pending: true };
 		case "accepted": {
