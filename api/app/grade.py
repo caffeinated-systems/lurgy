@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from app.board import DESKS, Board, Desk
-from app.clues import BOARDS, NoMoreThan, Total
+from app.clues import BOARDS, NoMoreThan, Total, settled
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
+    from collections.abc import Container
 
-    from app.clues import Clue, Mask
+    from app.clues import Boards, Clue, Mask
     from app.week import Day, Difficulty
 
 # Combining more than this many clues counts as one "3+" step.
@@ -57,18 +57,20 @@ def grade(board: Board, day: Day) -> Grade:
         alive = np.flatnonzero(
             (BOARDS & np.uint32(known)) == _bits(declared & day.sick)
         )
-        step, forced = _step(clues, [m[alive] for m in masks], BOARDS[alive], declared)
+        step, forced = next_step(
+            clues, [m[alive] for m in masks], BOARDS[alive], declared
+        )
         steps.append(step)
         new = sorted(forced)
         declared |= forced
     return Grade(tuple(steps))
 
 
-def _step(
+def next_step(
     clues: list[Clue],
     masks: list[Mask],
-    boards: NDArray[np.uint32],
-    declared: set[Desk],
+    boards: Boards,
+    declared: Container[Desk],
 ) -> tuple[Step, set[Desk]]:
     wide = [isinstance(c, Total | NoMoreThan) for c in clues]
     sizes = [*range(1, min(MOST, len(clues)) + 1)]
@@ -81,21 +83,11 @@ def _step(
                 if any(wide[i] for i in subset) != whole_board:
                     continue
                 alive = np.logical_and.reduce([masks[i] for i in subset])
-                forced |= _forced(boards[alive], declared)
+                forced |= settled(boards[alive], declared).keys()
             if forced:
                 return Step(min(k, MOST), len(forced), whole_board), forced
     msg = "no clue forces anyone: the day can't be solved without guessing"
     raise ValueError(msg)
-
-
-def _forced(boards: NDArray[np.uint32], declared: set[Desk]) -> set[Desk]:
-    always = int(np.bitwise_and.reduce(boards))
-    ever = int(np.bitwise_or.reduce(boards))
-    return {
-        d
-        for i, d in enumerate(DESKS)
-        if d not in declared and (always >> i & 1 or not ever >> i & 1)
-    }
 
 
 def _bits(desks: set[Desk] | frozenset[Desk]) -> int:

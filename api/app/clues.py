@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.board import COLUMNS, DESKS, ROWS, Board, Column, Department, Desk, Group, Row
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Container, Iterable, Mapping
 
 # Every possible board: bit i set means the coworker at desk i is sick.
 BOARDS = np.arange(2 ** len(DESKS), dtype=np.uint32)
@@ -19,9 +19,12 @@ type State = Literal["sick", "well"]
 type Op = Literal["exactly", "at_least"]
 
 
-def _count(bits: int, state: State) -> Counts:
-    """How many coworkers in these desks are in this state, on every board."""
-    sick = np.bitwise_count(BOARDS & np.uint32(bits))
+type Boards = NDArray[np.uint32]
+
+
+def _count(bits: int, state: State, boards: Boards) -> Counts:
+    """How many coworkers in these desks are in this state, on each board."""
+    sick = np.bitwise_count(boards & np.uint32(bits))
     return sick if state == "sick" else bits.bit_count() - sick
 
 
@@ -42,8 +45,9 @@ class Count(_Model):
     n: Annotated[int, Field(ge=0)]
     state: State = "sick"
 
-    def mask(self, board: Board) -> Mask:
-        return _compare(_count(board.bits(self.group), self.state), self.op, self.n)
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        counts = _count(board.bits(self.group), self.state, boards)
+        return _compare(counts, self.op, self.n)
 
 
 class Total(_Model):
@@ -54,8 +58,8 @@ class Total(_Model):
     n: Annotated[int, Field(ge=0)]
     state: State = "sick"
 
-    def mask(self, board: Board) -> Mask:  # noqa: ARG002 (same signature as every clue)
-        return _compare(_count(EVERYONE, self.state), self.op, self.n)
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:  # noqa: ARG002 (same signature as every clue)
+        return _compare(_count(EVERYONE, self.state, boards), self.op, self.n)
 
 
 class NoMoreThan(_Model):
@@ -66,7 +70,7 @@ class NoMoreThan(_Model):
     n: Annotated[int, Field(ge=0)]
     state: State = "sick"
 
-    def mask(self, board: Board) -> Mask:
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
         groups: list[Group]
         match self.family:
             case "rows":
@@ -75,9 +79,9 @@ class NoMoreThan(_Model):
                 groups = [Column(column=c) for c in COLUMNS]
             case "departments":  # pragma: no branch (the match is exhaustive)
                 groups = [Department(name=d) for d in board.departments]
-        mask = np.ones(BOARDS.shape, dtype=np.bool_)
+        mask = np.ones(boards.shape, dtype=np.bool_)
         for group in groups:
-            mask &= _count(board.bits(group), self.state) <= self.n
+            mask &= _count(board.bits(group), self.state, boards) <= self.n
         return mask
 
 
@@ -89,9 +93,9 @@ class More(_Model):
     b: Group
     state: State = "sick"
 
-    def mask(self, board: Board) -> Mask:
-        a = _count(board.bits(self.a), self.state)
-        return a > _count(board.bits(self.b), self.state)
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        a = _count(board.bits(self.a), self.state, boards)
+        return a > _count(board.bits(self.b), self.state, boards)
 
 
 type Clue = Annotated[Count | Total | NoMoreThan | More, Field(discriminator="kind")]
@@ -115,11 +119,15 @@ def forced(
     sick = sum(1 << DESKS.index(d) for d, s in declared.items() if s)
     alive &= (BOARDS & np.uint32(known)) == sick
 
-    survivors = BOARDS[alive]
-    if survivors.size == 0:
+    return settled(BOARDS[alive], declared)
+
+
+def settled(boards: Boards, declared: Container[Desk]) -> dict[Desk, bool]:
+    """Undeclared coworkers in the same state on all of these boards."""
+    if boards.size == 0:
         raise ContradictionError
-    always = int(np.bitwise_and.reduce(survivors))
-    ever = int(np.bitwise_or.reduce(survivors))
+    always = int(np.bitwise_and.reduce(boards))
+    ever = int(np.bitwise_or.reduce(boards))
     return {
         desk: bool(always >> i & 1)
         for i, desk in enumerate(DESKS)

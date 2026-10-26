@@ -5,7 +5,7 @@ import pytest
 
 from app.board import DESKS, Column, Corners, Desk, Direction, Neighbours, Row
 from app.clues import Clue, Count, Total
-from app.grade import Step, _step, grade
+from app.grade import Step, grade, next_step
 from app.week import Day, Reveal, load_days
 from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD
 
@@ -110,7 +110,7 @@ def test_more_than_three_clues_at_once_counts_as_three() -> None:
     a, b, c, d = ((boards >> i & 1).astype(np.bool_) for i in range(4))
     masks = [a | b, ~b | c, ~c | d, ~d | a]
 
-    step, forced = _step([NOTHING] * 4, masks, boards, set(DESKS[4:]))
+    step, forced = next_step([NOTHING] * 4, masks, boards, set(DESKS[4:]))
 
     assert step == Step(hardness=3, breadth=1, whole_board=False)
     assert forced == {"A1"}

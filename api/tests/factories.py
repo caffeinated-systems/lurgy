@@ -1,33 +1,14 @@
 from datetime import date
 from pathlib import Path
 
-from app.board import DESKS, Board, Coworker, Desk
+from app.board import DESKS, Desk
+from app.cast import STUB_BOARD
 
 FIXTURES = Path(__file__).parent / "fixtures" / "puzzles"
 MONDAY = date(2026, 10, 19)  # the Monday sample's day in the fixture Week
 
-# The Monday sample from the voice prototype: names run A to T across the floor.
-SAMPLE_DEPARTMENTS = (
-    "Facilities", "Facilities", "HR", "Marketing",
-    "IT", "Facilities", "Marketing", "Finance",
-    "IT", "HR", "IT", "Sales",
-    "Finance", "Sales", "Sales", "Marketing",
-    "Finance", "Sales", "HR", "IT",
-)  # fmt: skip
-SAMPLE_NAMES = (
-    "Aisha", "Barry", "Carol", "Dev",
-    "Erin", "Fergus", "Gemma", "Hamid",
-    "Imogen", "Jas", "Kev", "Linda",
-    "Mo", "Nadia", "Ollie", "Priya",
-    "Quentin", "Rosa", "Steve", "Tariq",
-)  # fmt: skip
-
-SAMPLE_BOARD = Board(
-    coworkers=tuple(
-        Coworker(name=n, department=d)
-        for n, d in zip(SAMPLE_NAMES, SAMPLE_DEPARTMENTS, strict=True)
-    )
-)
+# The Monday sample from the voice prototype, which is also the stub cast.
+SAMPLE_BOARD = STUB_BOARD
 
 
 def desks(bits: int) -> set[Desk]:
