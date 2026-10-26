@@ -182,6 +182,10 @@ SPEAKER: Desk = "B3"
             AllIn(a=Row(row=3), b=Neighbours(of="B2"), n=None, state="well"),
             "All the well people in my row are among Fergus's neighbours.",
         ),
+        (
+            AllIn(a=Row(row=5), b=Corners(), n=1),
+            "The only sick person in row 5 is in a corner.",
+        ),
     ],
 )
 def test_wording(clue: Clue, said: str) -> None:
@@ -389,6 +393,14 @@ def test_wording(clue: Clue, said: str) -> None:
                 "My row is Imogen, Kev, Linda and me. Fergus's neighbours are Aisha,"
                 " Barry, Carol, Erin, Gemma, Imogen, Kev and me. Exactly one of the"
                 " first is sick, and they're in the second too, so Linda is not sick."
+            ),
+        ),
+        (
+            AllIn(a=Row(row=3), b=Neighbours(of="D2"), n=2),
+            (
+                "My row is Imogen, Kev, Linda and me. Hamid's neighbours are Carol,"
+                " Dev, Gemma, Kev and Linda. Exactly two of the first are sick, both"
+                " in the second too, so Imogen and I are not sick."
             ),
         ),
         (

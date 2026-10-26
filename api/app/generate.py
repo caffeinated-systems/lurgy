@@ -396,26 +396,33 @@ def _overlaps(board: Board, solution: int) -> Iterator[Clue]:
         a_bits, b_bits = board.bits(a), board.bits(b)
         for state in STATES:
             n = _how_many(a_bits & b_bits, solution, state)
-            if n >= 2:  # noqa: PLR2004 ("one of the" means two or more)
-                yield Overlap(a=a, b=b, n=n, state=state)
             total = _how_many(a_bits, solution, state)
-            if total and not _how_many(a_bits & ~b_bits, solution, state):
+            # "Two of the" means two or more, short of them all (that's "both"), in
+            # groups that cross: when b is inside a, it's just a count of b.
+            if 2 <= n < total and b_bits & ~a_bits:  # noqa: PLR2004
+                yield Overlap(a=a, b=b, n=n, state=state)
+            # Over a single shared desk, "the only sick person" names who's sick.
+            if (
+                total
+                and not _how_many(a_bits & ~b_bits, solution, state)
+                and (a_bits & b_bits).bit_count() > 1
+            ):
                 yield AllIn(a=a, b=b, n=total if total <= 2 else None, state=state)  # noqa: PLR2004
 
 
 @cache
-def _overlapping(board: Board) -> list[tuple[Group, Group]]:
+def _overlapping(board: Board) -> tuple[tuple[Group, Group], ...]:
     """Any group against a row, column, department, neighbours, corners or edges
     that shares some of its desks, but not all."""
     targets = ("row", "column", "department", "neighbours", "corners", "edges")
-    return [
+    return tuple(
         (a, b)
         for a in _groups(board)
         for b in _groups(board)
         if b.kind in targets
         and board.bits(a) & board.bits(b)
         and board.bits(a) & ~board.bits(b)
-    ]
+    )
 
 
 def _pairs(board: Board) -> Iterator[tuple[Group, Group]]:

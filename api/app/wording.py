@@ -46,6 +46,7 @@ NUMBERS = (
 _SIDES = {"left": "to the left of", "right": "to the right of"}
 _MY_SIDES = {"left": "to my left", "right": "to my right"}
 _OTHER: dict[State, State] = {"sick": "well", "well": "sick"}
+_ONE_OF_THEM = {"in the corners": "in a corner", "on the edges": "on an edge"}
 
 
 def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911, PLR0912 (a case per kind)
@@ -107,7 +108,10 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0
                 2: f"Both {state} people {where} are",
                 None: f"All the {state} people {where} are",
             }[n]
-            return f"{lead} {_where(board, speaker, b)}."
+            there = _where(board, speaker, b)
+            if n == 1:  # one person sits in one corner, on one edge
+                there = _ONE_OF_THEM.get(there, there)
+            return f"{lead} {there}."
 
 
 def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911, PLR0912 (a case per kind)
@@ -251,7 +255,7 @@ def _not(board: Board, speaker: Desk, a: Group, b: Group) -> str:
     rest = board.bits(a) & ~board.bits(b)
     if rest.bit_count() == 1:
         return f"{_subject(board, speaker, DESKS[rest.bit_length() - 1])} not"
-    return f"{_names(board, speaker, rest)} are not"
+    return f"{_names(board, speaker, rest, me='I')} are not"
 
 
 def _subject(board: Board, speaker: Desk, desk: Desk) -> str:
@@ -313,11 +317,14 @@ def _members(board: Board, speaker: Desk, group: Group) -> str:
     return f"{noun} {'are' if plural else 'is'} {names}"
 
 
-def _names(board: Board, speaker: Desk, bits: int) -> str:
-    """Everyone in the desks, in desk order, but the speaker last: "…, Kev and me"."""
+def _names(board: Board, speaker: Desk, bits: int, me: str = "me") -> str:
+    """Everyone in the desks, in desk order, but the speaker last: "…, Kev and me".
+
+    As the subject of a sentence the speaker is "I": "Kev and I are not sick".
+    """
     desks = [d for i, d in enumerate(DESKS) if bits >> i & 1]
     desks.sort(key=lambda d: d == speaker)
-    return _list([_who(board, speaker, d) for d in desks])
+    return _list([me if d == speaker else _who(board, speaker, d) for d in desks])
 
 
 def _list(items: list[str], last: str = "and") -> str:
