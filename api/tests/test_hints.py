@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from app.board import DESKS
-from app.clues import BOARDS, NoMoreThan, Total, settled
+from app.clues import BOARDS, EVERYONE, Count, NoMoreThan, Total, settled
 from app.generate import generate_day
 from app.grade import MOST, hint
-from app.main import app
+from app.main import ExplainedClue, app
 from app.week import load_days
 from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD
 from tests.test_declarations import PERFECT, REJECTED, client, declare
@@ -135,3 +135,26 @@ def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
 
 def test_more_declarations_than_desks_is_invalid() -> None:
     assert ask(PERFECT + PERFECT[:1])[0] == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+def test_a_hint_spells_out_each_of_its_clues() -> None:
+    hint = ask(PERFECT[:3])[1]
+
+    assert [e["desk"] for e in hint["explanations"]] == hint["clues"]
+
+
+def test_an_explained_clue_names_its_desks() -> None:
+    day = generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(2026))
+    for desk, reveal in zip(DESKS, day.reveals, strict=True):
+        match reveal.clue:
+            case None:
+                continue
+            case Count(group=group):
+                bits = SAMPLE_BOARD.bits(group)
+            case _:
+                bits = EVERYONE
+        explained = ExplainedClue.at(SAMPLE_BOARD, day, desk)
+
+        assert explained.explanation == reveal.explanation
+        assert explained.explanation
+        assert explained.desks == [d for i, d in enumerate(DESKS) if bits >> i & 1]

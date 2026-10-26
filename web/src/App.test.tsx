@@ -256,7 +256,18 @@ test("a joke follows its clue", async () => {
 });
 
 test("a hint shows its clues, then on a second press its coworker", async () => {
-	const fetch = await open({ clues: ["A1"], coworker: "B3" });
+	const fetch = await open({
+		clues: ["A1"],
+		coworker: "B3",
+		explanations: [
+			{
+				desk: "A1",
+				explanation:
+					"Row 1 is NameA1, NameB1, NameC1 and NameD1: two are sick.",
+				desks: ["A1", "B1", "C1", "D1"],
+			},
+		],
+	});
 
 	fireEvent.click(screen.getByRole("button", { name: "Hint" }));
 

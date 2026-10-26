@@ -91,7 +91,11 @@ test("a day saved before hints existed loads with none taken", () => {
 	}
 });
 
-const HINT = { clues: ["A1" as const, "C2" as const], coworker: "B3" as const };
+const HINT = {
+	clues: ["A1" as const, "C2" as const],
+	coworker: "B3" as const,
+	explanations: [],
+};
 
 test("a first hint points at its clues and marks its coworker once", () => {
 	const game = reducer(

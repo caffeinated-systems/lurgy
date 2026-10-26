@@ -177,6 +177,29 @@ export interface components {
         Desk: "A1" | "B1" | "C1" | "D1" | "A2" | "B2" | "C2" | "D2" | "A3" | "B3" | "C3" | "D3" | "A4" | "B4" | "C4" | "D4" | "A5" | "B5" | "C5" | "D5";
         /** @enum {string} */
         Difficulty: "Easy" | "Medium" | "Hard";
+        /** ExplainedClue */
+        ExplainedClue: {
+            /**
+             * @description Who said it.
+             * @example B3
+             */
+            desk: components["schemas"]["Desk"];
+            /**
+             * Explanation
+             * @description The clue spelled out desk by desk; puzzles built before explanations existed have none.
+             * @example Kev's neighbours are Jas and Rosa: exactly one of them is sick.
+             */
+            explanation: string | null;
+            /**
+             * Desks
+             * @description The desks the clue talks about.
+             * @example [
+             *       "A3",
+             *       "C3"
+             *     ]
+             */
+            desks: components["schemas"]["Desk"][];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -209,6 +232,11 @@ export interface components {
              * @example A4
              */
             coworker: components["schemas"]["Desk"];
+            /**
+             * Explanations
+             * @description Each of those clues spelled out, in the same order.
+             */
+            explanations: components["schemas"]["ExplainedClue"][];
         };
         /** HintRequest */
         HintRequest: {
