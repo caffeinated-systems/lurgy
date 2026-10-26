@@ -38,7 +38,9 @@ from app.clues import (
     WIDE,
     AllIn,
     Clue,
+    Connected,
     Count,
+    Directly,
     Equal,
     More,
     Most,
@@ -51,7 +53,9 @@ from app.clues import (
     SickVsWell,
     State,
     Total,
+    Way,
     family_groups,
+    next_desk,
     settled,
 )
 from app.grade import Grade, Step, grade, next_step
@@ -86,6 +90,8 @@ WEIGHTS = {
     "one coworker": 1,
     "uniqueness": 1,
     "overlaps": 1,
+    "connected": 1,
+    "directional": 1,
 }  # fmt: skip
 # Each family's forms, drawn evenly once the family is chosen, so a form with a
 # handful of clues (the most) isn't crowded out by one with hundreds (pairs).
@@ -96,6 +102,8 @@ FORMS = {
     "one coworker": ("one_of",),
     "uniqueness": ("only_one", "only_one_neighbours"),
     "overlaps": ("overlap", "all_in"),
+    "connected": ("connected",),
+    "directional": ("directly",),
 }
 STATES: tuple[State, ...] = ("sick", "well")
 
@@ -287,6 +295,8 @@ def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
         _one_coworker(board, solution),
         _uniqueness(board, solution),
         _overlaps(board, solution),
+        _connections(board, solution),
+        _directions(board, solution),
     ):
         catalogue[_form(clue)].append(clue)
     return catalogue
@@ -423,6 +433,38 @@ def _overlapping(board: Board) -> tuple[tuple[Group, Group], ...]:
         and board.bits(a) & board.bits(b)
         and board.bits(a) & ~board.bits(b)
     )
+
+
+def _connections(board: Board, solution: int) -> Iterator[Clue]:
+    """Lines of three or more where the two or more sick (or well) sit in one run."""
+    one = np.array([solution], dtype=np.uint32)
+    for line in _groups(board):
+        if not isinstance(line, Row | Column | Between | Direction):
+            continue
+        if board.bits(line).bit_count() < 3:  # noqa: PLR2004 (both of two names them)
+            continue
+        for state in STATES:
+            n = _how_many(board.bits(line), solution, state)
+            clue = Connected(group=line, n=2 if n == 2 else None, state=state)  # noqa: PLR2004
+            if n >= 2 and clue.mask(board, one)[0]:  # noqa: PLR2004
+                yield clue
+
+
+def _directions(board: Board, solution: int) -> Iterator[Clue]:
+    """Who in a group has a sick (or well) coworker at the next desk, each way."""
+    ways: tuple[Way, ...] = ("above", "below", "left", "right")
+    for group in _groups(board):
+        members = [d for i, d in enumerate(DESKS) if board.bits(group) >> i & 1]
+        for way in ways:
+            there = [nxt for d in members if (nxt := next_desk(d, way))]
+            if len(there) < 2:  # noqa: PLR2004 (one desk there would name who's sick)
+                continue
+            for state in STATES:
+                hits = sum(
+                    _how_many(1 << DESKS.index(d), solution, state) for d in there
+                )
+                n = None if hits == len(members) else hits
+                yield Directly(group=group, direction=way, n=n, state=state)
 
 
 def _pairs(board: Board) -> Iterator[tuple[Group, Group]]:

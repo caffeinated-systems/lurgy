@@ -14,7 +14,9 @@ from app.board import (
 from app.clues import (
     AllIn,
     Clue,
+    Connected,
     Count,
+    Directly,
     Equal,
     More,
     Most,
@@ -185,6 +187,39 @@ SPEAKER: Desk = "B3"
         (
             AllIn(a=Row(row=5), b=Corners(), n=1),
             "The only sick person in row 5 is in a corner.",
+        ),
+        (
+            Connected(group=Row(row=3), n=None),
+            "All the sick people in my row are connected.",
+        ),
+        (
+            Connected(group=Column(column="A"), n=2, state="well"),
+            "Both well people in column A are connected.",
+        ),
+        (
+            Connected(group=Between(a="A1", b="A5"), n=None),
+            "All the sick people between Aisha and Quentin are connected.",
+        ),
+        (
+            Directly(group=Department(name="HR"), direction="below", n=None),
+            "Everyone in my department has a sick coworker directly below them.",
+        ),
+        (
+            Directly(
+                group=Department(name="Sales"), direction="left", n=0, state="well"
+            ),
+            "No one in Sales has a well coworker directly to their left.",
+        ),
+        (
+            Directly(group=Row(row=1), direction="below", n=2),
+            "Exactly two people in row 1 have a sick coworker directly below them.",
+        ),
+        (
+            Directly(group=Column(column="D"), direction="left", n=1),
+            (
+                "Exactly one person in column D has a sick coworker"
+                " directly to their left."
+            ),
         ),
     ],
 )
@@ -404,6 +439,49 @@ def test_wording(clue: Clue, said: str) -> None:
             ),
         ),
         (
+            Connected(group=Row(row=3), n=None),
+            (
+                "My row is Imogen, Kev, Linda and me: at least one of them is sick,"
+                " and the sick ones sit side by side in one unbroken line, with no"
+                " well person between them."
+            ),
+        ),
+        (
+            Connected(group=Column(column="A"), n=2, state="well"),
+            (
+                "Column A is Aisha, Erin, Imogen, Mo and Quentin: exactly two of them"
+                " are well, and they sit next to each other."
+            ),
+        ),
+        (
+            Directly(group=Row(row=1), direction="below", n=2),
+            (
+                "Row 1 is Aisha, Barry, Carol and Dev. Directly below them are Erin,"
+                " Fergus, Gemma and Hamid: exactly two of them are sick."
+            ),
+        ),
+        (
+            Directly(group=Department(name="HR"), direction="above", n=0),
+            (
+                "My department is Carol, Steve and me. Directly above us are Fergus"
+                " and Ollie (Carol has no one there): none of them is sick."
+            ),
+        ),
+        (
+            Directly(group=Column(column="A"), direction="right", n=None, state="well"),
+            (
+                "Column A is Aisha, Erin, Imogen, Mo and Quentin. Directly to their"
+                " right are Barry, Fergus, Nadia, Rosa and me: all of them are well."
+            ),
+        ),
+        (
+            Directly(group=Row(row=3), direction="below", n=1),
+            (
+                "My row is Imogen, Kev, Linda and me. Directly below us are Mo, Nadia,"
+                " Ollie and Priya: exactly one of them is sick."
+            ),
+        ),
+        (
             AllIn(a=Row(row=1), b=Corners(), n=2),
             (
                 "Row 1 is Aisha, Barry, Carol and Dev. The corners are Aisha, Dev,"
@@ -424,3 +502,28 @@ def test_wording(clue: Clue, said: str) -> None:
 )
 def test_explanation(clue: Clue, explained: str) -> None:
     assert explanation(SAMPLE_BOARD, SPEAKER, clue) == explained
+
+
+def test_directly_says_who_has_no_one_there() -> None:
+    clue = Directly(group=Row(row=1), direction="left", n=0)
+
+    assert explanation(SAMPLE_BOARD, "A1", clue) == (
+        "My row is Barry, Carol, Dev and me. Directly to our left are Barry, Carol"
+        " and me (I have no one there): none of them is sick."
+    )
+    assert explanation(
+        SAMPLE_BOARD, SPEAKER, Directly(group=Corners(), direction="below", n=1)
+    ) == (
+        "The corners are Aisha, Dev, Quentin and Tariq. Directly below them are Erin"
+        " and Hamid (Quentin and Tariq have no one there): exactly one of them is sick."
+    )
+
+
+def test_connected_explains_a_line_between_two_coworkers() -> None:
+    clue = Connected(group=Between(a="A1", b="A5"), n=None)
+
+    assert explanation(SAMPLE_BOARD, SPEAKER, clue) == (
+        "The people between Aisha and Quentin are Erin, Imogen and Mo: at least one"
+        " of them is sick, and the sick ones sit side by side in one unbroken line,"
+        " with no well person between them."
+    )
