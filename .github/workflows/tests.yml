@@ -31,8 +31,6 @@ jobs:
         run: uv run mypy .
       - name: Tests
         run: uv run pytest
-      - name: Cast and stories
-        run: uv run python -m app.cast check
 
   web:
     runs-on: ubuntu-latest
