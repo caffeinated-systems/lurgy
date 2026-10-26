@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 # Every possible board: bit i set means the coworker at desk i is sick.
 BOARDS = np.arange(2 ** len(DESKS), dtype=np.uint32)
-EVERYONE = 2 ** len(DESKS) - 1
+EVERYONE: int = 2 ** len(DESKS) - 1
 
 type Mask = NDArray[np.bool_]
 type Counts = NDArray[np.uint8]
@@ -32,8 +32,28 @@ def _compare(counts: Counts, op: Op, n: int) -> Mask:
     return counts == n if op == "exactly" else counts >= n
 
 
+type Family = Literal["rows", "columns", "departments"]
+_FAMILY_OF: dict[str, Family] = {
+    "row": "rows", "column": "columns", "department": "departments",
+}  # fmt: skip
+
+
+def _family(board: Board, family: Family) -> list[Group]:
+    match family:
+        case "rows":
+            return [Row(row=r) for r in range(1, ROWS + 1)]
+        case "columns":
+            return [Column(column=c) for c in COLUMNS]
+        case "departments":  # pragma: no branch (the match is exhaustive)
+            return [Department(name=d) for d in board.departments]
+
+
 class _Model(BaseModel):
     model_config = ConfigDict(frozen=True)
+
+    def bits(self, board: Board) -> int:  # noqa: ARG002 (same signature as every clue)
+        """The desks the clue talks about: the whole office, unless it names groups."""
+        return EVERYONE
 
 
 class Count(_Model):
@@ -48,6 +68,9 @@ class Count(_Model):
     def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
         counts = _count(board.bits(self.group), self.state, boards)
         return _compare(counts, self.op, self.n)
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.group)
 
 
 class Total(_Model):
@@ -66,27 +89,35 @@ class NoMoreThan(_Model):
     """No row / column / department has more than n sick (or well)."""
 
     kind: Literal["no_more_than"] = "no_more_than"
-    family: Literal["rows", "columns", "departments"]
+    family: Family
     n: Annotated[int, Field(ge=0)]
     state: State = "sick"
 
     def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
-        groups: list[Group]
-        match self.family:
-            case "rows":
-                groups = [Row(row=r) for r in range(1, ROWS + 1)]
-            case "columns":
-                groups = [Column(column=c) for c in COLUMNS]
-            case "departments":  # pragma: no branch (the match is exhaustive)
-                groups = [Department(name=d) for d in board.departments]
         mask = np.ones(boards.shape, dtype=np.bool_)
-        for group in groups:
+        for group in _family(board, self.family):
             mask &= _count(board.bits(group), self.state, boards) <= self.n
         return mask
 
 
+class Parity(_Model):
+    """An odd / even number sick (or well) in a group; even includes zero."""
+
+    kind: Literal["parity"] = "parity"
+    group: Group
+    parity: Literal["odd", "even"]
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        odd: Mask = _count(board.bits(self.group), self.state, boards) % 2 == 1
+        return odd if self.parity == "odd" else ~odd
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.group)
+
+
 class More(_Model):
-    """More sick (or well) in group a than in group b."""
+    """More sick (or well) in group a than in group b, which can have none."""
 
     kind: Literal["more"] = "more"
     a: Group
@@ -97,8 +128,96 @@ class More(_Model):
         a = _count(board.bits(self.a), self.state, boards)
         return a > _count(board.bits(self.b), self.state, boards)
 
+    def bits(self, board: Board) -> int:
+        return board.bits(self.a) | board.bits(self.b)
 
-type Clue = Annotated[Count | Total | NoMoreThan | More, Field(discriminator="kind")]
+
+class Equal(_Model):
+    """As many sick (or well) in group a as in group b, none included."""
+
+    kind: Literal["equal"] = "equal"
+    a: Group
+    b: Group
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        a = _count(board.bits(self.a), self.state, boards)
+        return np.equal(a, _count(board.bits(self.b), self.state, boards))
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.a) | board.bits(self.b)
+
+
+class SickVsWell(_Model):
+    """More sick than well in a group, more well than sick, or (None) as many."""
+
+    kind: Literal["sick_vs_well"] = "sick_vs_well"
+    group: Group
+    more: State | None
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        bits = board.bits(self.group)
+        sick = _count(bits, "sick", boards).astype(np.int8)
+        well = bits.bit_count() - sick
+        match self.more:
+            case "sick":
+                return sick > well
+            case "well":
+                return well > sick
+            case None:  # pragma: no branch (the match is exhaustive)
+                return np.equal(sick, well)
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.group)
+
+
+class Most(_Model):
+    """A row / column / department has more sick (or well) than every other one."""
+
+    kind: Literal["most"] = "most"
+    group: Annotated[Row | Column | Department, Field(discriminator="kind")]
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        family = _FAMILY_OF[self.group.kind]
+        mine = _count(board.bits(self.group), self.state, boards)
+        mask = np.ones(boards.shape, dtype=np.bool_)
+        for group in _family(board, family):
+            if group != self.group:
+                mask &= mine > _count(board.bits(group), self.state, boards)
+        return mask
+
+
+def _is(desk: Desk, state: State, boards: Boards) -> Mask:
+    sick: Mask = (boards >> DESKS.index(desk) & 1).astype(np.bool_)
+    return sick if state == "sick" else ~sick
+
+
+class OneOf(_Model):
+    """A coworker is one of n sick (or well) in their group, or (None) of 2+."""
+
+    kind: Literal["one_of"] = "one_of"
+    desk: Desk
+    group: Group
+    n: Annotated[int, Field(ge=2)] | None
+    state: State = "sick"
+
+    def mask(self, board: Board, boards: Boards = BOARDS) -> Mask:
+        counts = _count(board.bits(self.group), self.state, boards)
+        them = counts >= 2 if self.n is None else np.equal(counts, self.n)  # noqa: PLR2004 (one of the: two or more)
+        return _is(self.desk, self.state, boards) & them
+
+    def bits(self, board: Board) -> int:
+        return board.bits(self.group)
+
+
+type Clue = Annotated[
+    Count | Total | NoMoreThan | Parity | More | Equal | SickVsWell | Most | OneOf,
+    Field(discriminator="kind"),
+]
+
+# Clues about the whole office: a step that needs one makes the day Hard.
+WIDE = (Total, NoMoreThan, Most)
 
 
 class ContradictionError(Exception):

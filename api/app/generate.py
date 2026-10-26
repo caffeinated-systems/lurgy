@@ -5,7 +5,7 @@ import random
 import secrets
 import subprocess
 from datetime import date, timedelta
-from itertools import combinations
+from itertools import chain, combinations
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -30,7 +30,23 @@ from app.board import (
     cell,
 )
 from app.cast import iso_monday, load_cast, load_story, quiet_week, story_path
-from app.clues import BOARDS, EVERYONE, Clue, Count, NoMoreThan, State, Total, settled
+from app.clues import (
+    BOARDS,
+    EVERYONE,
+    WIDE,
+    Clue,
+    Count,
+    Equal,
+    More,
+    Most,
+    NoMoreThan,
+    OneOf,
+    Parity,
+    SickVsWell,
+    State,
+    Total,
+    settled,
+)
 from app.grade import Grade, Step, grade, next_step
 from app.week import Day, Difficulty, Generator, Reveal, Week
 from app.wording import explanation, wording
@@ -54,6 +70,20 @@ JOKES = (1, 2)
 FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
     "rows", "columns", "departments",
 )  # fmt: skip
+# How often each clue family is drawn for a candidate.
+# ponytail: guessed weights; retune after reading a few generated weeks.
+WEIGHTS = {"counts": 4, "parity": 1, "comparisons": 1, "one coworker": 1}
+# Each family's forms, drawn evenly once the family is chosen, so a form with a
+# handful of clues (the most) isn't crowded out by one with hundreds (pairs).
+FORMS = {
+    "counts": ("count",),
+    "parity": ("parity",),
+    "comparisons": ("more", "sick_vs_well", "most"),
+    "one coworker": ("one_of",),
+}
+STATES: tuple[State, ...] = ("sick", "well")
+
+type Catalogue = dict[str, list[Clue]]
 
 
 class GenerationError(Exception):
@@ -109,9 +139,12 @@ def _attempt(
     """One try: reveal coworkers in order until everyone is declared, or stuck."""
     sick = frozenset(rng.sample(DESKS, rng.randint(FEWEST_SICK, MOST_SICK)))
     solution = sum(1 << DESKS.index(d) for d in sick)
-    catalogue = list(_true_clues(board, solution, rng))
+    catalogue = _true_clues(board, solution, rng)
     if difficulty == "Easy":  # a whole-board clue is Hard whenever it's needed
-        catalogue = [c for c in catalogue if isinstance(c, Count)]
+        catalogue = {
+            f: [c for c in clues if not isinstance(c, WIDE)]
+            for f, clues in catalogue.items()
+        }
 
     start = rng.choice([d for d in DESKS if d not in flavour])
     declared: dict[Desk, bool] = {start: start in sick}
@@ -128,7 +161,7 @@ def _attempt(
         for desk in (d for d in new if d not in flavour):
             clues[desk] = clue = _choose(
                 board,
-                rng.sample(catalogue, CANDIDATES),
+                _candidates(catalogue, rng),
                 known=known,
                 alive=alive,
                 declared=declared,
@@ -136,7 +169,7 @@ def _attempt(
                 easy=difficulty == "Easy",
             )
             said.append(clue)
-            catalogue.remove(clue)  # no one says it twice
+            catalogue[_form(clue)].remove(clue)  # no one says it twice
             alive = alive[clue.mask(board, alive)]
         if len(declared) == len(DESKS):
             break
@@ -191,6 +224,8 @@ def _choose(  # noqa: PLR0913
         # settled after the clue is new.
         return bool(settled(boards[clue.mask(board, boards)], declared))
 
+    # A clue true on every board the declarations allow tells the player nothing.
+    candidates = [c for c in candidates if not c.mask(board, known).all()] or candidates
     # Declarations alone never settle anyone undeclared.
     alone = [c for c in candidates if forces(c, known)]
     if easy:
@@ -209,12 +244,41 @@ def _keep(boards: Boards, desk: Desk, solution: int) -> Boards:
     return boards[same]
 
 
-def _true_clues(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
+def _candidates(catalogue: Catalogue, rng: random.Random) -> list[Clue]:
+    """Clues to weigh: a family drawn by WEIGHTS, then a form; repeats dropped."""
+    forms = {f: [x for x in xs if catalogue[x]] for f, xs in FORMS.items()}
+    families = [f for f, xs in forms.items() if xs]
+    drawn = rng.choices(families, [WEIGHTS[f] for f in families], k=CANDIDATES)
+    return list(
+        dict.fromkeys(rng.choice(catalogue[rng.choice(forms[f])]) for f in drawn)
+    )
+
+
+def _form(clue: Clue) -> str:
+    """Which of FORMS a clue is: every count is one, as are equal and more."""
+    return {"total": "count", "no_more_than": "count", "equal": "more"}.get(
+        clue.kind, clue.kind
+    )
+
+
+def _true_clues(board: Board, solution: int, rng: random.Random) -> Catalogue:
+    """Every clue true of the solution, by form."""
+    catalogue: Catalogue = {x: [] for xs in FORMS.values() for x in xs}
+    for clue in chain(
+        _counts(board, solution, rng),
+        _parities(board, solution),
+        _comparisons(board, solution),
+        _one_coworker(board, solution),
+    ):
+        catalogue[_form(clue)].append(clue)
+    return catalogue
+
+
+def _counts(board: Board, solution: int, rng: random.Random) -> Iterator[Clue]:
     """Every count clue true of the solution; "at least" ones at a random strength."""
-    states: tuple[State, ...] = ("sick", "well")
     for group in _groups(board):
         bits = board.bits(group)
-        for state in states:
+        for state in STATES:
             n = _how_many(bits, solution, state)
             yield Count(group=group, n=n, state=state)
             # "At least" short of everyone: at least two of two reads as both.
@@ -223,7 +287,7 @@ def _true_clues(board: Board, solution: int, rng: random.Random) -> Iterator[Clu
                 yield Count(
                     group=group, op="at_least", n=rng.randint(1, most), state=state
                 )
-    for state in states:
+    for state in STATES:
         n = _how_many(EVERYONE, solution, state)
         yield Total(n=n, state=state)
         yield Total(op="at_least", n=rng.randint(1, n), state=state)
@@ -240,6 +304,70 @@ def _true_clues(board: Board, solution: int, rng: random.Random) -> Iterator[Clu
             )
             if not clue.mask(board, extreme)[0]:
                 yield clue
+
+
+def _parities(board: Board, solution: int) -> Iterator[Clue]:
+    """Odd / even in groups of three or more: in two, it's just a count."""
+    for group in (g for g in _groups(board) if board.bits(g).bit_count() > 2):  # noqa: PLR2004
+        for state in STATES:
+            odd = _how_many(board.bits(group), solution, state) % 2
+            yield Parity(group=group, parity="odd" if odd else "even", state=state)
+
+
+def _comparisons(board: Board, solution: int) -> Iterator[Clue]:
+    """Equal / more between like groups, sick against well, and the most."""
+    one = np.array([solution], dtype=np.uint32)
+    for state in STATES:
+        for a, b in _pairs(board):
+            na = _how_many(board.bits(a), solution, state)
+            nb = _how_many(board.bits(b), solution, state)
+            if na == nb:
+                yield Equal(a=a, b=b, state=state)
+            else:
+                yield (
+                    More(a=a, b=b, state=state)
+                    if na > nb
+                    else More(a=b, b=a, state=state)
+                )
+        for group in (
+            *(Row(row=r) for r in range(1, ROWS + 1)),
+            *(Column(column=c) for c in COLUMNS),
+            *(Department(name=name) for name in board.departments),
+        ):
+            if (most := Most(group=group, state=state)).mask(board, one)[0]:
+                yield most
+    for group in _groups(board):
+        sick = _how_many(board.bits(group), solution, "sick")
+        well = board.bits(group).bit_count() - sick
+        more: State | None = None if sick == well else "sick" if sick > well else "well"
+        yield SickVsWell(group=group, more=more)
+
+
+def _one_coworker(board: Board, solution: int) -> Iterator[Clue]:
+    """Each coworker as one of two or more in a group they're in."""
+    for i, desk in enumerate(DESKS):
+        state: State = "sick" if solution >> i & 1 else "well"
+        for group in _groups(board):
+            if board.bits(group) >> i & 1:
+                n = _how_many(board.bits(group), solution, state)
+                if n >= 2:  # noqa: PLR2004 (one of one would just say they're sick)
+                    yield OneOf(desk=desk, group=group, n=n, state=state)
+                    yield OneOf(desk=desk, group=group, n=None, state=state)
+
+
+def _pairs(board: Board) -> Iterator[tuple[Group, Group]]:
+    """Groups worth comparing: two of a kind, or opposite sides of one coworker."""
+    # ponytail: like-for-like only; mixed pairs (my row vs to my right) if days
+    # feel samey.
+    groups = _groups(board)
+    for kind in ("row", "column", "department", "neighbours"):
+        yield from combinations([g for g in groups if g.kind == kind], 2)
+    for desk in DESKS:
+        for x, y in (("above", "below"), ("left", "right")):
+            a = Direction(of=desk, direction=x)
+            b = Direction(of=desk, direction=y)
+            if board.bits(a) and board.bits(b):
+                yield a, b
 
 
 def _how_many(bits: int, solution: int, state: State) -> int:

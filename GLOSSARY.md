@@ -49,7 +49,7 @@ The coworkers at the desks touching a coworker's desk, diagonals included: up to
 _Avoid_: adjacent, nearby
 
 **Clue**:
-A true statement a revealed coworker makes about how many coworkers are sick or well in one or more groups. Every clue is true, whoever says it. A clue names coworkers in the first person when they are the speaker ("my neighbours", "I").
+A true statement a revealed coworker makes about who is sick or well: one coworker, or how many in one or more groups. Every clue is true, whoever says it. A clue names coworkers in the first person when they are the speaker ("my neighbours", "I").
 _Avoid_: hint, statement, evidence
 
 **Flavour**:
@@ -75,6 +75,14 @@ _Avoid_: right next to, immediately
 **Connected**:
 Forming one unbroken chain of desks touching side to side, never diagonally. A single coworker counts as connected.
 _Avoid_: adjacent, together, grouped
+
+**Most**:
+More than every other row, column or department, never tied: "Column D has the most sick people" is false if column A has as many.
+_Avoid_: biggest, top
+
+**One of the**:
+A coworker and at least one other: "Kev is one of the sick people in row 2" means Kev is sick and so is someone else in row 2.
+_Avoid_: among
 
 **Declare**:
 The office manager's move: naming a coworker as sick or well. A declaration is accepted only when it is both correct and forced.

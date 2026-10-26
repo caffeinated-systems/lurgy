@@ -17,7 +17,20 @@ from app.board import (
     Row,
     cell,
 )
-from app.clues import Clue, Count, More, NoMoreThan, Op, State, Total
+from app.clues import (
+    Clue,
+    Count,
+    Equal,
+    More,
+    Most,
+    NoMoreThan,
+    OneOf,
+    Op,
+    Parity,
+    SickVsWell,
+    State,
+    Total,
+)
 
 NUMBERS = (
     "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
@@ -27,9 +40,10 @@ NUMBERS = (
 
 _SIDES = {"left": "to the left of", "right": "to the right of"}
 _MY_SIDES = {"left": "to my left", "right": "to my right"}
+_OTHER: dict[State, State] = {"sick": "well", "well": "sick"}
 
 
-def wording(board: Board, speaker: Desk, clue: Clue) -> str:
+def wording(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911 (a case per kind)
     """The clue as the speaker says it: "Two of my neighbours are sick."."""
     match clue:
         case Count(group=group, op=op, n=n, state=state):
@@ -41,18 +55,41 @@ def wording(board: Board, speaker: Desk, clue: Clue) -> str:
             if n == 0:
                 return f"No {one} has any {state} people."
             return f"No {one} has more than {_people(n, state)}."
-        case More():  # pragma: no cover (not generated until #29)
-            raise NotImplementedError
+        case Parity(group=group, parity=parity, state=state):
+            return (
+                f"An {parity} number of people {_where(board, speaker, group)}"
+                f" are {state}."
+            )
+        case Equal(a=a, b=b, state=state):
+            return (
+                f"There are as many {state} people {_where(board, speaker, a)}"
+                f" as {state} people {_where(board, speaker, b)}."
+            )
+        case More(a=a, b=b, state=state):
+            return (
+                f"There are more {state} people {_where(board, speaker, a)}"
+                f" than {state} people {_where(board, speaker, b)}."
+            )
+        case SickVsWell(group=group, more=more):
+            where = _where(board, speaker, group)
+            if more is None:
+                return f"Half the people {where} are sick."
+            return f"More people {where} are {more} than {_OTHER[more]}."
+        case Most(group=group, state=state):
+            return f"{_noun(board, speaker, group)[0]} has the most {state} people."
+        case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
+            count = "the" if n is None else NUMBERS[n]
+            return (
+                f"{_subject(board, speaker, desk)} one of {count} {state} people"
+                f" {_where(board, speaker, group)}."
+            )
 
 
-def explanation(board: Board, speaker: Desk, clue: Clue) -> str:
+def explanation(board: Board, speaker: Desk, clue: Clue) -> str:  # noqa: C901, PLR0911 (a case per kind)
     """The clue spelled out desk by desk, with nothing left implied."""
     match clue:
         case Count(group=group, op=op, n=n, state=state):
-            noun, plural = _noun(board, speaker, group)
-            names = _names(board, speaker, board.bits(group))
-            verb = "are" if plural else "is"
-            return f"{noun} {verb} {names}: {_of_them(op, n, state)}."
+            return f"{_members(board, speaker, group)}: {_of_them(op, n, state)}."
         case Total(op=op, n=n, state=state):
             everyone = NUMBERS[len(DESKS)]
             return (
@@ -67,8 +104,41 @@ def explanation(board: Board, speaker: Desk, clue: Clue) -> str:
             if n == 0:
                 return f"{groups} each have no {state} people."
             return f"{groups} each have at most {_people(n, state)}."
-        case More():  # pragma: no cover (not generated until #29)
-            raise NotImplementedError
+        case Parity(group=group, parity=parity, state=state):
+            size = board.bits(group).bit_count()
+            could = _list(
+                [NUMBERS[k] for k in range(parity == "odd", size + 1, 2)], "or"
+            )
+            return (
+                f"{_members(board, speaker, group)}:"
+                f" an {parity} number of them ({could}) are {state}."
+            )
+        case Equal(a=a, b=b, state=state):
+            return (
+                f"{_members(board, speaker, a)}. {_members(board, speaker, b)}."
+                f" As many of the first are {state} as of the second,"
+                " and that can be none."
+            )
+        case More(a=a, b=b, state=state):
+            return (
+                f"{_members(board, speaker, a)}. {_members(board, speaker, b)}."
+                f" More of the first are {state} than of the second,"
+                " which can have none."
+            )
+        case SickVsWell(group=group, more=more):
+            members = _members(board, speaker, group)
+            if more is None:
+                half = NUMBERS[board.bits(group).bit_count() // 2]
+                return f"{members}: half of them ({half}) are sick, and half are well."
+            return f"{members}: more of them are {more} than {_OTHER[more]}."
+        case Most(group=group, state=state):
+            noun = _noun(board, speaker, group)[0]
+            return f"{noun} has more {state} people than any other {group.kind}."
+        case OneOf(desk=desk, group=group, n=n, state=state):  # pragma: no branch
+            return (
+                f"{_members(board, speaker, group)}:"
+                f" {_subject(board, speaker, desk)} {state}, and {_others(n)}."
+            )
 
 
 def _sentence(op: Op, n: int, state: State, where: str) -> str:
@@ -93,6 +163,20 @@ def _of_them(op: Op, n: int, state: State) -> str:
 
 def _who(board: Board, speaker: Desk, desk: Desk) -> str:
     return "me" if desk == speaker else board.coworkers[DESKS.index(desk)].name
+
+
+def _others(n: int | None) -> str:
+    """Everyone else in a "one of" clue's state: "so are exactly two others"."""
+    if n is None:
+        return "so is at least one other"
+    if n == 2:  # noqa: PLR2004 (this coworker and one other)
+        return "so is exactly one other"
+    return f"so are exactly {NUMBERS[n - 1]} others"
+
+
+def _subject(board: Board, speaker: Desk, desk: Desk) -> str:
+    """Someone and their "is": "Kev is", or "I am" for the speaker."""
+    return "I am" if desk == speaker else f"{_who(board, speaker, desk)} is"
 
 
 def _whose(board: Board, speaker: Desk, desk: Desk) -> str:
@@ -142,6 +226,13 @@ def _noun(board: Board, speaker: Desk, group: Group) -> tuple[str, bool]:
             return f"The people {where}", True
 
 
+def _members(board: Board, speaker: Desk, group: Group) -> str:
+    """A group and who is in it: "My row is Imogen, Kev, Linda and me"."""
+    noun, plural = _noun(board, speaker, group)
+    names = _names(board, speaker, board.bits(group))
+    return f"{noun} {'are' if plural else 'is'} {names}"
+
+
 def _names(board: Board, speaker: Desk, bits: int) -> str:
     """Everyone in the desks, in desk order, but the speaker last: "…, Kev and me"."""
     desks = [d for i, d in enumerate(DESKS) if bits >> i & 1]
@@ -149,8 +240,10 @@ def _names(board: Board, speaker: Desk, bits: int) -> str:
     return _list([_who(board, speaker, d) for d in desks])
 
 
-def _list(items: list[str]) -> str:
-    return items[0] if len(items) == 1 else f"{', '.join(items[:-1])} and {items[-1]}"
+def _list(items: list[str], last: str = "and") -> str:
+    return (
+        items[0] if len(items) == 1 else f"{', '.join(items[:-1])} {last} {items[-1]}"
+    )
 
 
 def _capital(text: str) -> str:

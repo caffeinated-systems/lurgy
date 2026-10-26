@@ -1,14 +1,14 @@
 import random
 from http import HTTPStatus
-from itertools import combinations
+from itertools import combinations, count
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from app.board import DESKS
-from app.clues import BOARDS, EVERYONE, Count, NoMoreThan, Total, settled
+from app.clues import BOARDS, WIDE, settled
 from app.generate import generate_day
-from app.grade import MOST, hint
+from app.grade import MOST, grade, hint
 from app.main import ExplainedClue, app
 from app.week import load_days
 from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD
@@ -87,7 +87,14 @@ def _forces(
 
 
 def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
-    day = generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(2026))
+    # Any change to the generator reshuffles what a seed builds, so look for one.
+    days = (
+        generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(seed))
+        for seed in count(2026)
+    )
+    day = next(
+        d for d in days if any(s.whole_board for s in grade(SAMPLE_BOARD, d).steps)
+    )
     steps: list[tuple[Desk, State]] = []
     sizes = []
     wides = []
@@ -106,7 +113,7 @@ def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
         speakers = [d for d in DESKS if d in declared and day.reveal(d).clue]
         masks = {d: day.reveal(d).clue.mask(SAMPLE_BOARD, alive) for d in speakers}  # type: ignore[union-attr]
 
-        wide = any(isinstance(day.reveal(d).clue, Total | NoMoreThan) for d in clues)
+        wide = any(isinstance(day.reveal(d).clue, WIDE) for d in clues)
         fewer = range(1, min(len(clues), MOST + 1) if len(clues) > MOST else len(clues))
         assert not any(
             _forces(s, masks, alive, declared)
@@ -114,11 +121,7 @@ def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
             for s in combinations(speakers, k)
         )
         if wide:  # no local-only subset of the same size would do
-            local = [
-                d
-                for d in speakers
-                if not isinstance(day.reveal(d).clue, Total | NoMoreThan)
-            ]
+            local = [d for d in speakers if not isinstance(day.reveal(d).clue, WIDE)]
             assert not any(
                 _forces(s, masks, alive, declared)
                 for s in combinations(local, len(clues))
@@ -144,15 +147,11 @@ def test_a_hint_spells_out_each_of_its_clues() -> None:
 
 
 def test_an_explained_clue_names_its_desks() -> None:
-    day = generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(2026))
+    day = generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(2027))
     for desk, reveal in zip(DESKS, day.reveals, strict=True):
-        match reveal.clue:
-            case None:
-                continue
-            case Count(group=group):
-                bits = SAMPLE_BOARD.bits(group)
-            case _:
-                bits = EVERYONE
+        if reveal.clue is None:
+            continue
+        bits = reveal.clue.bits(SAMPLE_BOARD)
         explained = ExplainedClue.at(SAMPLE_BOARD, day, desk)
 
         assert explained.explanation == reveal.explanation

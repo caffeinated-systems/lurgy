@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.board import DESKS, Board, Desk
-from app.clues import EVERYONE, Count, More, State
+from app.clues import State
 from app.grade import hint
 from app.week import Day, Difficulty, load_days
 
@@ -202,15 +202,9 @@ class ExplainedClue(BaseModel):
     @classmethod
     def at(cls, board: Board, day: Day, desk: Desk) -> Self:
         reveal = day.reveal(desk)
-        match reveal.clue:
-            case None:  # pragma: no cover (a hint only names clues)
-                raise ValueError(desk)
-            case Count(group=group):
-                bits = board.bits(group)
-            case More(a=a, b=b):
-                bits = board.bits(a) | board.bits(b)
-            case _:  # the rest are about the whole office
-                bits = EVERYONE
+        if reveal.clue is None:  # pragma: no cover (a hint only names clues)
+            raise ValueError(desk)
+        bits = reveal.clue.bits(board)
         return cls(
             desk=desk,
             explanation=reveal.explanation,
