@@ -1,5 +1,5 @@
 from datetime import date
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Literal
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
@@ -10,6 +10,9 @@ from app.clues import BOARDS, Clue, State
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
+
+
+type Difficulty = Literal["Easy", "Medium", "Hard"]
 
 
 class _Model(BaseModel):
