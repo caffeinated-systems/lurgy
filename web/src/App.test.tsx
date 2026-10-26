@@ -63,6 +63,7 @@ beforeEach(() => {
 afterEach(() => {
 	cleanup();
 	vi.useRealTimers();
+	vi.unstubAllGlobals();
 });
 
 test("the local date pads its month and day", () => {
@@ -143,16 +144,18 @@ test("an accepted declaration reveals the coworker and posts what came before", 
 	]);
 });
 
-test("a rejected declaration marks a mistake", async () => {
+test("a rejected declaration masks the coworker", async () => {
 	await open("rejected");
 
 	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 well" }));
 
-	expect(await screen.findByText("Not enough evidence.")).toBeDefined();
+	expect(
+		await screen.findByText(/^Not enough evidence\. NameB1 says: “.+”$/),
+	).toBeDefined();
 	expect(tile("B1").getAttribute("aria-label")).toBe(
-		"B1, NameB1, HR, unknown, one mistake",
+		"B1, NameB1, HR, unknown, wearing a mask",
 	);
-	expect(tile("B1").className).toContain("mistake");
+	expect(tile("B1").textContent).toContain("😷");
 });
 
 test("a failed declaration says so and marks nothing", async () => {
@@ -163,7 +166,7 @@ test("a failed declaration says so and marks nothing", async () => {
 	expect(
 		await screen.findByText("Couldn't reach the office, try again."),
 	).toBeDefined();
-	expect(tile("B1").className).not.toContain("mistake");
+	expect(tile("B1").textContent).not.toContain("😷");
 });
 
 test("a revealed coworker can't be declared again", async () => {
@@ -219,7 +222,7 @@ test("S and W declare the selected coworker; modified keys don't", async () => {
 	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
 	fireEvent.keyDown(tile("B1"), { key: "ArrowRight" });
 	fireEvent.keyDown(tile("C1"), { key: "w" });
-	await screen.findByText("Not enough evidence.");
+	await screen.findByText(/^Not enough evidence\./);
 
 	expect(
 		JSON.parse(fetch.mock.calls[2]?.[1]?.body as string).declaration,
@@ -279,22 +282,78 @@ test("a hint shows its clues, then on a second press its coworker", async () => 
 	expect(fetch).toHaveBeenCalledTimes(2);
 });
 
-test("no hint once the office is cleared", async () => {
+/** Opens a day that was already solved, with B1 masked. */
+async function openSolved() {
 	localStorage.setItem(
 		"office-bug:2026-10-19",
 		JSON.stringify({
 			reveals: DESKS.map((desk) => sick(desk)),
-			mistakes: [],
+			masks: ["B1"],
+			hints: {},
 			startedAt: 0,
 			solvedAt: 1,
 		}),
 	);
 	await open();
+}
 
-	expect(screen.getByRole("button", { name: "Hint" })).toHaveProperty(
-		"disabled",
-		true,
+const RESULT =
+	/^Office Lurgy · Mon 19 Oct \(Medium\) · ⏱ 00:00\n"[^"]+"\n🟩😷🟩🟩\n/;
+
+test("a cleared office shows the result in place of the buttons", async () => {
+	await openSolved();
+
+	expect(screen.queryByRole("button", { name: "Hint" })).toBeNull();
+	expect(screen.queryByRole("button", { name: /^Declare/ })).toBeNull();
+	expect(screen.getByRole("button", { name: "Share" })).toBeDefined();
+});
+
+test("sharing uses the share sheet where there is one", async () => {
+	const share = vi.fn(() => Promise.resolve());
+	vi.stubGlobal("navigator", { share });
+	await openSolved();
+
+	fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+	await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+	expect(share.mock.calls[0]).toEqual([
+		{ text: expect.stringMatching(RESULT) },
+	]);
+});
+
+test("closing the share sheet does nothing", async () => {
+	const writeText = vi.fn(() => Promise.resolve());
+	const share = vi.fn(() =>
+		Promise.reject(new DOMException("closed", "AbortError")),
 	);
+	vi.stubGlobal("navigator", { share, clipboard: { writeText } });
+	await openSolved();
+
+	fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+	await waitFor(() => expect(share).toHaveBeenCalled());
+	expect(writeText).not.toHaveBeenCalled();
+});
+
+test("without a share sheet the result is copied", async () => {
+	const writeText = vi.fn(() => Promise.resolve());
+	const share = vi.fn(() => Promise.reject(new Error("not allowed")));
+	vi.stubGlobal("navigator", { share, clipboard: { writeText } });
+	await openSolved();
+
+	fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+	expect(await screen.findByText("Result copied.")).toBeDefined();
+	expect(writeText.mock.calls[0]).toEqual([expect.stringMatching(RESULT)]);
+});
+
+test("a result that can't be copied says so", async () => {
+	vi.stubGlobal("navigator", {});
+	await openSolved();
+
+	fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+	expect(await screen.findByText("Couldn't copy the result.")).toBeDefined();
 });
 
 test("no hint while a declaration is waiting", async () => {
@@ -341,6 +400,11 @@ test("the timer ticks, stops on the solve and stays stopped after a reload", asy
 	expect(screen.getByRole("status").textContent).toMatch(
 		/Office cleared in 01:0[56]\.$/,
 	);
+	await waitFor(() =>
+		expect(document.activeElement).toBe(
+			screen.getByRole("button", { name: "Share" }),
+		),
+	);
 	const stopped = timer.textContent;
 	await act(() => vi.advanceTimersByTimeAsync(10_000));
 	expect(timer.textContent).toBe(stopped);
@@ -348,6 +412,7 @@ test("the timer ticks, stops on the solve and stays stopped after a reload", asy
 	cleanup();
 	await open();
 	expect(screen.getByRole("timer").textContent).toBe(stopped);
+	expect(document.activeElement).toBe(document.body);
 });
 
 test("a reload rebuilds the board from the browser", async () => {
@@ -381,7 +446,7 @@ test("a second declaration waits for the first one's answer", async () => {
 	reply(Response.json({ accepted: true, reveal: sick("B1") }));
 	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
 	fireEvent.keyDown(tile("C1"), { key: "w" });
-	await screen.findByText("Not enough evidence.");
+	await screen.findByText(/^Not enough evidence\./);
 
 	expect(JSON.parse(fetch.mock.calls[2]?.[1]?.body as string).declared).toEqual(
 		[{ desk: "B1", state: "sick" }],

@@ -1,17 +1,26 @@
-import { type KeyboardEvent, useEffect, useReducer, useState } from "react";
+import {
+	type KeyboardEvent,
+	useEffect,
+	useReducer,
+	useRef,
+	useState,
+} from "react";
 import { hint as askForHint, declare as post } from "./api.ts";
 import {
 	type Day,
 	type Desk,
+	dayLabel,
 	declared,
 	elapsed,
 	formatTime,
 	type Progress,
 	reducer,
+	result,
 	revealOf,
 	type State,
 	save,
 	start,
+	verdict,
 } from "./game.ts";
 import "./App.css";
 
@@ -58,6 +67,16 @@ export function Play({ day }: { day: Day }) {
 
 	useEffect(() => save(day.date, progress), [day.date, progress]);
 
+	// The solving move unmounts the Sick/Well buttons; hand focus to Share so it
+	// isn't dropped. Not on reloading a solved day.
+	const shareButton = useRef<HTMLButtonElement>(null);
+	const wasSolved = useRef(progress.solvedAt !== undefined);
+	useEffect(() => {
+		if (progress.solvedAt === undefined || wasSolved.current) return;
+		wasSolved.current = true;
+		shareButton.current?.focus();
+	}, [progress.solvedAt]);
+
 	async function declare(desk: Desk, state: State) {
 		if (revealOf(progress, desk)) return dispatch({ type: "already" });
 		if (game.pending) return;
@@ -71,7 +90,7 @@ export function Play({ day }: { day: Day }) {
 			dispatch(
 				reveal
 					? { type: "accepted", reveal, at: Date.now() }
-					: { type: "rejected", desk },
+					: { type: "rejected", desk, state },
 			);
 		} catch {
 			dispatch({ type: "failed" });
@@ -98,6 +117,27 @@ export function Play({ day }: { day: Day }) {
 			});
 		} catch {
 			dispatch({ type: "failed" });
+		}
+	}
+
+	async function share() {
+		const text = result(day, progress, location.origin);
+		if (navigator.share) {
+			try {
+				return await navigator.share({ text });
+			} catch (error) {
+				// Closing the share sheet isn't a failure; anything else falls back to copying.
+				// ponytail: Safari may refuse the copy once the share has failed; show the
+				// text to copy by hand if players hit it.
+				if (error instanceof DOMException && error.name === "AbortError")
+					return;
+			}
+		}
+		try {
+			await navigator.clipboard.writeText(text);
+			dispatch({ type: "shared", copied: true });
+		} catch {
+			dispatch({ type: "shared", copied: false });
 		}
 	}
 
@@ -128,13 +168,7 @@ export function Play({ day }: { day: Day }) {
 			<header>
 				<Logo />
 				<div className="today">
-					<p className="date">
-						{new Date(`${day.date}T00:00`).toLocaleDateString("en-GB", {
-							weekday: "short",
-							day: "numeric",
-							month: "short",
-						})}
-					</p>
+					<p className="date">{dayLabel(day.date)}</p>
 					<Timer progress={progress} />
 				</div>
 			</header>
@@ -152,7 +186,7 @@ export function Play({ day }: { day: Day }) {
 					<div role="row" className="row" key={row[0]?.desk}>
 						{row.map((c) => {
 							const reveal = revealOf(progress, c.desk);
-							const mistake = progress.mistakes.includes(c.desk);
+							const masked = progress.masks.includes(c.desk);
 							const hints = progress.hints[c.desk];
 							const lit = game.hint?.clues.includes(c.desk);
 							const named =
@@ -162,7 +196,7 @@ export function Play({ day }: { day: Day }) {
 								c.name,
 								c.department,
 								reveal?.state ?? "unknown",
-								...(mistake ? ["one mistake"] : []),
+								...(masked ? ["wearing a mask"] : []),
 								...(hints ? [hints === 1 ? "one hint" : "two hints"] : []),
 								...(lit ? ["hinted clue"] : []),
 								...(named ? ["the hint is about them"] : []),
@@ -174,7 +208,7 @@ export function Play({ day }: { day: Day }) {
 									type="button"
 									key={c.desk}
 									data-desk={c.desk}
-									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${mistake ? "mistake" : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""}`}
+									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""}`}
 									tabIndex={c.desk === selected ? 0 : -1}
 									role="gridcell"
 									aria-keyshortcuts="S W"
@@ -185,6 +219,11 @@ export function Play({ day }: { day: Day }) {
 									<span className="coord">{c.desk}</span>
 									<span className="nm">{c.name}</span>
 									{reveal && <span className="state">{reveal.state}</span>}
+									{masked && (
+										<span className="mask" aria-hidden="true">
+											😷
+										</span>
+									)}
 									{hints && (
 										<span className="mark" aria-hidden="true">
 											{hints === 1 ? "🟡" : "🟠"}
@@ -220,40 +259,54 @@ export function Play({ day }: { day: Day }) {
 				<p className="toast" role="status">
 					<span key={game.said}>{game.message}</span>
 				</p>
-				{chosen && (
+				{progress.solvedAt !== undefined ? (
+					<div className="result">
+						<p className="verdict">{verdict(progress, day.date)}</p>
+						<button
+							type="button"
+							className="btn-share"
+							ref={shareButton}
+							onClick={share}
+						>
+							Share
+						</button>
+					</div>
+				) : (
 					<>
-						<span className="who">
-							{chosen.desk} · {chosen.name} · {chosen.department}
-							{revealOf(progress, chosen.desk) && " · Already declared"}
-						</span>
-						<div className="big">
-							{(["sick", "well"] as const).map((state) => (
-								<button
-									type="button"
-									key={state}
-									className={`btn-${state}`}
-									disabled={game.pending || !!revealOf(progress, chosen.desk)}
-									aria-label={`Declare ${chosen.name} ${state}`}
-									onClick={() => declare(chosen.desk, state)}
-								>
-									{state === "sick" ? "Sick" : "Well"}
-								</button>
-							))}
-						</div>
+						{chosen && (
+							<>
+								<span className="who">
+									{chosen.desk} · {chosen.name} · {chosen.department}
+									{revealOf(progress, chosen.desk) && " · Already declared"}
+								</span>
+								<div className="big">
+									{(["sick", "well"] as const).map((state) => (
+										<button
+											type="button"
+											key={state}
+											className={`btn-${state}`}
+											disabled={
+												game.pending || !!revealOf(progress, chosen.desk)
+											}
+											aria-label={`Declare ${chosen.name} ${state}`}
+											onClick={() => declare(chosen.desk, state)}
+										>
+											{state === "sick" ? "Sick" : "Well"}
+										</button>
+									))}
+								</div>
+							</>
+						)}
+						<button
+							type="button"
+							className="btn-hint"
+							disabled={game.pending || game.hint?.presses === 2}
+							onClick={hint}
+						>
+							{game.hint ? "Who do they settle?" : "Hint"}
+						</button>
 					</>
 				)}
-				<button
-					type="button"
-					className="btn-hint"
-					disabled={
-						game.pending ||
-						progress.solvedAt !== undefined ||
-						game.hint?.presses === 2
-					}
-					onClick={hint}
-				>
-					{game.hint ? "Who do they settle?" : "Hint"}
-				</button>
 			</div>
 		</main>
 	);

@@ -40,7 +40,7 @@ def test_a_day_never_shows_the_solution_or_other_clues() -> None:
     response = client.get("/api/days/2026-10-19")
 
     body = response.json()
-    assert body.keys() == {"date", "coworkers", "start"}
+    assert body.keys() == {"date", "coworkers", "start", "difficulty"}
     assert all(c.keys() == {"desk", "name", "department"} for c in body["coworkers"])
     _, day = load_days(FIXTURES)[MONDAY]
     hidden = [r.text for r in day.reveals if r is not day.reveal("B3")]
@@ -73,3 +73,15 @@ def test_days_come_from_puzzles_dir(monkeypatch: pytest.MonkeyPatch) -> None:
     with TestClient(app):  # runs the startup hook, which loads them
         assert days.cache_info().currsize == 1
     assert MONDAY in days()
+
+
+def test_a_day_says_how_hard_it_is() -> None:
+    board, puzzle = load_days(FIXTURES)[MONDAY]
+    graded = {MONDAY: (board, puzzle.model_copy(update={"difficulty": "Medium"}))}
+    app.dependency_overrides[days] = lambda: graded
+
+    assert client.get("/api/days/2026-10-19").json()["difficulty"] == "Medium"
+
+
+def test_a_day_built_before_grading_has_no_difficulty() -> None:
+    assert client.get("/api/days/2026-10-19").json()["difficulty"] is None

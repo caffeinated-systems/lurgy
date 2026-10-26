@@ -46,13 +46,13 @@ test("solves the fixture day by keyboard and keeps it after a reload", async ({
 	await page.keyboard.press("Tab");
 	await expect(tile(page, "A1")).toBeFocused();
 
-	// A3 is sick, so calling them well is a mistake.
+	// A3 is sick, so calling them well gets a mask.
 	await goTo(page, "A3");
 	await page.keyboard.press("w");
-	await expect(status).toHaveText("Not enough evidence.");
+	await expect(status).toHaveText(/^Not enough evidence\. Imogen says: “.+”$/);
 	await expect(tile(page, "A3")).toHaveAttribute(
 		"aria-label",
-		"A3, Imogen, IT, unknown, one mistake",
+		"A3, Imogen, IT, unknown, wearing a mask",
 	);
 
 	for (const desk of ORDER) {
@@ -66,6 +66,7 @@ test("solves the fixture day by keyboard and keeps it after a reload", async ({
 		);
 	}
 	await expect(status).toContainText(/Office cleared in \d\d:\d\d\.$/);
+	await expect(page.getByRole("button", { name: "Share" })).toBeVisible();
 	const time = (await page.getByRole("timer").textContent()) ?? "";
 
 	await page.reload();
@@ -74,10 +75,13 @@ test("solves the fixture day by keyboard and keeps it after a reload", async ({
 	for (const desk of [...ORDER, "B3"]) {
 		await expect(tile(page, desk)).toHaveAttribute(
 			"aria-label",
-			/, (sick|well)(, one mistake)?, says: /,
+			/, (sick|well)(, wearing a mask)?, says: /,
 		);
 	}
-	await expect(tile(page, "A3")).toHaveAttribute("aria-label", /one mistake/);
+	await expect(tile(page, "A3")).toHaveAttribute(
+		"aria-label",
+		/wearing a mask/,
+	);
 });
 
 test("a hint shows Jas's clue, then that it settles Imogen", async ({
