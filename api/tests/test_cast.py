@@ -1,15 +1,12 @@
 import random
 from dataclasses import replace
 from datetime import date
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import pytest
 
 from app.cast import Member, StoryError, fits, load_cast, load_story, main, quiet_week
 from tests.factories import STORIES
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 CAST = load_cast(STORIES / "cast.md")
 STORY = (STORIES / "2026-W45.md").read_text()
@@ -24,6 +21,15 @@ def test_the_cast_reads_names_departments_and_pools() -> None:
         ("Aisha's line.",),
         ("Aisha's joke.",),
     )
+
+
+def test_every_cast_member_has_a_portrait() -> None:
+    # The board loads /portraits/<lowercase name>.svg: a missing file is a blank tile.
+    root = Path(__file__).parents[2]
+    portraits = root / "web" / "public" / "portraits"
+    cast = load_cast(root / "stories" / "cast.md")
+
+    assert [n for n in cast if not (portraits / f"{n.lower()}.svg").is_file()] == []
 
 
 def test_a_story_reads_who_is_in_and_who_speaks() -> None:

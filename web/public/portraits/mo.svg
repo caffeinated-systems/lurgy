@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Finance Drab Olive Partition -->
+    <linearGradient id="moPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5A664B"/>
+      <stop offset="100%" stop-color="#3C4532"/>
+    </linearGradient>
+
+    <!-- Heather Grey Crewneck Gradient -->
+    <linearGradient id="heatherSweat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ADB5BD"/>
+      <stop offset="100%" stop-color="#868E96"/>
+    </linearGradient>
+
+    <linearGradient id="moSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DEAC8A"/>
+      <stop offset="100%" stop-color="#BD8661"/>
+    </linearGradient>
+
+    <filter id="softShadowMo" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="mustardLanyardGlowMo" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#F4A261" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="moClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Finance Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#moPartition)"/>
+
+    <!-- Fantasy Football Memo -->
+    <g transform="translate(48, 110) rotate(-4)">
+      <rect width="60" height="48" rx="2" fill="#FFFFFF" stroke="#3C4532" stroke-width="1"/>
+      <rect width="60" height="8" fill="#5A664B"/>
+      <text x="30" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">FANTASY LEAGUE</text>
+      <text x="30" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#1C1F1A" text-anchor="middle">1st: MO'S XI</text>
+      <text x="30" y="30" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#6C757D" text-anchor="middle">24th: QUENTIN</text>
+      <text x="30" y="41" font-family="Arial Black, Impact" font-size="6" fill="#2B9348" text-anchor="middle">BACK OF THE NET</text>
+      <circle cx="30" cy="3" r="1.8" fill="#F4A261"/>
+    </g>
+
+    <!-- CHARACTER: MO (Shifted up, relaxed posture) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowMo)">
+
+      <!-- White Tee Collar peeking out -->
+      <path d="M166,298 C176,316 224,316 234,298 Z" fill="#FFFFFF" stroke="#CED4DA" stroke-width="1.5"/>
+
+      <!-- Heather Grey Crewneck Sweatshirt -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#heatherSweat)" stroke="#495057" stroke-width="3"/>
+
+      <!-- Classic Sweatshirt V-Stitch at Collar -->
+      <polygon points="190,314 210,314 200,328" fill="none" stroke="#6C757D" stroke-width="2"/>
+      <!-- Ribbed Crewneck Collar -->
+      <path d="M160,302 C172,320 228,320 240,302 Z" fill="none" stroke="#495057" stroke-width="3"/>
+
+      <!-- Pushed-up Sleeve Seams on Forearms -->
+      <path d="M68,430 Q80,422 92,434" stroke="#495057" stroke-width="2.5" fill="none"/>
+      <path d="M332,430 Q320,422 308,434" stroke="#495057" stroke-width="2.5" fill="none"/>
+
+      <!-- Neck -->
+      <path d="M170,258 L170,306 C170,322 230,322 230,306 L230,258 Z" fill="#BD8661" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- MUSTARD GOLD FINANCE LANYARD -->
+      <g filter="url(#mustardLanyardGlowMo)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#F4A261" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#F4A261" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFE3C2" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFE3C2" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base -->
+      <path d="M148,168 C148,132 252,132 252,168 L252,222 C252,260 226,282 200,282 C174,282 148,260 148,222 Z"
+            fill="url(#moSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Ears -->
+      <ellipse cx="142" cy="206" rx="8" ry="16" fill="#BD8661" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="258" cy="206" rx="8" ry="16" fill="#BD8661" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- Neat Modern Fade Hair (Jet Black) -->
+      <path d="M142,172 C136,122 154,88 200,88 C246,88 264,122 258,172 C250,146 236,136 200,136 C164,136 150,146 142,172 Z"
+            fill="#1F2421" stroke="#0B0D0C" stroke-width="2"/>
+
+      <!-- Trim, Sculpted Modern Beard -->
+      <path d="M148,206 C148,248 165,284 200,284 C235,284 252,248 252,206 C246,212 238,216 200,216 C162,216 154,212 148,206 Z"
+            fill="#1F2421" stroke="#0B0D0C" stroke-width="2"/>
+
+      <!-- Laid-Back, Confident Eyebrows -->
+      <path d="M160,180 Q174,174 188,180" stroke="#1F2421" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M212,180 Q226,174 240,180" stroke="#1F2421" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+      <!-- Relaxed, Hooded Warm Eyes (Unflappable) -->
+      <g>
+        <ellipse cx="174" cy="198" rx="8" ry="5.5" fill="#FFFFFF" stroke="#1F2421" stroke-width="1.8"/>
+        <circle cx="174" cy="198" r="3.8" fill="#3D2314"/>
+        <circle cx="175" cy="197" r="1.2" fill="#FFFFFF"/>
+        <!-- Heavy relaxed eyelid crease -->
+        <path d="M164,193 Q174,191 184,193" stroke="#9A6544" stroke-width="1.8" fill="none"/>
+
+        <ellipse cx="226" cy="198" rx="8" ry="5.5" fill="#FFFFFF" stroke="#1F2421" stroke-width="1.8"/>
+        <circle cx="226" cy="198" r="3.8" fill="#3D2314"/>
+        <circle cx="227" cy="197" r="1.2" fill="#FFFFFF"/>
+        <path d="M216,193 Q226,191 236,193" stroke="#9A6544" stroke-width="1.8" fill="none"/>
+      </g>
+
+      <!-- Nose -->
+      <path d="M197,196 L194,222 Q200,226 206,222 L203,196" fill="#A86C45" stroke="#7A4E39" stroke-width="1.8"/>
+
+      <!-- Easygoing Half-Smile under Moustache -->
+      <path d="M184,244 Q198,252 216,244" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- PROP: MINI FOAM FOOTBALL (Held / Tumbled in Hand) -->
+      <g transform="translate(230, 370) rotate(10)">
+        <!-- White Foam Ball -->
+        <circle cx="30" cy="30" r="26" fill="#F8F9FA" stroke="#212529" stroke-width="2"/>
+        <!-- Classic Black Pentagons -->
+        <polygon points="30,16 38,22 35,32 25,32 22,22" fill="#212529"/>
+        <polygon points="12,38 18,34 22,40 18,46 12,44" fill="#212529"/>
+        <polygon points="48,38 42,34 38,40 42,46 48,44" fill="#212529"/>
+        <line x1="30" y1="16" x2="30" y2="4" stroke="#212529" stroke-width="1.5"/>
+        <line x1="38" y1="22" x2="48" y2="20" stroke="#212529" stroke-width="1.5"/>
+        <line x1="22" y1="22" x2="12" y2="20" stroke="#212529" stroke-width="1.5"/>
+
+        <!-- Mo's Hand Cradling the Ball -->
+        <g transform="translate(10, 36)">
+          <path d="M0,6 C10,-2 26,-2 36,6 L32,20 C24,14 12,14 4,20 Z" fill="#DEAC8A" stroke="#4A3228" stroke-width="2"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

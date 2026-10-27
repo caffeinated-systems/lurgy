@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- HR Calming Sage/Teal Partition -->
+    <linearGradient id="aidenPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4E878C"/>
+      <stop offset="100%" stop-color="#346266"/>
+    </linearGradient>
+
+    <!-- 90s Vintage Windbreaker Gradient -->
+    <linearGradient id="windbreakerGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2EC4B6"/>
+      <stop offset="100%" stop-color="#7209B7"/>
+    </linearGradient>
+
+    <linearGradient id="aidenSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDE8DF"/>
+      <stop offset="100%" stop-color="#F0C2B0"/>
+    </linearGradient>
+
+    <filter id="softShadowAiden" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <clipPath id="aidenClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- HR Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#aidenPartition)"/>
+
+    <!-- Accidental Booking Post-it -->
+    <g transform="translate(48, 110) rotate(4)">
+      <rect width="60" height="48" rx="2" fill="#E8F8F5" stroke="#2EC4B6" stroke-width="1.2"/>
+      <rect width="60" height="8" fill="#7209B7"/>
+      <text x="30" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">HR APOLOGY</text>
+      <text x="30" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">MINDFULNESS COURSE</text>
+      <text x="30" y="29" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">IS NOT CANCELABLE.</text>
+      <text x="30" y="40" font-family="Arial Black, Impact" font-size="6" fill="#D90429" text-anchor="middle">MY BAD! - AIDEN</text>
+      <circle cx="30" cy="3" r="1.8" fill="#2EC4B6"/>
+    </g>
+
+    <!-- CHARACTER: AIDEN (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowAiden)">
+
+      <!-- Rumpled White Band Tee Underneath -->
+      <path d="M160,300 L240,300 L240,400 L160,400 Z" fill="#F8F9FA" stroke="#DEE2E6" stroke-width="1.5"/>
+
+      <!-- 90s Vintage Colour-Blocked Windbreaker -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#windbreakerGrad)" stroke="#161718" stroke-width="3"/>
+
+      <!-- Windbreaker Geometric Neon Chevrons (Teal & Purple) -->
+      <polygon points="62,374 130,420 80,480 52,490" fill="#F72585"/>
+      <polygon points="338,374 270,420 320,480 348,490" fill="#4CC9F0"/>
+
+      <!-- Windbreaker Open Collar Flaps -->
+      <polygon points="156,300 134,360 178,390 190,320" fill="#7209B7" stroke="#3A0CA3" stroke-width="1.8"/>
+      <polygon points="244,300 266,360 222,390 210,320" fill="#7209B7" stroke="#3A0CA3" stroke-width="1.8"/>
+
+      <!-- Neck -->
+      <path d="M172,258 L172,306 C172,322 228,322 228,306 L228,258 Z" fill="#F0C2B0" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- THE ABSURD NEST OF EIGHT MULTI-COLOURED LANYARDS -->
+      <!-- 1. Mint Teal (HR) -->
+      <path d="M154,298 C158,356 182,418 196,450" stroke="#2EC4B6" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M246,298 C242,356 218,418 204,450" stroke="#2EC4B6" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <!-- 2. Neon Electric Blue (IT) -->
+      <path d="M158,296 C164,364 178,414 192,446" stroke="#00E5FF" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M242,296 C236,364 222,414 208,446" stroke="#00E5FF" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <!-- 3. Flame Rust Orange (Procurement) -->
+      <path d="M162,298 C170,370 186,410 198,444" stroke="#FB8500" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M238,298 C230,370 214,410 202,444" stroke="#FB8500" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <!-- 4. Vibrant Coral Pink (Marketing) -->
+      <path d="M166,298 C160,374 180,422 194,454" stroke="#FF5A5F" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M234,298 C240,374 220,422 206,454" stroke="#FF5A5F" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <!-- 5. Royal Violet (Legal) -->
+      <path d="M150,302 C156,380 184,426 198,458" stroke="#9D4EDD" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M250,302 C244,380 216,426 202,458" stroke="#9D4EDD" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <!-- 6. Claret Crimson (Sales) -->
+      <path d="M170,304 C166,384 188,430 200,460" stroke="#E63946" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M230,304 C234,384 212,430 200,460" stroke="#E63946" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+      <!-- Giant clump of steel clips & tangled badges at the bottom -->
+      <circle cx="200" cy="456" r="10" fill="#CFD8DC" stroke="#37474F" stroke-width="2"/>
+      <rect x="180" y="466" width="40" height="30" rx="3" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+      <text x="200" y="484" font-family="Arial Black, Impact" font-size="7" fill="#D90429" text-anchor="middle">ALL-ACCESS</text>
+
+      <!-- Head Base (Youthful, Chaotic) -->
+      <path d="M148,168 C148,132 252,132 252,168 L252,222 C252,260 226,282 200,282 C174,282 148,260 148,222 Z"
+            fill="url(#aidenSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Ears -->
+      <ellipse cx="140" cy="206" rx="9" ry="17" fill="#F0C2B0" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="260" cy="206" rx="9" ry="17" fill="#F0C2B0" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- MESSY RUFFLED DIRTY-BLONDE HAIR -->
+      <path d="M138,172 C132,120 152,86 200,86 C248,86 268,120 262,172 C252,142 236,132 200,132 C164,132 148,142 138,172 Z"
+            fill="#B08968" stroke="#5C3D2E" stroke-width="2"/>
+      <!-- Wild, sticking-out messy hair tufts -->
+      <path d="M140,138 L128,124 L148,128 Z" fill="#B08968" stroke="#5C3D2E" stroke-width="1.5"/>
+      <path d="M174,96 L178,78 L190,92 Z" fill="#B08968" stroke="#5C3D2E" stroke-width="1.5"/>
+      <path d="M220,92 L230,76 L234,96 Z" fill="#B08968" stroke="#5C3D2E" stroke-width="1.5"/>
+      <path d="M258,138 L272,124 L254,128 Z" fill="#B08968" stroke="#5C3D2E" stroke-width="1.5"/>
+
+      <!-- Expressive High Eyebrows -->
+      <path d="M160,174 Q174,164 188,174" stroke="#5C3D2E" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,174 Q226,164 240,174" stroke="#5C3D2E" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Wide, Friendly, Slightly Unhinged Chaos-Intern Eyes -->
+      <g>
+        <ellipse cx="174" cy="196" rx="8.5" ry="8" fill="#FFFFFF" stroke="#212529" stroke-width="2"/>
+        <circle cx="174" cy="196" r="4.2" fill="#2A9D8F"/>
+        <circle cx="174" cy="196" r="1.8" fill="#000000"/>
+        <circle cx="176" cy="194" r="1.5" fill="#FFFFFF"/>
+
+        <ellipse cx="226" cy="196" rx="8.5" ry="8" fill="#FFFFFF" stroke="#212529" stroke-width="2"/>
+        <circle cx="226" cy="196" r="4.2" fill="#2A9D8F"/>
+        <circle cx="226" cy="196" r="1.8" fill="#000000"/>
+        <circle cx="228" cy="194" r="1.5" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Nose -->
+      <path d="M197,196 L195,222 Q200,226 205,222 L203,196" fill="#E8A992" stroke="#8C5237" stroke-width="1.8"/>
+
+      <!-- Huge, Infectious, Manic Grin ("Absolute scenes!") -->
+      <path d="M174,242 Q200,270 226,242 Z" fill="#D90429" stroke="#7A0012" stroke-width="2"/>
+      <path d="M178,242 Q200,252 222,242" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round"/> <!-- Big white smile -->
+
+      <!-- Hand Clasping Lanyards Enthusiastically -->
+      <g transform="translate(230, 430)">
+        <path d="M0,0 C-10,10 -4,24 10,20 L10,0 Z" fill="#FDE8DF" stroke="#4A3228" stroke-width="2"/>
+      </g>
+
+    </g>
+  </g>
+</svg>

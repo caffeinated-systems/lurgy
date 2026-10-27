@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+  <!-- mask body -->
+  <path d="M152,172 C176,164 224,164 248,172 L250,206 C238,232 162,232 150,206 Z" fill="#9FD3E8" stroke="#3E7C93" stroke-width="2.5"/>
+  <!-- pleats -->
+  <path d="M154,184 C180,178 220,178 246,184 M153,196 C180,190 220,190 247,196 M156,208 C182,204 218,204 244,208" fill="none" stroke="#3E7C93" stroke-width="1.5" opacity=".7"/>
+  <path d="M182,169 C192,166 208,166 218,169" fill="none" stroke="#C9D3D8" stroke-width="3" stroke-linecap="round"/>
+</svg>

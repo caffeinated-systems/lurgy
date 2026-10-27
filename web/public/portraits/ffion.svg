@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Procurement Terracotta Partition -->
+    <linearGradient id="ffionPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8D5B4C"/>
+      <stop offset="100%" stop-color="#54372D"/>
+    </linearGradient>
+
+    <!-- Forest Green Knit Jumper -->
+    <linearGradient id="forestJumper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2D6A4F"/>
+      <stop offset="100%" stop-color="#1B4332"/>
+    </linearGradient>
+
+    <linearGradient id="ffionSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDE8DF"/>
+      <stop offset="100%" stop-color="#EDBFA8"/>
+    </linearGradient>
+
+    <!-- Industrial Blue Paper Roll Gradient -->
+    <linearGradient id="blueRollGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1D6FA5"/>
+      <stop offset="50%" stop-color="#38A3D8"/>
+      <stop offset="100%" stop-color="#165B88"/>
+    </linearGradient>
+
+    <filter id="softShadowFfion" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="rustLanyardGlowF" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#FB8500" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="ffionClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Procurement Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#ffionPartition)"/>
+
+    <!-- Deal Invoice Note -->
+    <g transform="translate(48, 110) rotate(-4)">
+      <rect width="60" height="48" rx="2" fill="#FFFFFF" stroke="#54372D" stroke-width="1"/>
+      <rect width="60" height="8" fill="#FB8500"/>
+      <text x="30" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">SUPPLIER INVOICE</text>
+      <text x="30" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#1C1F1A" text-anchor="middle">50,000 BLUE ROLLS</text>
+      <text x="30" y="30" font-family="Arial Black, Impact" font-size="6.5" fill="#D90429" text-anchor="middle">92% DISCOUNT</text>
+      <text x="30" y="41" font-family="Arial" font-size="5" font-weight="bold" fill="#2B9348" text-anchor="middle">LOVELY, THAT.</text>
+      <circle cx="30" cy="3" r="1.8" fill="#FB8500"/>
+    </g>
+
+    <!-- CHARACTER: FFION (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowFfion)">
+
+      <!-- Denim Shirt Collar peeking through -->
+      <polygon points="166,296 196,334 174,338 152,306" fill="#4A6B82" stroke="#2C404E" stroke-width="1.8"/>
+      <polygon points="234,296 204,334 226,338 248,306" fill="#4A6B82" stroke="#2C404E" stroke-width="1.8"/>
+
+      <!-- Forest Green Chunky Knit Jumper -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#forestJumper)" stroke="#0E2319" stroke-width="3"/>
+
+      <!-- Jumper Crew Neck -->
+      <path d="M162,304 C174,324 226,324 238,304 Z" fill="none" stroke="#0E2319" stroke-width="2.5"/>
+
+      <!-- Multi-Coloured Glass Bead Necklace -->
+      <path d="M166,292 Q200,324 234,292" stroke="#E76F51" stroke-width="6" stroke-linecap="round" stroke-dasharray="8,2" fill="none"/>
+
+      <!-- Neck -->
+      <path d="M172,258 L172,306 C172,322 228,322 228,306 L228,258 Z" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- FLAME RUST ORANGE PROCUREMENT LANYARD -->
+      <g filter="url(#rustLanyardGlowF)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#FB8500" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#FB8500" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFE3A8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFE3A8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base (Warm, Rosy) -->
+      <path d="M146,174 C146,136 256,136 256,174 L256,226 C256,264 228,284 200,284 C172,284 144,264 144,226 Z"
+            fill="url(#ffionSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Rosy Welsh Complexion Cheeks -->
+      <circle cx="164" cy="226" r="15" fill="#FF758F" opacity="0.45"/>
+      <circle cx="236" cy="226" r="15" fill="#FF758F" opacity="0.45"/>
+
+      <!-- Ears -->
+      <ellipse cx="140" cy="210" rx="9" ry="16" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="260" cy="210" rx="9" ry="16" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- BOUNCY BROWN CURLS WITH TORTOISESHELL CLIP -->
+      <path d="M136,176 C128,124 148,88 200,88 C252,88 272,124 264,176 C274,206 272,246 258,258 C250,228 250,180 250,180 C234,152 220,144 200,144 C176,144 162,152 148,180 C148,180 148,228 140,258 C126,246 126,206 136,176 Z"
+            fill="#5C3A21" stroke="#2B180B" stroke-width="2.5"/>
+      <!-- Soft Curls Texture -->
+      <circle cx="140" cy="156" r="12" fill="#754C2E"/>
+      <circle cx="260" cy="156" r="12" fill="#754C2E"/>
+      <!-- Tortoiseshell Clip on left side -->
+      <rect x="144" y="142" width="16" height="6" rx="2" fill="#D4A373" stroke="#8C5828" stroke-width="1.2" transform="rotate(15, 152, 145)"/>
+
+      <!-- Eyebrows (Warm, Animated) -->
+      <path d="M162,178 Q174,168 188,178" stroke="#452714" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,178 Q226,168 238,178" stroke="#452714" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Bright Hazel Eyes (Victorious Negotiator Sparkle) -->
+      <g>
+        <ellipse cx="174" cy="198" rx="8" ry="6.5" fill="#FFFFFF"/>
+        <circle cx="174" cy="198" r="4.2" fill="#6B705C"/>
+        <circle cx="174" cy="198" r="1.8" fill="#000000"/>
+        <circle cx="175.5" cy="196.5" r="1.2" fill="#FFFFFF"/>
+
+        <ellipse cx="226" cy="198" rx="8" ry="6.5" fill="#FFFFFF"/>
+        <circle cx="226" cy="198" r="4.2" fill="#6B705C"/>
+        <circle cx="226" cy="198" r="1.8" fill="#000000"/>
+        <circle cx="227.5" cy="196.5" r="1.2" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Soft Button Nose -->
+      <path d="M197,196 L195,222 Q200,226 205,222 L203,196" fill="#DB9F87" stroke="#8D5237" stroke-width="1.8"/>
+
+      <!-- Broad, Victorious Bargain-Hunter Grin -->
+      <path d="M176,242 Q200,268 224,242 Z" fill="#D90429" stroke="#7A0012" stroke-width="2"/>
+      <path d="M180,243 Q200,250 220,243" stroke="#FFFFFF" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- PROP: COLOSSAL BULK ROLL OF BLUE INDUSTRIAL PAPER TOWEL -->
+      <g transform="translate(224, 340) rotate(-12)">
+        <!-- Giant Cylinder Roll -->
+        <rect x="0" y="0" width="86" height="130" rx="8" fill="url(#blueRollGrad)" stroke="#165B88" stroke-width="2.5"/>
+        <!-- Perforation Lines on Roll -->
+        <line x1="16" y1="0" x2="16" y2="130" stroke="#70C8F8" stroke-width="2" stroke-dasharray="4,4"/>
+        <line x1="42" y1="0" x2="42" y2="130" stroke="#70C8F8" stroke-width="2" stroke-dasharray="4,4"/>
+        <!-- Top Hollow Core -->
+        <ellipse cx="43" cy="6" rx="36" ry="6" fill="#0E3D5C" stroke="#165B88" stroke-width="2"/>
+        <ellipse cx="43" cy="6" rx="14" ry="3" fill="#D4A373"/> <!-- Brown cardboard core -->
+
+        <!-- Ffion's Hand Tucking the Giant Roll Under Her Arm -->
+        <g transform="translate(10, 60)">
+          <path d="M-10,0 C-14,12 -4,26 10,22 L10,0 Z" fill="#FDE8DF" stroke="#4A3228" stroke-width="2"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

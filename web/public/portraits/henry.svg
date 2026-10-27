@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Finance Drab Olive Partition -->
+    <linearGradient id="henryPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5A664B"/>
+      <stop offset="100%" stop-color="#3C4532"/>
+    </linearGradient>
+
+    <!-- Navy Merino Sweater Vest -->
+    <linearGradient id="merinoVest" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1D2A44"/>
+      <stop offset="100%" stop-color="#0F1726"/>
+    </linearGradient>
+
+    <linearGradient id="henrySkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F7DFD4"/>
+      <stop offset="100%" stop-color="#E2B7A3"/>
+    </linearGradient>
+
+    <!-- Blue Gingham Pattern -->
+    <pattern id="ginghamPlaid" width="14" height="14" patternUnits="userSpaceOnUse">
+      <rect width="14" height="14" fill="#FFFFFF"/>
+      <rect x="0" y="0" width="14" height="7" fill="#6EA8D9" opacity="0.6"/>
+      <rect x="0" y="0" width="7" height="14" fill="#6EA8D9" opacity="0.6"/>
+      <rect x="0" y="0" width="7" height="7" fill="#2E6BA4" opacity="0.7"/>
+    </pattern>
+
+    <filter id="softShadowH" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="mustardLanyardGlowH" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#F4A261" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="henryClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Finance Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#henryPartition)"/>
+
+    <!-- Pinned Disappointment Note -->
+    <g transform="translate(48, 110) rotate(-4)">
+      <rect width="56" height="48" rx="2" fill="#E2D9F3" stroke="#7209B7" stroke-width="1.2"/>
+      <rect width="56" height="8" fill="#7209B7"/>
+      <text x="28" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">EXPENSE AUDIT</text>
+      <text x="28" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">PURPLE INK</text>
+      <text x="28" y="28" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">MEANS I AM</text>
+      <text x="28" y="39" font-family="Arial Black, Impact" font-size="6.5" fill="#560BAD" text-anchor="middle">DISAPPOINTED</text>
+      <circle cx="28" cy="3" r="1.8" fill="#F4A261"/>
+    </g>
+
+    <!-- CHARACTER: HENRY (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowH)">
+
+      <!-- Gingham Shirt Sleeves & Base -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#ginghamPlaid)" stroke="#1F3A52" stroke-width="2.5"/>
+
+      <!-- Fitted Navy Merino V-Neck Sweater Vest -->
+      <path d="M110,344 L160,302 L200,380 L240,302 L290,344 L294,560 L106,560 Z"
+            fill="url(#merinoVest)" stroke="#0A101C" stroke-width="3"/>
+      <!-- V-Neck Rib Trim -->
+      <polygon points="160,302 200,380 240,302 248,304 200,388 152,304" fill="#2B3A57"/>
+
+      <!-- Fastidiously Buttoned Gingham Collar -->
+      <polygon points="170,296 196,332 178,336 158,308" fill="url(#ginghamPlaid)" stroke="#1F3A52" stroke-width="1.8"/>
+      <polygon points="230,296 204,332 222,336 242,308" fill="url(#ginghamPlaid)" stroke="#1F3A52" stroke-width="1.8"/>
+      <circle cx="200" cy="326" r="2.5" fill="#FFFFFF" stroke="#6EA8D9" stroke-width="1"/> <!-- Top button done up -->
+
+      <!-- Pocket Protector with Menacing Purple Pen on Left Breast -->
+      <g transform="translate(122, 380)">
+        <rect width="36" height="48" rx="2" fill="#E8EDF2" stroke="#8D9CA8" stroke-width="1.5"/>
+        <path d="M0,0 L36,0 L36,12 C36,16 28,18 18,18 C8,18 0,16 0,12 Z" fill="#CFD8DC" stroke="#8D9CA8" stroke-width="1.5"/>
+        <!-- 4 Pens -->
+        <rect x="4" y="-12" width="5" height="16" rx="1" fill="#212529"/> <!-- Black -->
+        <rect x="12" y="-12" width="5" height="16" rx="1" fill="#0077B6"/> <!-- Blue -->
+        <rect x="20" y="-12" width="5" height="16" rx="1" fill="#2D6A4F"/> <!-- Green -->
+        <rect x="28" y="-15" width="5.5" height="19" rx="1" fill="#7209B7" stroke="#3A0CA3" stroke-width="0.8"/> <!-- Menacing Purple Pen -->
+      </g>
+
+      <!-- Neck -->
+      <path d="M172,260 L172,306 C172,322 228,322 228,306 L228,260 Z" fill="#E2B7A3" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- MUSTARD GOLD FINANCE LANYARD -->
+      <g filter="url(#mustardLanyardGlowH)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#F4A261" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#F4A261" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFE3C2" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFE3C2" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base (Mid 30s, Neat Oval) -->
+      <path d="M148,168 C148,132 252,132 252,168 L252,222 C252,260 226,282 200,282 C174,282 148,260 148,222 Z"
+            fill="url(#henrySkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Ears -->
+      <ellipse cx="142" cy="206" rx="8" ry="16" fill="#E2B7A3" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="258" cy="206" rx="8" ry="16" fill="#E2B7A3" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- Meticulous Side-Parted Chestnut Hair -->
+      <path d="M144,170 C140,122 162,94 200,94 C238,94 256,122 254,170 C246,144 230,136 200,136 C170,136 152,144 144,170 Z"
+            fill="#5A3825" stroke="#2E1B10" stroke-width="2"/>
+      <!-- Razor sharp side parting line on left -->
+      <line x1="166" y1="108" x2="162" y2="152" stroke="#2E1B10" stroke-width="2.5"/>
+      <path d="M166,112 Q206,104 246,124" stroke="#825233" stroke-width="2.5" fill="none"/>
+
+      <!-- Skeptical, Analytical Eyebrows -->
+      <path d="M162,182 L186,180" stroke="#3D2415" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M214,180 L238,184" stroke="#3D2415" stroke-width="3.5" stroke-linecap="round"/>
+
+      <!-- Analytical Wire-Rimmed Glasses & Narrow Squinting Eyes -->
+      <g>
+        <!-- Eyes -->
+        <ellipse cx="174" cy="198" rx="7.5" ry="5.5" fill="#FFFFFF" stroke="#2B2D42" stroke-width="1.8"/>
+        <circle cx="175" cy="198" r="3.2" fill="#4B382A"/>
+        <ellipse cx="226" cy="198" rx="7.5" ry="5.5" fill="#FFFFFF" stroke="#2B2D42" stroke-width="1.8"/>
+        <circle cx="225" cy="198" r="3.2" fill="#4B382A"/>
+
+        <!-- Thin Silver Spectacles -->
+        <rect x="160" y="188" width="28" height="20" rx="3" fill="#EAF4F4" fill-opacity="0.25" stroke="#5C6B73" stroke-width="2"/>
+        <rect x="212" y="188" width="28" height="20" rx="3" fill="#EAF4F4" fill-opacity="0.25" stroke="#5C6B73" stroke-width="2"/>
+        <path d="M188,196 Q200,192 212,196" stroke="#5C6B73" stroke-width="2" fill="none"/>
+        <line x1="160" y1="194" x2="144" y2="198" stroke="#5C6B73" stroke-width="1.5"/>
+        <line x1="240" y1="194" x2="256" y2="198" stroke="#5C6B73" stroke-width="1.5"/>
+      </g>
+
+      <!-- Straight, Symmetrical Nose -->
+      <path d="M197,196 L194,222 Q200,226 206,222 L203,196" fill="#D8A58F" stroke="#8C5237" stroke-width="1.8"/>
+
+      <!-- Fastidious Pursed Lips (Audit-Proof Disapproval) -->
+      <path d="M186,248 L214,248" stroke="#4A1E17" stroke-width="3" stroke-linecap="round"/>
+      <path d="M184,248 L182,252 M216,248 L218,252" stroke="#8C5237" stroke-width="1.8"/>
+
+      <!-- PROP: TAKEAWAY COFFEE CUP LABELED "OAT" (Gemma's Influence) -->
+      <g transform="translate(226, 376) rotate(-8)">
+        <!-- Paper Cup Body -->
+        <polygon points="6,12 12,80 44,80 50,12" fill="#F4F1DE" stroke="#3D405B" stroke-width="2"/>
+        <!-- Brown Cardboard Heat Sleeve -->
+        <polygon points="9,30 11,56 45,56 47,30" fill="#D4A373" stroke="#8C5828" stroke-width="1.5"/>
+        <!-- Hand-written Sharpie text: "OAT" -->
+        <text x="28" y="46" font-family="'Courier New', monospace" font-size="9" font-weight="900" fill="#28180A" text-anchor="middle">OAT</text>
+        <!-- White Sip Lid -->
+        <rect x="3" y="4" width="50" height="10" rx="3" fill="#FFFFFF" stroke="#3D405B" stroke-width="2"/>
+
+        <!-- Henry's Right Hand Holding the Cup -->
+        <g transform="translate(20, 36)">
+          <path d="M24,-6 C28,4 28,14 24,24 L14,24 C18,14 18,4 14,-6 Z" fill="#F7DFD4" stroke="#4A3228" stroke-width="1.8"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

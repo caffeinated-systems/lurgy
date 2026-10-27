@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Facilities Concrete/Warehouse Divider -->
+    <linearGradient id="facPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#677277"/>
+      <stop offset="100%" stop-color="#464F53"/>
+    </linearGradient>
+
+    <!-- Navy Fleece Vest -->
+    <linearGradient id="navyVest" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#243447"/>
+      <stop offset="100%" stop-color="#141E2B"/>
+    </linearGradient>
+
+    <linearGradient id="barrySkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EAB99A"/>
+      <stop offset="100%" stop-color="#D39775"/>
+    </linearGradient>
+
+    <!-- Aluminium Stepladder Gradient -->
+    <linearGradient id="aluGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#D8E2E6"/>
+      <stop offset="50%" stop-color="#A8B4B8"/>
+      <stop offset="100%" stop-color="#849296"/>
+    </linearGradient>
+
+    <filter id="softShadowBarry" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="amberLanyardGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#FFB703" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="barryClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Facilities Divider Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#facPartition)"/>
+
+    <!-- Boiler Warning Tag Pinned Behind Him -->
+    <g transform="translate(50, 114) rotate(4)">
+      <rect width="44" height="54" rx="2" fill="#E65100" stroke="#BF360C" stroke-width="1.5"/>
+      <circle cx="22" cy="8" r="3" fill="#FFFFFF"/>
+      <text x="22" y="24" font-family="Arial, sans-serif" font-weight="900" font-size="7" fill="#FFFFFF" text-anchor="middle">BOILER</text>
+      <text x="22" y="34" font-family="Arial, sans-serif" font-weight="bold" font-size="6" fill="#FFFFFF" text-anchor="middle">DO NOT</text>
+      <text x="22" y="44" font-family="Arial, sans-serif" font-weight="bold" font-size="6" fill="#FFFFFF" text-anchor="middle">TOUCH</text>
+    </g>
+
+    <!-- STEPLADDER TOP (Peeking over his left shoulder) -->
+    <g transform="translate(290, 80) rotate(8)">
+      <!-- Left Stile -->
+      <rect x="0" y="0" width="12" height="180" rx="2" fill="url(#aluGrad)" stroke="#5E696D" stroke-width="1.5"/>
+      <!-- Right Stile -->
+      <rect x="34" y="0" width="12" height="180" rx="2" fill="url(#aluGrad)" stroke="#5E696D" stroke-width="1.5"/>
+      <!-- Top Step / Platform -->
+      <rect x="-6" y="10" width="58" height="16" rx="2" fill="#455A64" stroke="#263238" stroke-width="2"/>
+      <line x1="4" y1="60" x2="42" y2="60" stroke="#78909C" stroke-width="4"/>
+      <line x1="4" y1="110" x2="42" y2="110" stroke="#78909C" stroke-width="4"/>
+    </g>
+
+    <!-- CHARACTER: BARRY (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowBarry)">
+
+      <!-- Grey Thermal Long Sleeve Under-Shirt -->
+      <path d="M50,560 L52,490 L64,374 C70,332 114,310 164,306 L236,306 C286,310 330,332 336,374 L348,490 L350,560 Z"
+            fill="#B0BEC5" stroke="#37474F" stroke-width="3"/>
+      <!-- Waffle Texture -->
+      <path d="M70,390 L110,480 M100,380 L140,460 M290,380 L250,460" stroke="#90A4AE" stroke-width="2" stroke-dasharray="3,3"/>
+
+      <!-- Navy Fleece Utility Vest -->
+      <path d="M104,336 L154,306 L200,420 L246,306 L296,336 L298,560 L102,560 Z"
+            fill="url(#navyVest)" stroke="#101721" stroke-width="2.5"/>
+      <line x1="200" y1="420" x2="200" y2="560" stroke="#37474F" stroke-width="3.5"/>
+
+      <!-- Neck & Stubble -->
+      <path d="M166,264 L166,312 C166,328 234,328 234,312 L234,264 Z" fill="#D39775" stroke="#4A3228" stroke-width="2.5"/>
+      <ellipse cx="200" cy="284" rx="30" ry="12" fill="#B47B5B" opacity="0.6"/>
+
+      <!-- SAFETY GOLD FACILITIES LANYARD -->
+      <g filter="url(#amberLanyardGlow)">
+        <path d="M158,302 C162,360 184,408 196,442" stroke="#FFB703" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,302 C238,360 216,408 204,442" stroke="#FFB703" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,302 C162,360 184,408 196,442" stroke="#FFF275" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,302 C238,360 216,408 204,442" stroke="#FFF275" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Brass Boiler Key hanging from Lanyard -->
+      <circle cx="200" cy="445" r="5" fill="#C5A059" stroke="#5C4314" stroke-width="1.5"/>
+      <path d="M200,450 L200,480 L208,480 M200,470 L206,470" stroke="#C5A059" stroke-width="3.5" fill="none" stroke-linecap="square"/>
+
+      <!-- Head Base -->
+      <path d="M144,174 C144,136 256,136 256,174 L256,228 C256,268 228,288 200,288 C172,288 144,268 144,228 Z"
+            fill="url(#barrySkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Ears with Carpenter's Red Pencil behind Right Ear -->
+      <ellipse cx="139" cy="212" rx="11" ry="18" fill="#D39775" stroke="#4A3228" stroke-width="2.5"/>
+      <!-- Red Pencil -->
+      <g transform="translate(122, 175) rotate(-35)">
+        <rect width="38" height="8" rx="1" fill="#D32F2F" stroke="#7F0000" stroke-width="1"/>
+        <polygon points="38,0 48,4 38,8" fill="#D7CCC8"/>
+        <polygon points="45,2.5 48,4 45,5.5" fill="#212121"/>
+      </g>
+      <ellipse cx="261" cy="212" rx="11" ry="18" fill="#D39775" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Grey 5-o'clock Shadow / Stubble -->
+      <path d="M150,210 C150,248 165,286 200,286 C235,286 250,248 250,210 C242,216 230,222 200,222 C170,222 158,216 150,210 Z"
+            fill="#757F87" opacity="0.45"/>
+
+      <!-- Wry Smirking Mouth ("Seen it all, chief") -->
+      <path d="M178,252 Q196,254 224,242" stroke="#4E261B" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M220,240 Q225,244 222,250" stroke="#4E261B" stroke-width="2" fill="none"/>
+
+      <!-- Knowing Squint Eyes & Heavy Crow's Feet -->
+      <g>
+        <!-- Left eye squinting -->
+        <path d="M162,204 Q174,198 186,204" stroke="#37261D" stroke-width="2.8" fill="none"/>
+        <circle cx="174" cy="204" r="3.5" fill="#3E2723"/>
+        <path d="M152,198 L158,203 M150,206 L158,206 M152,212 L158,209" stroke="#A96E50" stroke-width="1.8" stroke-linecap="round"/>
+
+        <!-- Right eye slightly wider, knowing -->
+        <path d="M214,202 Q226,196 238,202" stroke="#37261D" stroke-width="2.8" fill="none"/>
+        <circle cx="226" cy="203" r="3.8" fill="#3E2723"/>
+        <circle cx="227.5" cy="201.5" r="1.2" fill="#FFFFFF"/>
+        <path d="M246,196 L240,202 M248,204 L240,205 M246,211 L239,209" stroke="#A96E50" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+
+      <!-- Bushy Salt-and-Pepper Eyebrows -->
+      <path d="M158,190 Q174,184 188,190" stroke="#546E7A" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M212,188 Q226,180 242,186" stroke="#546E7A" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+      <!-- Nose (Slightly broad, friendly) -->
+      <path d="M194,200 L191,228 Q200,234 209,228 L206,200" fill="#DFA283" stroke="#8D573B" stroke-width="2" stroke-linejoin="round"/>
+
+      <!-- BRITISH WOOL FLAT CAP (Pushed back cockily) -->
+      <!-- Cap Bill -->
+      <path d="M138,154 C158,138 242,138 262,154 C244,148 156,148 138,154 Z" fill="#37474F" stroke="#212121" stroke-width="2"/>
+      <!-- Cap Crown -->
+      <path d="M132,150 C128,96 156,76 200,76 C244,76 272,96 268,150 C256,134 238,124 200,124 C162,124 144,134 132,150 Z"
+            fill="#455A64" stroke="#212121" stroke-width="2.5"/>
+      <line x1="200" y1="76" x2="200" y2="124" stroke="#37474F" stroke-width="2"/>
+      <!-- Peak Stud -->
+      <circle cx="200" cy="78" r="3.5" fill="#263238"/>
+
+    </g>
+  </g>
+</svg>

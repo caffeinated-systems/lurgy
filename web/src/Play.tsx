@@ -186,10 +186,20 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 				aria-label="Office floor, 4 desks across, 5 rows"
 				onKeyDown={onKeyDown}
 			>
+				{/* Column letters and row numbers sit on the edges, so tiles show faces, not coordinates. */}
+				<div className="axis" aria-hidden="true">
+					<span />
+					{rows[0]?.map((c) => (
+						<span key={c.desk}>{c.desk[0]}</span>
+					))}
+				</div>
 				{rows.map((row) => (
 					// biome-ignore lint/a11y/useSemanticElements: a row of the ARIA grid above
 					// biome-ignore lint/a11y/useFocusableInteractive: a grid row only groups its cells
 					<div role="row" className="row" key={row[0]?.desk}>
+						<span className="axis" aria-hidden="true">
+							{row[0]?.desk.slice(1)}
+						</span>
 						{row.map((c) => {
 							const reveal = revealOf(progress, c.desk);
 							const masked = progress.masks.includes(c.desk);
@@ -226,14 +236,20 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 									aria-label={label}
 									onClick={() => dispatch({ type: "selected", desk: c.desk })}
 								>
-									<span className="coord">{c.desk}</span>
+									<img
+										className="portrait"
+										src={`/portraits/${c.name.toLowerCase()}.svg`}
+										alt=""
+									/>
+									{masked && (
+										<img
+											className="portrait mask"
+											src="/portraits/mask.svg"
+											alt=""
+										/>
+									)}
 									<span className="nm">{c.name}</span>
 									{reveal && <span className="state">{reveal.state}</span>}
-									{masked && (
-										<span className="mask" aria-hidden="true">
-											😷
-										</span>
-									)}
 									{hints && (
 										<span className="mark" aria-hidden="true">
 											{hints === 1 ? "🟡" : "🟠"}

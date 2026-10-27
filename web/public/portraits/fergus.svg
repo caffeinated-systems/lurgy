@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Facilities Concrete/Warehouse Divider -->
+    <linearGradient id="fergusPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#677277"/>
+      <stop offset="100%" stop-color="#464F53"/>
+    </linearGradient>
+
+    <!-- Moss Green Cable-Knit Gradient -->
+    <linearGradient id="cableKnit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#556B2F"/>
+      <stop offset="100%" stop-color="#3A4D1A"/>
+    </linearGradient>
+
+    <!-- Fair Scottish Skin Tone -->
+    <linearGradient id="fergusSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDE8DF"/>
+      <stop offset="100%" stop-color="#F2C7B6"/>
+    </linearGradient>
+
+    <!-- Oil Can Silver Gradient -->
+    <linearGradient id="oilSilver" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#E0E5E8"/>
+      <stop offset="50%" stop-color="#B0B9BE"/>
+      <stop offset="100%" stop-color="#838E94"/>
+    </linearGradient>
+
+    <filter id="softShadowFergus" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="amberLanyardGlowF" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#FFB703" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="fergusClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Facilities Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#fergusPartition)"/>
+
+    <!-- Secret Poem Pinned to Screen -->
+    <g transform="translate(48, 110) rotate(-5)">
+      <rect width="56" height="52" rx="2" fill="#FFFDF0" stroke="#C7BA9D" stroke-width="1"/>
+      <text x="28" y="14" font-family="'Courier New', monospace" font-size="5" font-weight="bold" fill="#6B5B3B" text-anchor="middle">ODE TO THE</text>
+      <text x="28" y="22" font-family="'Courier New', monospace" font-size="5" font-weight="bold" fill="#6B5B3B" text-anchor="middle">PHOTOCOPIER</text>
+      <line x1="8" y1="28" x2="48" y2="28" stroke="#8A7A58" stroke-width="1"/>
+      <line x1="12" y1="34" x2="44" y2="34" stroke="#8A7A58" stroke-width="1"/>
+      <line x1="10" y1="40" x2="38" y2="40" stroke="#8A7A58" stroke-width="1"/>
+      <circle cx="28" cy="3" r="1.8" fill="#FFB703"/>
+    </g>
+
+    <!-- CHARACTER: FERGUS (Shifted up, slightly hunched shy posture) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowFergus)">
+
+      <!-- Denim Shirt Collar peeking out -->
+      <polygon points="160,296 200,340 240,296" fill="#4A6B82" stroke="#2C404E" stroke-width="2"/>
+
+      <!-- Chunky Moss-Green Cable-Knit Jumper -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#cableKnit)" stroke="#263311" stroke-width="3"/>
+
+      <!-- Braided Cable-Knit Texture Ribs -->
+      <path d="M110,360 Q118,440 120,560 M140,340 Q148,430 150,560" stroke="#435525" stroke-width="3" fill="none"/>
+      <path d="M290,360 Q282,440 280,560 M260,340 Q252,430 250,560" stroke="#435525" stroke-width="3" fill="none"/>
+      <!-- Cable braiding crosses -->
+      <path d="M195,350 L205,370 M205,370 L195,390 M195,390 L205,410" stroke="#435525" stroke-width="3" stroke-linecap="round"/>
+
+      <!-- Jumper Crew Neck -->
+      <path d="M160,298 C170,320 230,320 240,298 Z" fill="#3A4D1A" stroke="#263311" stroke-width="2"/>
+
+      <!-- Neck -->
+      <path d="M168,260 L168,304 C168,320 232,320 232,304 L232,260 Z" fill="#F2C7B6" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- SAFETY GOLD FACILITIES LANYARD -->
+      <g filter="url(#amberLanyardGlowF)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#FFB703" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#FFB703" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFF275" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFF275" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base -->
+      <path d="M144,174 C144,136 256,136 256,174 L256,226 C256,264 228,284 200,284 C172,284 144,264 144,226 Z"
+            fill="url(#fergusSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- INTENSE ROSY BLUSHING CHEEKS (Bashful / Priya's fault) -->
+      <circle cx="162" cy="224" r="15" fill="#FF758F" opacity="0.5"/>
+      <circle cx="238" cy="224" r="15" fill="#FF758F" opacity="0.5"/>
+      <!-- Soft freckles over bridge of nose -->
+      <circle cx="188" cy="214" r="1.5" fill="#C97A56"/>
+      <circle cx="194" cy="218" r="1.2" fill="#C97A56"/>
+      <circle cx="206" cy="217" r="1.3" fill="#C97A56"/>
+      <circle cx="212" cy="213" r="1.5" fill="#C97A56"/>
+
+      <!-- Ears -->
+      <ellipse cx="140" cy="208" rx="9" ry="16" fill="#F2C7B6" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="260" cy="208" rx="9" ry="16" fill="#F2C7B6" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- WAVY UNRULY GINGER HAIR -->
+      <path d="M136,176 C128,124 150,86 200,86 C250,86 272,124 264,176 C258,154 242,142 200,142 C158,142 142,154 136,176 Z"
+            fill="#D95D24" stroke="#87320C" stroke-width="2"/>
+      <!-- Messy Wavy Curls -->
+      <path d="M138,136 Q146,110 162,118 Q174,104 186,112 Q200,94 216,108 Q234,98 248,114 Q260,118 262,138"
+            fill="#E86E30" stroke="#87320C" stroke-width="2"/>
+      <path d="M166,134 Q180,122 196,132" stroke="#F4A261" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M206,128 Q220,118 236,128" stroke="#F4A261" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- Gentle Arched Eyebrows (Slightly nervous tilt) -->
+      <path d="M160,182 Q174,174 188,180" stroke="#B84A16" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,180 Q226,174 240,182" stroke="#B84A16" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Soft, Gentle Brown Eyes (Shy gaze) -->
+      <g>
+        <ellipse cx="174" cy="198" rx="8" ry="7" fill="#FFFFFF" stroke="#3D2411" stroke-width="2"/>
+        <circle cx="174" cy="199" r="4.2" fill="#5C3A21"/>
+        <circle cx="174" cy="199" r="1.8" fill="#000000"/>
+        <circle cx="175.5" cy="197.5" r="1.3" fill="#FFFFFF"/>
+
+        <ellipse cx="226" cy="198" rx="8" ry="7" fill="#FFFFFF" stroke="#3D2411" stroke-width="2"/>
+        <circle cx="226" cy="199" r="4.2" fill="#5C3A21"/>
+        <circle cx="226" cy="199" r="1.8" fill="#000000"/>
+        <circle cx="227.5" cy="197.5" r="1.3" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Soft Friendly Nose -->
+      <path d="M197,196 L194,222 Q200,227 206,222 L203,196" fill="#E8A992" stroke="#8D5237" stroke-width="1.8"/>
+
+      <!-- Bashful, Sweet Half-Smile -->
+      <path d="M184,248 Q198,256 216,246" stroke="#8C3518" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- PROP: VINTAGE SQUEEZE-CAN OF OIL (Held bashfully) -->
+      <g transform="translate(136, 386) rotate(6)">
+        <!-- Can Body -->
+        <rect x="0" y="24" width="68" height="74" rx="4" fill="url(#oilSilver)" stroke="#4A555C" stroke-width="2"/>
+        <!-- Red Label Band -->
+        <rect x="0" y="44" width="68" height="34" fill="#D90429"/>
+        <text x="34" y="62" font-family="Arial Black, Impact" font-size="8" fill="#FFFFFF" text-anchor="middle">3-IN-1</text>
+        <text x="34" y="72" font-family="Arial" font-size="5" font-weight="bold" fill="#FFCCD5" text-anchor="middle">LUBRICANT</text>
+        <!-- Spout Funnel & Nozzle -->
+        <polygon points="26,24 42,24 37,0 31,0" fill="#B0B9BE" stroke="#4A555C" stroke-width="1.8"/>
+        <!-- Long Curved Copper Oiling Spout -->
+        <path d="M34,0 Q36,-30 50,-44" fill="none" stroke="#DDA15E" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Tiny droplet of oil at tip -->
+        <circle cx="51" cy="-45" r="2.5" fill="#E9C46A"/>
+
+        <!-- Fergus's Hands Clamping Can -->
+        <g transform="translate(48, 48)">
+          <path d="M0,0 C12,0 18,10 18,20 C18,30 12,38 0,38 Z" fill="#FDE8DF" stroke="#4A3228" stroke-width="2"/>
+          <line x1="2" y1="12" x2="14" y2="12" stroke="#E8A992" stroke-width="2"/>
+          <line x1="2" y1="24" x2="14" y2="24" stroke="#E8A992" stroke-width="2"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Sales Burgundy Partition -->
+    <linearGradient id="lindaPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#723344"/>
+      <stop offset="100%" stop-color="#441C27"/>
+    </linearGradient>
+
+    <!-- Leopard Silk Base Gradient -->
+    <linearGradient id="leopardSilk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F2C179"/>
+      <stop offset="100%" stop-color="#D19847"/>
+    </linearGradient>
+
+    <linearGradient id="lindaSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCE1D2"/>
+      <stop offset="100%" stop-color="#E5AF95"/>
+    </linearGradient>
+
+    <filter id="softShadowL" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="crimsonLanyardGlowL" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#E63946" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="lindaClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Sales Partition Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#lindaPartition)"/>
+
+    <!-- Sales Motto Sticky Note -->
+    <g transform="translate(48, 110) rotate(4)">
+      <rect width="56" height="48" rx="2" fill="#FFE3E0" stroke="#E63946" stroke-width="1"/>
+      <rect width="56" height="8" fill="#E63946"/>
+      <text x="28" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">SALES RULE #1</text>
+      <text x="28" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#1C1F1A" text-anchor="middle">IF NOT IN MY</text>
+      <text x="28" y="30" font-family="Arial Black, Impact" font-size="7" fill="#C92A2A" text-anchor="middle">FILOFAX,</text>
+      <text x="28" y="42" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">IT DIDN'T HAPPEN</text>
+      <circle cx="28" cy="3" r="1.8" fill="#FFFFFF"/>
+    </g>
+
+    <!-- CHARACTER: LINDA (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowL)">
+
+      <!-- Leopard Silk Blouse Body -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#leopardSilk)" stroke="#4A3319" stroke-width="3"/>
+
+      <!-- Leopard Print Rosettes & Spots -->
+      <!-- Left side spots -->
+      <path d="M90,370 Q96,364 102,372 Q98,378 90,370" fill="#3D2411"/>
+      <circle cx="96" cy="371" r="2" fill="#A86F28"/>
+      <path d="M120,410 Q128,404 134,414 Q128,422 120,410" fill="#3D2411"/>
+      <circle cx="127" cy="412" r="2.5" fill="#A86F28"/>
+      <path d="M80,450 Q88,442 94,452 Q86,460 80,450" fill="#3D2411"/>
+      <!-- Right side spots -->
+      <path d="M300,370 Q306,364 312,372 Q308,378 300,370" fill="#3D2411"/>
+      <circle cx="306" cy="371" r="2" fill="#A86F28"/>
+      <path d="M270,410 Q278,404 284,414 Q278,422 270,410" fill="#3D2411"/>
+      <circle cx="277" cy="412" r="2.5" fill="#A86F28"/>
+      <path d="M310,450 Q318,442 324,452 Q316,460 310,450" fill="#3D2411"/>
+
+      <!-- Pussy-Bow Knot at Neck -->
+      <g transform="translate(200, 316)">
+        <ellipse cx="0" cy="0" rx="12" ry="8" fill="#D19847" stroke="#3D2411" stroke-width="1.8"/>
+        <!-- Bow loops -->
+        <path d="M-10,-4 C-26,-18 -34,4 -10,4 Z" fill="#F2C179" stroke="#3D2411" stroke-width="1.8"/>
+        <path d="M10,-4 C26,-18 34,4 10,4 Z" fill="#F2C179" stroke="#3D2411" stroke-width="1.8"/>
+        <!-- Bow tails -->
+        <path d="M-6,6 L-14,32 L-4,30 Z" fill="#D19847" stroke="#3D2411" stroke-width="1.5"/>
+        <path d="M6,6 L14,32 L4,30 Z" fill="#D19847" stroke="#3D2411" stroke-width="1.5"/>
+      </g>
+
+      <!-- Neck -->
+      <path d="M168,262 L168,310 C168,326 232,326 232,310 L232,262 Z" fill="#E5AF95" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- CLARET CRIMSON SALES LANYARD -->
+      <g filter="url(#crimsonLanyardGlowL)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#E63946" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#E63946" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFCCD5" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFCCD5" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base -->
+      <path d="M144,174 C144,136 256,136 256,174 L256,226 C256,264 228,284 200,284 C172,284 144,264 144,226 Z"
+            fill="url(#lindaSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- TEASED CARAMEL BLONDE 80s POWER HAIR -->
+      <!-- Massive volume backdrop -->
+      <path d="M120,180 C110,120 130,76 200,76 C270,76 290,120 280,180 C296,206 294,242 276,252 C266,224 264,180 264,180 C248,154 226,146 200,146 C174,146 152,154 136,180 C136,180 134,224 124,252 C106,242 104,206 120,180 Z"
+            fill="#DDA15E" stroke="#7A4E1D" stroke-width="2.5"/>
+      <!-- Highlights in big hair -->
+      <path d="M148,116 Q200,94 252,116" stroke="#FFE3A8" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M136,144 Q198,124 264,144" stroke="#FFE3A8" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- Heavy Gold Hoop Earrings -->
+      <circle cx="138" cy="214" r="13" fill="none" stroke="#F4A261" stroke-width="4"/>
+      <circle cx="262" cy="214" r="13" fill="none" stroke="#F4A261" stroke-width="4"/>
+
+      <!-- Ears -->
+      <ellipse cx="140" cy="210" rx="8" ry="15" fill="#E5AF95" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="260" cy="210" rx="8" ry="15" fill="#E5AF95" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- Charismatic Laugh Lines & Crow's Feet -->
+      <path d="M152,196 L158,200 M150,203 L158,204 M152,210 L158,208" stroke="#B87D65" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M248,196 L242,200 M250,203 L242,204 M248,210 L242,208" stroke="#B87D65" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- Warm, Sharp Shark Eyes (Closing the deal) -->
+      <g>
+        <!-- Blue Eyes with Heavy Mascara Eyelashes -->
+        <ellipse cx="174" cy="198" rx="8.5" ry="6.5" fill="#FFFFFF" stroke="#2B2D42" stroke-width="2"/>
+        <circle cx="174" cy="198" r="4.2" fill="#2A9D8F"/>
+        <circle cx="174" cy="198" r="2" fill="#000000"/>
+        <circle cx="175" cy="196" r="1.2" fill="#FFFFFF"/>
+        <!-- Mascara flick -->
+        <path d="M166,194 L160,190 M182,194 L188,190" stroke="#1D2A44" stroke-width="2" stroke-linecap="round"/>
+
+        <ellipse cx="226" cy="198" rx="8.5" ry="6.5" fill="#FFFFFF" stroke="#2B2D42" stroke-width="2"/>
+        <circle cx="226" cy="198" r="4.2" fill="#2A9D8F"/>
+        <circle cx="226" cy="198" r="2" fill="#000000"/>
+        <circle cx="227" cy="196" r="1.2" fill="#FFFFFF"/>
+        <path d="M218,194 L212,190 M234,194 L240,190" stroke="#1D2A44" stroke-width="2" stroke-linecap="round"/>
+      </g>
+
+      <!-- Defined Eyebrows -->
+      <path d="M160,180 Q174,170 188,180" stroke="#8C5828" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,180 Q226,170 240,180" stroke="#8C5828" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Nose with Rosy Warmth -->
+      <path d="M196,198 L193,222 Q200,227 207,222 L204,198" fill="#DB9A7E" stroke="#8D5237" stroke-width="1.8"/>
+
+      <!-- Broad Closer Smile with Frosted Coral Lipstick -->
+      <path d="M174,242 Q200,266 226,242 Z" fill="#E76F51" stroke="#9A3412" stroke-width="2"/>
+      <path d="M178,242 Q200,250 222,242" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+      <!-- PROP: BATTERED VINTAGE BLACK LEATHER FILOFAX -->
+      <g transform="translate(136, 390) rotate(5)">
+        <!-- Filofax Spine & Binder Cover -->
+        <rect x="0" y="0" width="136" height="96" rx="6" fill="#1C1F22" stroke="#000000" stroke-width="2.5"/>
+        <!-- Leather Snap Clasp with Brass Popper -->
+        <path d="M-6,40 L26,40 L26,58 L-6,58 Z" fill="#2C3036" stroke="#000000" stroke-width="2"/>
+        <circle cx="18" cy="49" r="4" fill="#E9C46A" stroke="#7A5807" stroke-width="1.5"/>
+
+        <!-- Multi-Colored Frayed Plastic Index Tabs Protruding -->
+        <rect x="134" y="14" width="8" height="14" rx="2" fill="#E63946"/>
+        <rect x="134" y="32" width="8" height="14" rx="2" fill="#F4A261"/>
+        <rect x="134" y="50" width="8" height="14" rx="2" fill="#2A9D8F"/>
+        <rect x="134" y="68" width="8" height="14" rx="2" fill="#457B9D"/>
+
+        <!-- Stitched Leather Edge -->
+        <rect x="3" y="3" width="130" height="90" rx="4" fill="none" stroke="#4F555C" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Linda's Hand with Red Manicured Nails Cradling It -->
+        <g transform="translate(42, 60)">
+          <!-- Hand base -->
+          <ellipse cx="24" cy="18" rx="24" ry="14" fill="#FCE1D2" stroke="#4A3228" stroke-width="2"/>
+          <!-- Fingers with glossy red nails -->
+          <circle cx="8" cy="10" r="3.5" fill="#C9184A"/>
+          <circle cx="18" cy="8" r="3.5" fill="#C9184A"/>
+          <circle cx="28" cy="8" r="3.5" fill="#C9184A"/>
+          <circle cx="38" cy="10" r="3.5" fill="#C9184A"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

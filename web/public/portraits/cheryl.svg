@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Reception Sage Green Partition -->
+    <linearGradient id="cherylPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#557A61"/>
+      <stop offset="100%" stop-color="#344E3E"/>
+    </linearGradient>
+
+    <!-- Quilted Pink Bodywarmer Gradient -->
+    <linearGradient id="pinkQuilt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F4ACB7"/>
+      <stop offset="100%" stop-color="#D88C9A"/>
+    </linearGradient>
+
+    <linearGradient id="cherylSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCE5D8"/>
+      <stop offset="100%" stop-color="#EDBFA8"/>
+    </linearGradient>
+
+    <filter id="softShadowCheryl" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="greenLanyardGlowC" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#52B788" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="cherylClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Reception Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#cherylPartition)"/>
+
+    <!-- Visitor Sign Notice -->
+    <g transform="translate(48, 110) rotate(-3)">
+      <rect width="60" height="48" rx="2" fill="#FFFFFF" stroke="#344E3E" stroke-width="1"/>
+      <rect width="60" height="8" fill="#52B788"/>
+      <text x="30" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">FRONT DESK</text>
+      <text x="30" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#1C1F1A" text-anchor="middle">PLEASE SIGN IN</text>
+      <text x="30" y="30" font-family="Arial" font-size="4.5" font-weight="bold" fill="#6C757D" text-anchor="middle">THE PEN IS ON A</text>
+      <text x="30" y="41" font-family="Arial Black, Impact" font-size="5.5" fill="#C92A2A" text-anchor="middle">CHAIN FOR A REASON</text>
+      <circle cx="30" cy="3" r="1.8" fill="#52B788"/>
+    </g>
+
+    <!-- GARY THE RECEPTION PLANT (Leaves framing the right side) -->
+    <g transform="translate(290, 160)">
+      <!-- Long spider plant leaves arching into the portrait -->
+      <path d="M70,120 Q10,60 -20,80 Q20,110 70,140 Z" fill="#2D6A4F" stroke="#1B4332" stroke-width="1.5"/>
+      <line x1="70" y1="130" x2="-15" y2="82" stroke="#95D5B2" stroke-width="2"/>
+      <path d="M70,90 Q-10,10 -40,30 Q0,50 70,110 Z" fill="#40916C" stroke="#1B4332" stroke-width="1.5"/>
+      <line x1="70" y1="100" x2="-35" y2="32" stroke="#D8F3DC" stroke-width="2"/>
+      <text x="30" y="160" font-family="monospace" font-size="6" font-weight="bold" fill="#D8F3DC">GARY</text>
+    </g>
+
+    <!-- CHARACTER: CHERYL (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowCheryl)">
+
+      <!-- Chunky Cream Cowl-Neck Knit Jumper -->
+      <path d="M140,290 C120,320 120,360 144,380 C168,400 232,400 256,380 C280,360 280,320 260,290 Z"
+            fill="#F8F9FA" stroke="#DEE2E6" stroke-width="2"/>
+
+      <!-- Pink Quilted Thermal Bodywarmer (Draught-Proof) -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#pinkQuilt)" stroke="#9C5260" stroke-width="3"/>
+
+      <!-- Quilt Diamond Stitch Pattern -->
+      <line x1="70" y1="400" x2="130" y2="460" stroke="#C57584" stroke-width="2"/>
+      <line x1="70" y1="460" x2="130" y2="400" stroke="#C57584" stroke-width="2"/>
+      <line x1="270" y1="400" x2="330" y2="460" stroke="#C57584" stroke-width="2"/>
+      <line x1="270" y1="460" x2="330" y2="400" stroke="#C57584" stroke-width="2"/>
+
+      <!-- Neck -->
+      <path d="M172,258 L172,306 C172,322 228,322 228,306 L228,258 Z" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- FERN LEAF GREEN RECEPTION LANYARD -->
+      <g filter="url(#greenLanyardGlowC)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#52B788" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#52B788" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#D8F3DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#D8F3DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Retractable Key Reel hanging from Lanyard -->
+      <circle cx="200" cy="445" r="7" fill="#212529" stroke="#52B788" stroke-width="1.5"/>
+      <path d="M200,452 L200,480" stroke="#333333" stroke-width="1.5" stroke-dasharray="2,2"/>
+      <path d="M196,480 L204,480 L200,496 Z" fill="#E9C46A" stroke="#7A5807" stroke-width="1"/> <!-- Master Brass Key -->
+
+      <!-- Head Base (Late 50s, Warm Grandmotherly) -->
+      <path d="M146,174 C146,136 256,136 256,174 L256,226 C256,264 228,284 200,284 C172,284 144,264 144,226 Z"
+            fill="url(#cherylSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Soft Laugh Crinkles -->
+      <path d="M150,196 L158,200 M148,204 L158,205" stroke="#BA856D" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M250,196 L242,200 M252,204 L242,205" stroke="#BA856D" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- Ears -->
+      <ellipse cx="140" cy="210" rx="9" ry="16" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="260" cy="210" rx="9" ry="16" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- SHORT PERMED SILVER-GREY HAIR -->
+      <path d="M136,176 C128,124 148,90 200,90 C252,90 272,124 264,176 C272,204 270,238 258,248 C250,224 250,180 250,180 C234,152 220,146 200,146 C176,146 162,152 148,180 C148,180 148,224 140,248 C128,238 126,204 136,176 Z"
+            fill="#B0B9BE" stroke="#6C757D" stroke-width="2"/>
+      <!-- Soft Curls -->
+      <circle cx="142" cy="150" r="12" fill="#CFD8DC"/>
+      <circle cx="258" cy="150" r="12" fill="#CFD8DC"/>
+      <circle cx="200" cy="98" r="14" fill="#CFD8DC"/>
+
+      <!-- BIFOCALS ON BEADED NECK CORD -->
+      <path d="M144,214 C136,280 150,340 176,370" stroke="#D88C9A" stroke-width="3" stroke-dasharray="3,2" fill="none"/>
+      <path d="M256,214 C264,280 250,340 224,370" stroke="#D88C9A" stroke-width="3" stroke-dasharray="3,2" fill="none"/>
+
+      <!-- Round Bifocal Glasses Frames -->
+      <g>
+        <circle cx="174" cy="198" r="19" fill="#E8F8F5" fill-opacity="0.25" stroke="#9C5260" stroke-width="3"/>
+        <line x1="158" y1="204" x2="190" y2="204" stroke="#9C5260" stroke-width="1.2"/> <!-- Bifocal line -->
+        <circle cx="226" cy="198" r="19" fill="#E8F8F5" fill-opacity="0.25" stroke="#9C5260" stroke-width="3"/>
+        <line x1="210" y1="204" x2="242" y2="204" stroke="#9C5260" stroke-width="1.2"/> <!-- Bifocal line -->
+        <path d="M193,196 Q200,192 207,196" fill="none" stroke="#9C5260" stroke-width="3"/>
+      </g>
+
+      <!-- Warm Blue Eyes (All-Seeing, Serene) -->
+      <g>
+        <ellipse cx="174" cy="198" rx="7.5" ry="6" fill="#FFFFFF"/>
+        <circle cx="174" cy="198" r="3.8" fill="#468FAF"/>
+        <circle cx="174" cy="198" r="1.6" fill="#000000"/>
+        <circle cx="175" cy="197" r="1.2" fill="#FFFFFF"/>
+
+        <ellipse cx="226" cy="198" rx="7.5" ry="6" fill="#FFFFFF"/>
+        <circle cx="226" cy="198" r="3.8" fill="#468FAF"/>
+        <circle cx="226" cy="198" r="1.6" fill="#000000"/>
+        <circle cx="227" cy="197" r="1.2" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Soft Nose -->
+      <path d="M197,196 L195,222 Q200,226 205,222 L203,196" fill="#D9A890" stroke="#8D5237" stroke-width="1.8"/>
+
+      <!-- Serene, Warm, Knowing Smile -->
+      <path d="M178,246 Q200,262 222,246" stroke="#8C3518" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- PROP: PEN ON A SPIRAL CHAIN (Attached to Visitor Book) -->
+      <g transform="translate(136, 400)">
+        <!-- Black Desk Pen -->
+        <polygon points="6,10 12,50 18,50 24,10" fill="#212529" stroke="#000000" stroke-width="1.5"/>
+        <polygon points="12,50 18,50 15,62" fill="#CFD8DC"/> <!-- Nib -->
+        <!-- Stretchy Black Coil Chain leading to desk -->
+        <path d="M15,10 Q25,-6 35,10 Q45,-6 55,10 Q65,-6 75,10" fill="none" stroke="#212529" stroke-width="2.5"/>
+      </g>
+
+    </g>
+  </g>
+</svg>

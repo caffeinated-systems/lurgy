@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Procurement Terracotta Partition -->
+    <linearGradient id="ursulaPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8D5B4C"/>
+      <stop offset="100%" stop-color="#54372D"/>
+    </linearGradient>
+
+    <!-- Oatmeal Boiled-Wool Cardigan -->
+    <linearGradient id="oatmealCardigan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D6CEBE"/>
+      <stop offset="100%" stop-color="#B8AE9C"/>
+    </linearGradient>
+
+    <linearGradient id="ursulaSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F2D5C4"/>
+      <stop offset="100%" stop-color="#DBAC93"/>
+    </linearGradient>
+
+    <filter id="softShadowUrsula" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="rustLanyardGlowU" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#FB8500" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="ursulaClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Procurement Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#ursulaPartition)"/>
+
+    <!-- Purchase Order Rule Memo -->
+    <g transform="translate(48, 110) rotate(-2)">
+      <rect width="60" height="48" rx="2" fill="#FFFFFF" stroke="#54372D" stroke-width="1"/>
+      <rect width="60" height="8" fill="#54372D"/>
+      <text x="30" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">PURCHASE CONTROL</text>
+      <text x="30" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">NO PURCHASE ORDER,</text>
+      <text x="30" y="28" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">NO ENTRY.</text>
+      <text x="30" y="40" font-family="Arial Black, Impact" font-size="6.5" fill="#D90429" text-anchor="middle">VENDING IS WARNED</text>
+      <circle cx="30" cy="3" r="1.8" fill="#FB8500"/>
+    </g>
+
+    <!-- CHARACTER: URSULA (Shifted up, rigid wall) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowUrsula)">
+
+      <!-- High-Collared Brown Shirt buttoned to larynx -->
+      <path d="M166,252 L166,306 C166,322 234,322 234,306 L234,252 Z" fill="#4A3425" stroke="#261A10" stroke-width="2"/>
+      <circle cx="200" cy="274" r="2" fill="#D4A373"/>
+      <circle cx="200" cy="292" r="2" fill="#D4A373"/>
+
+      <!-- Heavy Oatmeal Boiled-Wool Cardigan -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#oatmealCardigan)" stroke="#6E6554" stroke-width="3"/>
+
+      <!-- Cardigan Lapels & Tortoiseshell Buttons -->
+      <path d="M156,302 L146,366 L178,440 L200,440 L166,302 Z" fill="#C7BEAE" stroke="#6E6554" stroke-width="2"/>
+      <path d="M244,302 L254,366 L222,440 L200,440 L234,302 Z" fill="#C7BEAE" stroke="#6E6554" stroke-width="2"/>
+      <circle cx="200" cy="460" r="4" fill="#3D2B1F" stroke="#241912" stroke-width="1.5"/>
+
+      <!-- FLAME RUST ORANGE PROCUREMENT LANYARD -->
+      <g filter="url(#rustLanyardGlowU)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#FB8500" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#FB8500" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFE3A8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFE3A8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base (Severe Jawline, Early 60s) -->
+      <path d="M148,168 C148,132 252,132 252,168 L252,224 C252,264 226,284 200,284 C174,284 148,264 148,224 Z"
+            fill="url(#ursulaSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Severe Marionette Lines & Sag Lines -->
+      <path d="M168,244 L164,264 M232,244 L236,264" stroke="#B8866E" stroke-width="2"/>
+
+      <!-- Ears -->
+      <ellipse cx="142" cy="208" rx="8" ry="16" fill="#DBAC93" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="258" cy="208" rx="8" ry="16" fill="#DBAC93" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- CROPPED IRON-GREY HAIR -->
+      <path d="M144,172 C140,126 156,96 200,96 C244,96 260,126 256,172 C248,146 236,138 200,138 C164,138 152,146 144,172 Z"
+            fill="#757F87" stroke="#3D454A" stroke-width="2"/>
+      <path d="M166,124 Q200,116 234,124" stroke="#B0B9BE" stroke-width="2.5" fill="none"/>
+
+      <!-- RIMLESS RECTANGULAR BIFOCALS -->
+      <g>
+        <rect x="160" y="190" width="28" height="18" rx="2" fill="#EAF4F4" fill-opacity="0.25" stroke="#757F87" stroke-width="1.8"/>
+        <line x1="160" y1="202" x2="188" y2="202" stroke="#757F87" stroke-width="1"/>
+        <rect x="212" y="190" width="28" height="18" rx="2" fill="#EAF4F4" fill-opacity="0.25" stroke="#757F87" stroke-width="1.8"/>
+        <line x1="212" y1="202" x2="240" y2="202" stroke="#757F87" stroke-width="1"/>
+        <path d="M188,198 L212,198" stroke="#757F87" stroke-width="2"/>
+      </g>
+
+      <!-- Stern, Thin Furrowed Eyebrows -->
+      <path d="M162,184 L186,188" stroke="#3D454A" stroke-width="4" stroke-linecap="round"/>
+      <path d="M214,188 L238,184" stroke="#3D454A" stroke-width="4" stroke-linecap="round"/>
+
+      <!-- Narrow, Unforgiving Cold Eyes -->
+      <g>
+        <ellipse cx="174" cy="198" rx="7.5" ry="4.5" fill="#FFFFFF"/>
+        <circle cx="174" cy="198" r="3" fill="#2B2D2F"/>
+
+        <ellipse cx="226" cy="198" rx="7.5" ry="4.5" fill="#FFFFFF"/>
+        <circle cx="226" cy="198" r="3" fill="#2B2D2F"/>
+      </g>
+
+      <!-- Nose -->
+      <path d="M198,192 L194,222 Q200,226 206,222 L202,192" fill="#D29A7F" stroke="#7A4E39" stroke-width="1.8"/>
+
+      <!-- Absolute Bureaucratic Down-Turned Scowl -->
+      <path d="M180,250 Q200,242 220,250" stroke="#4A1E17" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- PROP: HEAVY VINTAGE "REJECTED" RUBBER STAMP HELD IN HAND -->
+      <g transform="translate(224, 350) rotate(-10)">
+        <!-- Turned Wood Handle -->
+        <path d="M30,0 C22,0 20,20 26,40 L34,40 C40,20 38,0 30,0 Z" fill="#8C5828" stroke="#4A3219" stroke-width="1.8"/>
+        <circle cx="30" cy="8" r="8" fill="#A86F38" stroke="#4A3219" stroke-width="1.8"/>
+        <!-- Heavy Rectangular Stamp Base -->
+        <rect x="0" y="40" width="60" height="18" rx="2" fill="#2B2D2F" stroke="#111213" stroke-width="2"/>
+        <!-- Rubber Die Bottom Edge (Red Inked) -->
+        <rect x="0" y="58" width="60" height="8" rx="1" fill="#D90429"/>
+        <!-- Reversed "REJECTED" text on stamp edge -->
+        <text x="30" y="65" font-family="Arial Black, Impact" font-size="6.5" fill="#FFFFFF" text-anchor="middle">REJECTED</text>
+
+        <!-- Ursula's Unyielding Grip Hand -->
+        <g transform="translate(14, 20)">
+          <path d="M0,0 C-10,10 -4,22 10,20 L10,0 Z" fill="#F2D5C4" stroke="#4A3228" stroke-width="1.8"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

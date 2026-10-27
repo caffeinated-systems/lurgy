@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Finance Drab Olive Partition -->
+    <linearGradient id="quentinPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5A664B"/>
+      <stop offset="100%" stop-color="#3C4532"/>
+    </linearGradient>
+
+    <!-- Protest Charcoal Suit Gradient -->
+    <linearGradient id="suitGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#343A40"/>
+      <stop offset="100%" stop-color="#1B1E21"/>
+    </linearGradient>
+
+    <linearGradient id="quentinSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F2D1BD"/>
+      <stop offset="100%" stop-color="#DBAC93"/>
+    </linearGradient>
+
+    <filter id="softShadowQ" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="mustardLanyardGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#F4A261" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="quentinClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Finance Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#quentinPartition)"/>
+
+    <!-- Pinned Rejection Memo -->
+    <g transform="translate(48, 110) rotate(-3)">
+      <rect width="58" height="48" rx="2" fill="#FFFFFF" stroke="#8F968B" stroke-width="1"/>
+      <rect width="58" height="8" fill="#B7094C"/>
+      <text x="29" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">STATIONERY</text>
+      <text x="29" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="6" fill="#1C1F1A" text-anchor="middle">PEN REQUESTS</text>
+      <text x="29" y="30" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#1C1F1A" text-anchor="middle">MUST BE IN</text>
+      <text x="29" y="40" font-family="Arial, sans-serif" font-weight="900" font-size="7" fill="#C92A2A" text-anchor="middle">PENCIL</text>
+      <circle cx="29" cy="3" r="1.8" fill="#5A664B"/>
+    </g>
+
+    <!-- CHARACTER: QUENTIN (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowQ)">
+
+      <!-- Formal Protest Suit (Sharp, Stiff Shoulders) -->
+      <path d="M50,560 L52,490 L60,374 C66,328 106,306 156,300 L244,300 C294,306 334,328 340,374 L348,490 L350,560 Z"
+            fill="url(#suitGrad)" stroke="#111315" stroke-width="3"/>
+
+      <!-- Crisp White Formal Shirt V -->
+      <polygon points="170,300 230,300 200,420" fill="#FFFFFF" stroke="#CED4DA" stroke-width="1.5"/>
+
+      <!-- Starch White Spread Collar -->
+      <polygon points="166,290 196,336 174,342 152,306" fill="#FFFFFF" stroke="#ADB5BD" stroke-width="1.8"/>
+      <polygon points="234,290 204,336 226,342 248,306" fill="#FFFFFF" stroke="#ADB5BD" stroke-width="1.8"/>
+
+      <!-- Rigid Striped Silk Tie -->
+      <polygon points="194,334 206,334 212,470 200,488 188,470" fill="#780000" stroke="#370617" stroke-width="2"/>
+      <!-- Gold diagonal stripes on tie -->
+      <line x1="195" y1="350" x2="207" y2="358" stroke="#F4A261" stroke-width="3"/>
+      <line x1="193" y1="380" x2="209" y2="390" stroke="#F4A261" stroke-width="3"/>
+      <line x1="191" y1="410" x2="210" y2="422" stroke="#F4A261" stroke-width="3"/>
+      <line x1="190" y1="440" x2="211" y2="454" stroke="#F4A261" stroke-width="3"/>
+
+      <!-- Suit Lapels -->
+      <path d="M154,302 L136,366 L174,430 L200,430 L166,302 Z" fill="#2B3035" stroke="#111315" stroke-width="2"/>
+      <path d="M246,302 L264,366 L226,430 L200,430 L234,302 Z" fill="#2B3035" stroke="#111315" stroke-width="2"/>
+
+      <!-- Neck (Thin, gaunt) -->
+      <path d="M174,258 L174,308 C174,324 226,324 226,308 L226,258 Z" fill="#DBAC93" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- MUSTARD GOLD FINANCE LANYARD -->
+      <g filter="url(#mustardLanyardGlow)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#F4A261" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#F4A261" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFE3C2" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFE3C2" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Tiny Brass Stationery Key hanging on Lanyard -->
+      <circle cx="200" cy="444" r="4.5" fill="#E9C46A" stroke="#5C4206" stroke-width="1.5"/>
+      <!-- Key shaft & teeth -->
+      <path d="M200,448 L200,478 L206,478 M200,470 L205,470" stroke="#E9C46A" stroke-width="3" fill="none" stroke-linecap="square"/>
+      <text x="216" y="475" font-family="Arial" font-size="6" font-weight="bold" fill="#F4A261">CUPBOARD</text>
+
+      <!-- Head Base (Gaunt, Angular) -->
+      <path d="M150,166 C150,132 250,132 250,166 L248,220 C248,258 226,280 200,280 C174,280 152,258 152,220 Z"
+            fill="url(#quentinSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Severe Gaunt Cheekbone & Hollow Lines -->
+      <path d="M160,208 C158,230 166,246 176,252" stroke="#B8866E" stroke-width="2" fill="none"/>
+      <path d="M240,208 C242,230 234,246 224,252" stroke="#B8866E" stroke-width="2" fill="none"/>
+
+      <!-- Ears (Slightly prominent, sharp) -->
+      <ellipse cx="145" cy="204" rx="8" ry="17" fill="#DBAC93" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="255" cy="204" rx="8" ry="17" fill="#DBAC93" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- Slicked-Back Thin Grey Hair -->
+      <path d="M148,168 C144,116 166,94 200,94 C234,94 256,116 252,168 C246,140 236,134 200,134 C164,134 154,140 148,168 Z"
+            fill="#7F8C8D" stroke="#343A40" stroke-width="2"/>
+      <path d="M166,110 Q200,102 234,110 M172,122 Q200,116 228,122" stroke="#B0BEC5" stroke-width="2" fill="none"/>
+
+      <!-- Stern, Severe Furrowed Eyebrows -->
+      <path d="M162,186 L188,194" stroke="#495057" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M212,194 L238,186" stroke="#495057" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M196,186 L196,198 M204,186 L204,198" stroke="#B8866E" stroke-width="1.8"/> <!-- Scowl furrows -->
+
+      <!-- Cold, Budget-Slicing Eyes (Looking Down Nose) -->
+      <g>
+        <path d="M166,200 L186,204" stroke="#2B2D42" stroke-width="2" stroke-linecap="round"/>
+        <ellipse cx="178" cy="203" rx="3.5" ry="2.5" fill="#2F3E46"/>
+        <path d="M168,208 Q178,211 186,208" stroke="#B8866E" stroke-width="1.2" fill="none"/>
+
+        <path d="M214,204 L234,200" stroke="#2B2D42" stroke-width="2" stroke-linecap="round"/>
+        <ellipse cx="222" cy="203" rx="3.5" ry="2.5" fill="#2F3E46"/>
+        <path d="M214,208 Q222,211 232,208" stroke="#B8866E" stroke-width="1.2" fill="none"/>
+      </g>
+
+      <!-- Wire Spectacles Perched Halfway Down Long Nose -->
+      <g transform="translate(0, 8)">
+        <rect x="166" y="198" width="22" height="15" rx="3" fill="#EAF4F4" fill-opacity="0.3" stroke="#5E503F" stroke-width="2"/>
+        <rect x="212" y="198" width="22" height="15" rx="3" fill="#EAF4F4" fill-opacity="0.3" stroke="#5E503F" stroke-width="2"/>
+        <path d="M188,203 Q200,200 212,203" stroke="#5E503F" stroke-width="2" fill="none"/>
+        <line x1="166" y1="202" x2="148" y2="198" stroke="#5E503F" stroke-width="1.5"/>
+        <line x1="234" y1="202" x2="252" y2="198" stroke="#5E503F" stroke-width="1.5"/>
+      </g>
+
+      <!-- Long Sharp Nose -->
+      <path d="M198,188 L194,228 L206,228 Z" fill="#D29A7F" stroke="#7A4E39" stroke-width="1.8" stroke-linejoin="round"/>
+
+      <!-- Pursed, Downturned Disapproving Mouth -->
+      <path d="M182,254 Q200,248 218,254" stroke="#521B1B" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M180,256 L178,260 M220,256 L222,260" stroke="#7A4E39" stroke-width="2"/>
+    </g>
+  </g>
+</svg>
