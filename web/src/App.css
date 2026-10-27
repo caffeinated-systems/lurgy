@@ -337,13 +337,18 @@ div.axis {
 	cursor: default;
 }
 .btn-help {
-	padding: 0;
-	border: 0;
-	background: none;
-	color: var(--accent);
+	display: block;
+	margin: 4px 0 0 auto;
+	padding: 2px 12px;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	background: transparent;
 	font-size: 0.85rem;
-	text-decoration: underline;
+	font-weight: 600;
 	cursor: pointer;
+}
+main.notice .btn-help {
+	margin: 0;
 }
 .help {
 	max-width: min(30rem, calc(100vw - 32px));
@@ -353,12 +358,15 @@ div.axis {
 	border-radius: 12px;
 	background: var(--surface);
 	color: var(--ink);
+	/* It sits inside the right-aligned .today, so reset what it would inherit. */
+	text-align: left;
 }
 .help::backdrop {
 	background: rgb(0 0 0 / 0.5);
 }
 .help form {
 	float: right;
+	margin-left: 12px;
 }
 .help h2 {
 	margin-top: 0;

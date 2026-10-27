@@ -738,30 +738,28 @@ test("the footer links to Caffeinated Systems and Wordis", async () => {
 });
 
 // jsdom has no showModal; the browser does the rest (Esc, the Close form).
-function stubDialog() {
-	HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
-		this.open = true;
-	};
-}
+HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+	this.open = true;
+};
 
-test("how to play opens over the board", async () => {
-	stubDialog();
+test("help opens how to play over the board", async () => {
 	serve(Response.json(DAY));
 	render(<App />);
 
-	fireEvent.click(await screen.findByRole("button", { name: "How to play" }));
-	const help = screen.getByRole("dialog", { name: "How to play" });
-	expect(within(help).getByText("Reading the clues")).toBeDefined();
-	expect(within(help).getByText("Keys")).toBeDefined();
+	const help = await screen.findByRole("button", { name: "Help" });
+	expect(screen.queryByRole("dialog")).toBeNull();
+	fireEvent.click(help);
+	const panel = screen.getByRole("dialog", { name: "How to play" });
+	expect(within(panel).getByText("Reading the clues")).toBeDefined();
+	expect(within(panel).getByText("Keys")).toBeDefined();
 });
 
-test("how to play is on the weekend screen too", () => {
-	stubDialog();
+test("help is on the weekend screen too", () => {
 	vi.setSystemTime(new Date(2026, 9, 17, 12));
 	history.replaceState(null, "", "/");
 	serve(Response.json(DAY));
 	render(<App />);
 
-	fireEvent.click(screen.getByRole("button", { name: "How to play" }));
+	fireEvent.click(screen.getByRole("button", { name: "Help" }));
 	expect(screen.getByRole("dialog", { name: "How to play" })).toBeDefined();
 });

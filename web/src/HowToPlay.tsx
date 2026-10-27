@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-/** A "How to play" button and the panel it opens over whatever is on screen. */
+/** A Help button and the panel it opens over whatever is on screen. */
 export function HowToPlay() {
 	const dialog = useRef<HTMLDialogElement>(null);
 	return (
@@ -10,7 +10,7 @@ export function HowToPlay() {
 				className="btn-help"
 				onClick={() => dialog.current?.showModal()}
 			>
-				How to play
+				Help
 			</button>
 			<dialog ref={dialog} className="help" aria-labelledby="help-title">
 				{/* A dialog form closes the dialog natively, as Esc does. */}
@@ -23,7 +23,7 @@ export function HowToPlay() {
 				<p>
 					Something's going round the office. As office manager, work out who's
 					caught the lurgy and who's fine, using only what your coworkers let
-					slip. A new office every weekday, Monday to Friday, and the week's
+					slip. A new puzzle every weekday, Monday to Friday, and the week's
 					puzzles stay on the desk till Sunday.
 				</p>
 				<ul>
@@ -68,8 +68,8 @@ export function HowToPlay() {
 					</dd>
 					<dt>Above, below, left, right</dt>
 					<dd>
-						Anywhere in that column or row, not just next door. "Directly" means
-						only the next desk.
+						Anywhere in that column or row as you look at the board, not just
+						next door. "Directly" means only the next desk.
 					</dd>
 					<dt>Corners, edges</dt>
 					<dd>
@@ -81,13 +81,17 @@ export function HowToPlay() {
 					<dt>Connected</dt>
 					<dd>
 						One unbroken chain of desks touching side to side, never diagonally.
+						A single coworker counts as connected.
 					</dd>
 					<dt>Most</dt>
 					<dd>
 						More than every other row, column or department, with no ties.
 					</dd>
 					<dt>One of the</dt>
-					<dd>That coworker and at least one other.</dd>
+					<dd>
+						That coworker and at least one other. With a number, "one of two
+						sick people", exactly that many, them included.
+					</dd>
 				</dl>
 				<p>
 					For example, if B2 says "Two people among my neighbours are sick",
