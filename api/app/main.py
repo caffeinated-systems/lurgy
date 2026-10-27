@@ -1,6 +1,6 @@
 import os
 from contextlib import asynccontextmanager
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta, timezone
 from functools import cache
 from http import HTTPStatus
 from pathlib import Path
@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 
 # UTC+14 (Kiribati): where every day starts first.
 EARLIEST = timezone(timedelta(hours=14))
+# UTC-12 (Baker Island): where every day ends last.
+LATEST = timezone(timedelta(hours=-12))
 
 
 @cache
@@ -47,23 +49,41 @@ app = FastAPI(
 )
 
 
-def today_anywhere() -> date:
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+type Now = Annotated[datetime, Depends(utc_now)]
+
+
+def today_anywhere(now: Now) -> date:
     """The latest date anywhere on Earth right now."""
-    return datetime.now(EARLIEST).date()
+    return now.astimezone(EARLIEST).date()
+
+
+def open_week(now: Now) -> date:
+    """The Monday of the oldest Week still open somewhere: the earliest date's Week.
+
+    Weeks run Monday to Sunday, so the Week just ended stays open all weekend.
+    """
+    today = now.astimezone(LATEST).date()
+    return today - timedelta(days=today.weekday())
 
 
 type Days = Annotated[dict[date, tuple[Board, Day]], Depends(days)]
 type Today = Annotated[date, Depends(today_anywhere)]
+type OpenWeek = Annotated[date, Depends(open_week)]
 NOT_FOUND: dict[int | str, dict[str, Any]] = {
     HTTPStatus.NOT_FOUND: {"description": "No puzzle for that day yet."}
 }
 
 
 def find(
-    on: date, days: dict[date, tuple[Board, Day]], today: date
+    on: date, days: dict[date, tuple[Board, Day]], today: date, week: date
 ) -> tuple[Board, Day]:
-    """The day's board and puzzle, if it exists and has started somewhere."""
-    if on > today or on not in days:
+    """The day's board and puzzle, if it exists, has started somewhere and is in a
+    Week still open somewhere."""
+    if not week <= on <= today or on not in days:
         raise HTTPException(HTTPStatus.NOT_FOUND, "No puzzle for that day yet.")
     return days[on]
 
@@ -252,12 +272,13 @@ def health() -> Health:
 
 
 @app.get("/api/days/{day}", responses=NOT_FOUND)
-def get_day(day: date, days: Days, today: Today) -> DayResponse:
+def get_day(day: date, days: Days, today: Today, week: OpenWeek) -> DayResponse:
     """A day's board and its starting coworker's clue.
 
-    404 for a day with no puzzle or one that hasn't started anywhere on Earth yet.
+    404 for a day with no puzzle, one that hasn't started anywhere on Earth yet, or
+    one in a Week that has ended everywhere.
     """
-    board, puzzle = find(day, days, today)
+    board, puzzle = find(day, days, today, week)
     return DayResponse(
         date=day,
         coworkers=[
@@ -271,14 +292,14 @@ def get_day(day: date, days: Days, today: Today) -> DayResponse:
 
 @app.post("/api/declarations", responses=NOT_FOUND)
 def declare(
-    request: DeclarationRequest, days: Days, today: Today
+    request: DeclarationRequest, days: Days, today: Today, week: OpenWeek
 ) -> Accepted | Rejected:
     """Declare a coworker sick or well.
 
     Accepted only if every declaration so far, then this one, was correct and forced
     when made. Otherwise rejected, always with the same body, whatever the reason.
     """
-    board, puzzle = find(request.date, days, today)
+    board, puzzle = find(request.date, days, today, week)
     steps = [(d.desk, d.state) for d in [*request.declared, request.declaration]]
     if not puzzle.accepts(board, steps):
         return Rejected()
@@ -293,13 +314,13 @@ def declare(
         HTTPStatus.CONFLICT: {"description": "Everyone is already declared."},
     },
 )
-def get_hint(request: HintRequest, days: Days, today: Today) -> Hint:
+def get_hint(request: HintRequest, days: Days, today: Today, week: OpenWeek) -> Hint:
     """The fewest revealed clues that force some coworker, and that coworker.
 
     400 with the same body as any rejection if the declarations sent aren't all
     accepted, so a hint can't probe the solution.
     """
-    board, puzzle = find(request.date, days, today)
+    board, puzzle = find(request.date, days, today, week)
     steps = [(d.desk, d.state) for d in request.declared]
     if not puzzle.accepts(board, steps):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Not enough evidence.")

@@ -35,7 +35,8 @@ export interface paths {
          * Get Day
          * @description A day's board and its starting coworker's clue.
          *
-         *     404 for a day with no puzzle or one that hasn't started anywhere on Earth yet.
+         *     404 for a day with no puzzle, one that hasn't started anywhere on Earth yet, or
+         *     one in a Week that has ended everywhere.
          */
         get: operations["get_day_api_days__day__get"];
         put?: never;

@@ -8,7 +8,7 @@ import {
 	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { App, localToday } from "./App.tsx";
+import { App, countdown, localToday, nextMonday, weekOf } from "./App.tsx";
 import { DAY, DESKS } from "./fixture.ts";
 import type { Hint, Reveal } from "./game.ts";
 
@@ -56,7 +56,11 @@ const tile = (desk: string) =>
 		DESKS.indexOf(desk as (typeof DESKS)[number])
 	] as HTMLElement;
 
+// Noon on the fixture Monday, in the player's local time.
+const MONDAY = new Date(2026, 9, 19, 12);
+
 beforeEach(() => {
+	vi.useFakeTimers({ toFake: ["Date"], now: MONDAY });
 	localStorage.clear();
 	history.replaceState(null, "", "/?day=2026-10-19");
 });
@@ -68,6 +72,110 @@ afterEach(() => {
 
 test("the local date pads its month and day", () => {
 	expect(localToday(new Date(2026, 0, 5))).toBe("2026-01-05");
+});
+
+test.each([
+	["Monday", "2026-10-19"],
+	["Friday", "2026-10-23"],
+	["Saturday", "2026-10-24"],
+	["Sunday", "2026-10-25"],
+])("on %s the Week is that Monday to Friday", (_, date) => {
+	expect(weekOf(date)).toEqual([
+		"2026-10-19",
+		"2026-10-20",
+		"2026-10-21",
+		"2026-10-22",
+		"2026-10-23",
+	]);
+});
+
+test("a Week can span two months", () => {
+	expect(weekOf("2026-11-01")).toEqual([
+		"2026-10-26",
+		"2026-10-27",
+		"2026-10-28",
+		"2026-10-29",
+		"2026-10-30",
+	]);
+});
+
+test.each([
+	[new Date(2026, 9, 24, 12), new Date(2026, 9, 26)],
+	[new Date(2026, 9, 25, 23, 59), new Date(2026, 9, 26)],
+	[new Date(2026, 9, 31), new Date(2026, 10, 2)],
+])("from %s the next Monday starts %s", (now, monday) => {
+	expect(nextMonday(now)).toEqual(monday);
+});
+
+test("the countdown shows hours, minutes and seconds, rounded up", () => {
+	expect(countdown(36 * 3600_000)).toBe("36:00:00");
+	expect(countdown(61_500)).toBe("00:01:02");
+	expect(countdown(-1)).toBe("00:00:00");
+});
+
+test("the week strip links every day so far and marks the one open", async () => {
+	vi.setSystemTime(new Date(2026, 9, 21, 12));
+	serve(Response.json(DAY));
+	render(<App />);
+
+	const week = await screen.findByRole("navigation", {
+		name: "The week's puzzles",
+	});
+	const links = within(week).getAllByRole("link");
+	expect(links.map((a) => a.textContent)).toEqual(["Mon", "Tue", "Wed"]);
+	expect(links[0]?.getAttribute("href")).toBe("?day=2026-10-19");
+	expect(links[0]?.getAttribute("aria-current")).toBe("page");
+	expect(links[2]?.getAttribute("aria-current")).toBeNull();
+	expect(links[0]?.getAttribute("aria-label")).toBe("Mon 19 Oct");
+	expect(week.textContent).toContain("Thu, not open yet");
+});
+
+test.each([
+	["a later day this Week", "2026-10-20"],
+	["a day in an older Week", "2026-10-12"],
+])("%s is closed without asking the server", async (_, date) => {
+	history.replaceState(null, "", `/?day=${date}`);
+	const fetch = serve(Response.json(DAY));
+	render(<App />);
+
+	expect(screen.getByText(/^That day isn't open/)).toBeDefined();
+	expect(fetch).not.toHaveBeenCalled();
+});
+
+test("at the weekend the office is closed, counting down to Monday", () => {
+	// Not 24 Oct: 25 Oct is when European clocks go back, so that weekend has 37 hours.
+	vi.setSystemTime(new Date(2026, 9, 17, 12));
+	history.replaceState(null, "", "/");
+	const fetch = serve(Response.json(DAY));
+	render(<App />);
+
+	expect(screen.getByText(/^Office closed for the weekend/)).toBeDefined();
+	expect(screen.getByRole("timer").textContent).toBe("36:00:00");
+	const week = screen.getByRole("navigation", { name: "The week's puzzles" });
+	expect(within(week).getAllByRole("link")).toHaveLength(5);
+	expect(fetch).not.toHaveBeenCalled();
+});
+
+test("the Week just ended stays playable at the weekend", async () => {
+	vi.setSystemTime(new Date(2026, 9, 25, 12));
+	await open();
+
+	expect(screen.getByText("Mon 19 Oct")).toBeDefined();
+});
+
+test("Monday opens when the countdown runs out", async () => {
+	vi.useFakeTimers({ now: new Date(2026, 9, 25, 23, 59, 58) });
+	history.replaceState(null, "", "/");
+	const fetch = serve(new Response(null, { status: 404 }));
+	render(<App />);
+	expect(screen.getByRole("timer").textContent).toBe("00:00:02");
+
+	await act(() => vi.advanceTimersByTimeAsync(1000));
+	expect(screen.getByRole("timer").textContent).toBe("00:00:01");
+	await act(() => vi.advanceTimersByTimeAsync(1000));
+
+	expect(screen.queryByText(/^Office closed for the weekend/)).toBeNull();
+	expect(fetch).toHaveBeenCalledWith("/api/days/2026-10-26");
 });
 
 test("with no ?day it asks for the player's local today", async () => {
@@ -471,7 +579,7 @@ test("a hint that can't reach the office says so", async () => {
 });
 
 test("the timer ticks, stops on the solve and stays stopped after a reload", async () => {
-	vi.useFakeTimers({ shouldAdvanceTime: true, now: 0 });
+	vi.useFakeTimers({ shouldAdvanceTime: true, now: MONDAY });
 	const answers = DESKS.slice(1).map((desk) => sick(desk));
 	await open(...answers);
 	const timer = screen.getByRole("timer");

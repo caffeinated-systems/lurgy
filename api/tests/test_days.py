@@ -1,15 +1,12 @@
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime
 from http import HTTPStatus
-from typing import TYPE_CHECKING
 
+import pytest
 from fastapi.testclient import TestClient
 
-from app.main import EARLIEST, app, days, today_anywhere
+from app.main import app, days, open_week, today_anywhere, utc_now
 from app.week import load_days
 from tests.factories import FIXTURES, MONDAY
-
-if TYPE_CHECKING:
-    import pytest
 
 client = TestClient(app)
 
@@ -61,9 +58,35 @@ def test_a_day_that_has_not_started_anywhere_is_not_found() -> None:
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_today_anywhere_is_utc_plus_14() -> None:
-    assert EARLIEST.utcoffset(None) == timedelta(hours=14)
-    assert today_anywhere() == datetime.now(EARLIEST).date()
+def at(instant: str) -> datetime:
+    return datetime.fromisoformat(instant)
+
+
+def test_now_is_utc() -> None:
+    assert utc_now().tzinfo is UTC
+
+
+@pytest.mark.parametrize(
+    ("now", "today"),
+    [
+        (at("2026-10-25T09:59:59Z"), date(2026, 10, 25)),
+        (at("2026-10-25T10:00:00Z"), date(2026, 10, 26)),
+    ],
+)
+def test_today_anywhere_starts_at_utc_plus_14(now: datetime, today: date) -> None:
+    assert today_anywhere(now) == today
+
+
+@pytest.mark.parametrize(
+    ("now", "monday"),
+    [
+        (at("2026-10-26T11:59:59Z"), date(2026, 10, 19)),
+        (at("2026-10-26T12:00:00Z"), date(2026, 10, 26)),
+        (at("2027-01-03T23:00:00Z"), date(2026, 12, 28)),
+    ],
+)
+def test_open_week_turns_at_utc_minus_12(now: datetime, monday: date) -> None:
+    assert open_week(now) == monday
 
 
 def test_days_come_from_puzzles_dir(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -85,3 +108,35 @@ def test_a_day_says_how_hard_it_is() -> None:
 
 def test_a_day_built_before_grading_has_no_difficulty() -> None:
     assert client.get("/api/days/2026-10-19").json()["difficulty"] is None
+
+
+@pytest.mark.parametrize(
+    ("now", "status"),
+    [
+        (at("2026-10-18T09:59:59Z"), HTTPStatus.NOT_FOUND),  # Sunday everywhere
+        (at("2026-10-18T10:00:00Z"), HTTPStatus.OK),  # Monday at UTC+14
+        (at("2026-10-24T12:00:00Z"), HTTPStatus.OK),  # the weekend
+        (at("2026-10-26T11:59:59Z"), HTTPStatus.OK),  # still Sunday at UTC-12
+        (at("2026-10-26T12:00:00Z"), HTTPStatus.NOT_FOUND),  # Monday everywhere
+    ],
+)
+def test_a_week_opens_at_utc_plus_14_and_closes_at_utc_minus_12(
+    now: datetime, status: HTTPStatus
+) -> None:
+    app.dependency_overrides[utc_now] = lambda: now
+
+    assert client.get("/api/days/2026-10-19").status_code == status
+
+
+def test_declarations_and_hints_close_with_the_week() -> None:
+    app.dependency_overrides[utc_now] = lambda: at("2026-10-26T12:00:00Z")
+    declaration = {"desk": "A3", "state": "sick"}
+
+    declared = client.post(
+        "/api/declarations",
+        json={"date": "2026-10-19", "declared": [], "declaration": declaration},
+    )
+    hinted = client.post("/api/hints", json={"date": "2026-10-19", "declared": []})
+
+    assert declared.status_code == HTTPStatus.NOT_FOUND
+    assert hinted.status_code == HTTPStatus.NOT_FOUND

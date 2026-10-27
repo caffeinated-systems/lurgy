@@ -104,8 +104,40 @@ button {
 
 header {
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: space-between;
 	align-items: center;
+}
+.week {
+	display: flex;
+	flex-basis: 100%;
+	justify-content: space-between;
+	gap: 4px;
+}
+.week > * {
+	flex: 1;
+	padding: 6px 0;
+	text-align: center;
+	color: var(--muted);
+}
+.week a[aria-current="page"] {
+	color: inherit;
+	font-weight: 700;
+	text-decoration-thickness: 2px;
+}
+.week .later {
+	opacity: 0.5;
+}
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+main.notice .week {
+	width: 100%;
 }
 .logo {
 	margin: 0;
