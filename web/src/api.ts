@@ -15,8 +15,10 @@ export class Busy extends Error {
 
 async function ok(response: Response): Promise<Response> {
 	// ponytail: Retry-After in seconds only; the API never sends an HTTP date.
-	if (response.status === 429)
-		throw new Busy(Number(response.headers.get("Retry-After")) || 60);
+	if (response.status === 429) {
+		const seconds = Math.ceil(Number(response.headers.get("Retry-After")));
+		throw new Busy(seconds > 0 ? seconds : 60);
+	}
 	if (!response.ok) throw new Error(`HTTP ${response.status}`);
 	return response;
 }

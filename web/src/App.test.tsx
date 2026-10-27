@@ -598,16 +598,23 @@ test.each([
 	expect(tile("B1").getAttribute("aria-label")).not.toContain("mask");
 });
 
-test("loading a day over the limit asks the player to wait, a minute if it doesn't say", async () => {
-	serve(busy({}));
-	render(<App />);
+test.each<Record<string, string>>([
+	{},
+	{ "Retry-After": "-5" },
+	{ "Retry-After": "soon" },
+])(
+	"loading a day over the limit asks the player to wait, a minute if it doesn't say (%o)",
+	async (headers) => {
+		serve(busy(headers));
+		render(<App />);
 
-	expect(
-		await screen.findByText(
-			"Steady on, the whole office is asking at once. Try again in 60 seconds.",
-		),
-	).toBeDefined();
-});
+		expect(
+			await screen.findByText(
+				"Steady on, the whole office is asking at once. Try again in 60 seconds.",
+			),
+		).toBeDefined();
+	},
+);
 
 test("a hint that can't reach the office says so", async () => {
 	await open("down");

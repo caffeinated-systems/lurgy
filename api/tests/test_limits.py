@@ -46,6 +46,18 @@ def test_each_player_has_their_own_budget_and_it_comes_back_next_minute(
     assert hints(1) == [HTTPStatus.OK]
 
 
+def test_an_ipv6_network_shares_one_budget(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(limits, "clock", lambda: 600.0)
+
+    # One machine usually holds a whole /64, so it can't rotate through it for more.
+    assert [
+        *hints(30, ip="2001:db8::1"),
+        *hints(1, ip="2001:db8::ffff:2"),
+        *hints(1, ip="2001:db8:0:1::1"),
+        *hints(2, ip="not an address"),
+    ] == [HTTPStatus.OK] * 30 + [HTTPStatus.TOO_MANY_REQUESTS] + [HTTPStatus.OK] * 3
+
+
 def test_a_whole_game_of_declarations_and_loads_stays_under_the_limits() -> None:
     for i, declaration in enumerate(PERFECT):
         assert client.get("/api/days/2026-10-19").status_code == HTTPStatus.OK

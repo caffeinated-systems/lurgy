@@ -6,6 +6,7 @@ office of players behind one IP, not one player.
 
 import time
 from http import HTTPStatus
+from ipaddress import IPv6Address, ip_address, ip_network
 from math import ceil
 from threading import Lock
 from typing import TYPE_CHECKING
@@ -29,9 +30,23 @@ def clock() -> float:
 
 
 def client_ip(request: Request) -> str:
-    """The player's IP: Cloudflare sets the header, and is the only way in on Cloud."""
-    forwarded = request.headers.get("CF-Connecting-IP")
-    return forwarded or (request.client.host if request.client else "")
+    """Who to count: the player's IPv4 address, or their IPv6 /64.
+
+    One machine usually holds a whole IPv6 /64, so counting single addresses would
+    let a script rotate through them. The header is only trustworthy because on
+    Cloud, Cloudflare sets it and is the only way in; behind anything else, anyone
+    could send it for a fresh budget.
+    """
+    raw = request.headers.get("CF-Connecting-IP") or (
+        request.client.host if request.client else ""
+    )
+    try:
+        address = ip_address(raw)
+    except ValueError:
+        return raw
+    if isinstance(address, IPv6Address):
+        return str(ip_network(f"{address}/64", strict=False))
+    return raw
 
 
 def limit(name: str, per_minute: int) -> Callable[[Request], None]:
