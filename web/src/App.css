@@ -237,7 +237,9 @@ div.axis {
 	display: flex;
 	gap: 3px;
 	padding: 0 2px;
+	/* A thick top edge reads as the lanyard without narrowing the name. */
 	border: 2px solid;
+	border-top-width: 4px;
 	border-radius: 0 0 4px 4px;
 	background: color-mix(in srgb, var(--surface) 88%, transparent);
 	color: var(--ink);
@@ -273,16 +275,24 @@ div.axis {
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
 }
-.st-sick {
+/* A declared tile is done: the face fades into a wash of its state, while the name
+   bar, badge, mask and marks stay full strength. */
+.tile.st-sick {
 	border-color: var(--sick-ink);
+	background: var(--sick);
 }
 .st-sick .nm,
 .st-sick .state {
 	background: var(--sick);
 	color: var(--sick-ink);
 }
-.st-well {
+.tile.st-well {
 	border-color: var(--well-ink);
+	background: var(--well);
+}
+.st-sick .portrait:not(.mask),
+.st-well .portrait:not(.mask) {
+	opacity: 0.35;
 }
 .st-well .nm,
 .st-well .state {
@@ -302,6 +312,10 @@ div.axis {
 	position: absolute;
 	top: 2px;
 	right: 4px;
+	/* A chip, so the mark holds up on a faded sick or well wash. */
+	padding: 0 2px;
+	border-radius: 4px;
+	background: var(--surface);
 	font-size: 0.7rem;
 }
 .log li.hinted {

@@ -229,6 +229,9 @@ test("the board shows the logo, the date, the starting coworker and the first hi
 		"A1, NameA1, HR, well, says: Two in my row.",
 	);
 	expect(within(tile("A1")).getByText("HR")).toBeDefined();
+	// Declared tiles are washed in their state (App.css); the rest stay plain.
+	expect(tile("A1").classList).toContain("st-well");
+	expect(tile("B1").className).not.toMatch(/st-/);
 	expect(tile("B1").getAttribute("aria-selected")).toBe("true");
 	expect(tile("B1").tabIndex).toBe(0);
 	expect(tile("A1").tabIndex).toBe(-1);
@@ -252,6 +255,7 @@ test("an accepted declaration reveals the coworker and posts what came before", 
 	expect(tile("B1").getAttribute("aria-label")).toBe(
 		"B1, NameB1, HR, sick, says: Hi.",
 	);
+	expect(tile("B1").classList).toContain("st-sick");
 
 	fireEvent.click(tile("C1"));
 	fireEvent.click(screen.getByRole("button", { name: "Declare NameC1 well" }));
@@ -632,14 +636,14 @@ test("the timer waits for the first declaration, ticks, stops on the solve and s
 	await open(...answers);
 	const timer = screen.getByRole("timer");
 	await act(() => vi.advanceTimersByTimeAsync(30_000));
-	expect(timer.textContent).toBe("⏱ 00:00");
+	expect(timer.textContent).toBe("00:00");
 
 	fireEvent.keyDown(tile("B1"), { key: "s" });
 	await waitFor(() =>
 		expect(tile("B1").getAttribute("aria-label")).toContain("sick"),
 	);
 	await act(() => vi.advanceTimersByTimeAsync(65_000));
-	expect(timer.textContent).toMatch(/⏱ 01:0[56]/);
+	expect(timer.textContent).toMatch(/^01:0[56]$/);
 
 	for (const desk of DESKS.slice(2)) {
 		fireEvent.click(tile(desk));
@@ -678,12 +682,12 @@ test.each([
 	await open(answer);
 	const timer = screen.getByRole("timer");
 	await act(() => vi.advanceTimersByTimeAsync(30_000));
-	expect(timer.textContent).toBe("⏱ 00:00");
+	expect(timer.textContent).toBe("00:00");
 
 	fireEvent.click(screen.getByRole("button", { name: button }));
 	await act(() => vi.advanceTimersByTimeAsync(5_000));
 
-	expect(timer.textContent).not.toBe("⏱ 00:00");
+	expect(timer.textContent).not.toBe("00:00");
 });
 
 test("a reload rebuilds the board from the browser", async () => {

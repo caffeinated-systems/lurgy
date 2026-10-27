@@ -71,7 +71,7 @@ function Timer({ progress }: { progress: Progress }) {
 		return () => clearInterval(id);
 	}, [progress.startedAt, progress.solvedAt]);
 
-	return <span role="timer">⏱ {formatTime(elapsed(progress, now))}</span>;
+	return <span role="timer">{formatTime(elapsed(progress, now))}</span>;
 }
 
 export function Play({ day, week }: { day: Day; week: ReactNode }) {
