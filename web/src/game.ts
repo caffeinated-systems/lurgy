@@ -1,4 +1,5 @@
 import type { components } from "./api/schema";
+import { Busy } from "./api.ts";
 
 type Schemas = components["schemas"];
 export type Desk = Schemas["Desk"];
@@ -45,7 +46,7 @@ export type Action =
 	| { type: "hinted-again" }
 	| { type: "read"; desk: Desk }
 	| { type: "dimmed"; desk: Desk }
-	| { type: "failed" }
+	| { type: "failed"; error: unknown }
 	| { type: "already" }
 	| { type: "shared"; copied: boolean };
 
@@ -228,6 +229,13 @@ function say(game: Game, message: string): Game {
 	return { ...game, message, said: game.said + 1 };
 }
 
+/** What the office says when a request fails: wait if it was over the limit. */
+export function failure(error: unknown): string {
+	if (!(error instanceof Busy)) return "Couldn't reach the office, try again.";
+	const wait = `${error.seconds} second${error.seconds === 1 ? "" : "s"}`;
+	return `Steady on, the whole office is asking at once. Try again in ${wait}.`;
+}
+
 /** An answer to the pending declaration: say it and allow the next one. */
 function answer(game: Game, message: string): Game {
 	return { ...say(game, message), pending: false };
@@ -337,7 +345,7 @@ export function reducer(game: Game, action: Action): Game {
 			);
 		}
 		case "failed":
-			return answer(game, "Couldn't reach the office, try again.");
+			return answer(game, failure(action.error));
 		case "already":
 			return say(game, "Already declared.");
 		case "shared":

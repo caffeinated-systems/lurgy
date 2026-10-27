@@ -107,8 +107,8 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 					? { type: "accepted", reveal, at: Date.now() }
 					: { type: "rejected", desk, state },
 			);
-		} catch {
-			dispatch({ type: "failed" });
+		} catch (error) {
+			dispatch({ type: "failed", error });
 		}
 	}
 
@@ -130,8 +130,8 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 					declared: declared(progress),
 				}),
 			});
-		} catch {
-			dispatch({ type: "failed" });
+		} catch (error) {
+			dispatch({ type: "failed", error });
 		}
 	}
 

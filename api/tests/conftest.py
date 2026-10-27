@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from app import limits
 from app.main import app, days, utc_now
 from app.week import load_days
 from tests.factories import FIXTURES, NOON
@@ -16,3 +17,4 @@ def fixture_week() -> Iterator[None]:
     app.dependency_overrides[utc_now] = lambda: NOON
     yield
     app.dependency_overrides.clear()
+    limits.reset()

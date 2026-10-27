@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { fetchDay } from "./api.ts";
-import { type Day, dayLabel } from "./game.ts";
+import { type Day, dayLabel, failure } from "./game.ts";
 import { Logo, Play } from "./Play.tsx";
 
 /** The player's local date as YYYY-MM-DD. */
@@ -36,7 +36,7 @@ export function App() {
 	// past a weekday midnight keeps yesterday's strip until reloaded; add a midnight
 	// timeout if players notice.
 	const [now, setNow] = useState(() => new Date());
-	const [day, setDay] = useState<Day | "missing" | "offline">();
+	const [day, setDay] = useState<Day | "missing" | { failed: string }>();
 	const today = localToday(now);
 	const days = weekOf(today);
 	const asked = new URLSearchParams(location.search).get("day");
@@ -50,7 +50,7 @@ export function App() {
 		if (!open) return;
 		fetchDay(date).then(
 			(found) => setDay(found ?? "missing"),
-			() => setDay("offline"),
+			(error) => setDay({ failed: failure(error) }),
 		);
 	}, [date, open]);
 
@@ -71,8 +71,8 @@ export function App() {
 				</Notice>
 			) : day === undefined ? (
 				<Notice week={week}>Opening the office…</Notice>
-			) : day === "offline" ? (
-				<Notice week={week}>Couldn't reach the office, try again.</Notice>
+			) : "failed" in day ? (
+				<Notice week={week}>{day.failed}</Notice>
 			) : (
 				<Play day={day} week={week} />
 			)}
