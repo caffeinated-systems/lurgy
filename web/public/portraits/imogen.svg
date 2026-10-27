@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- IT Slate-Cyan Partition -->
+    <linearGradient id="imogenPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#587B87"/>
+      <stop offset="100%" stop-color="#3E5A64"/>
+    </linearGradient>
+
+    <!-- Mustard Dungarees Gradient -->
+    <linearGradient id="dungareeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E9C46A"/>
+      <stop offset="100%" stop-color="#C59B27"/>
+    </linearGradient>
+
+    <linearGradient id="imogenSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDE8DF"/>
+      <stop offset="100%" stop-color="#EDBFA8"/>
+    </linearGradient>
+
+    <!-- Striped Tee Pattern -->
+    <pattern id="bretonStripes" width="20" height="12" patternUnits="userSpaceOnUse">
+      <rect width="20" height="12" fill="#FFFFFF"/>
+      <rect x="0" y="0" width="20" height="6" fill="#1C1F22"/>
+    </pattern>
+
+    <filter id="softShadowImogen" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="neonBlueGlowI" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#00E5FF" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="imogenClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- IT Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#imogenPartition)"/>
+
+    <!-- Server Gandalf Note -->
+    <g transform="translate(48, 110) rotate(4)">
+      <rect width="58" height="48" rx="2" fill="#F8F9FA" stroke="#3E5A64" stroke-width="1"/>
+      <rect width="58" height="8" fill="#587B87"/>
+      <text x="29" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">SERVER STATUS</text>
+      <text x="29" y="20" font-family="Arial Black, Impact" font-size="6" fill="#2B2D42" text-anchor="middle">GANDALF IS UP</text>
+      <text x="29" y="30" font-family="'Courier New', monospace" font-size="5.5" font-weight="bold" fill="#D90429" text-anchor="middle">YOU SHALL</text>
+      <text x="29" y="40" font-family="'Courier New', monospace" font-size="5.5" font-weight="bold" fill="#D90429" text-anchor="middle">NOT PASS</text>
+      <circle cx="29" cy="3" r="1.8" fill="#00E5FF"/>
+    </g>
+
+    <!-- CHARACTER: IMOGEN (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowImogen)">
+
+      <!-- Striped Tee Shoulders & Sleeves -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#bretonStripes)" stroke="#1C1F22" stroke-width="3"/>
+
+      <!-- Mustard Corduroy Dungarees Bib & Straps -->
+      <path d="M140,360 L260,360 L270,560 L130,560 Z" fill="url(#dungareeGrad)" stroke="#7A5807" stroke-width="2.5"/>
+      <!-- Straps with Metal Buckles -->
+      <rect x="144" y="304" width="22" height="66" rx="2" fill="#E9C46A" stroke="#7A5807" stroke-width="2"/>
+      <rect x="142" y="356" width="26" height="12" rx="3" fill="#CFD8DC" stroke="#455A64" stroke-width="1.5"/>
+      <rect x="234" y="304" width="22" height="66" rx="2" fill="#E9C46A" stroke="#7A5807" stroke-width="2"/>
+      <rect x="232" y="356" width="26" height="12" rx="3" fill="#CFD8DC" stroke="#455A64" stroke-width="1.5"/>
+
+      <!-- Enamel D20 Pin on Strap -->
+      <polygon points="155,322 163,334 147,334" fill="#9D4EDD" stroke="#FFFFFF" stroke-width="1"/>
+
+      <!-- Neck -->
+      <path d="M172,258 L172,306 C172,322 228,322 228,306 L228,258 Z" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- NEON BLUE IT LANYARD -->
+      <g filter="url(#neonBlueGlowI)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#00E5FF" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#00E5FF" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#B8F9FF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#B8F9FF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base (Round, Cheerful) -->
+      <path d="M144,174 C144,136 256,136 256,174 L256,226 C256,264 228,284 200,284 C172,284 144,264 144,226 Z"
+            fill="url(#imogenSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Ears -->
+      <ellipse cx="140" cy="210" rx="9" ry="16" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="260" cy="210" rx="9" ry="16" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- PIXIE CUT WITH ELECTRIC-BLUE STREAK -->
+      <path d="M138,172 C132,122 152,88 200,88 C248,88 268,122 262,172 C252,142 236,132 200,132 C164,132 148,142 138,172 Z"
+            fill="#212529" stroke="#000000" stroke-width="2"/>
+      <!-- Vibrant Electric-Blue Dyed Fringe Chunk -->
+      <path d="M150,140 Q176,128 200,146 Q178,160 152,154 Z" fill="#00E5FF" stroke="#0077B6" stroke-width="1.8"/>
+
+      <!-- ROUND TURQUOISE ACRYLIC GLASSES -->
+      <g>
+        <circle cx="174" cy="198" r="19" fill="none" stroke="#2EC4B6" stroke-width="4"/>
+        <circle cx="174" cy="198" r="19" fill="#EAF4F4" fill-opacity="0.2"/>
+        <circle cx="226" cy="198" r="19" fill="none" stroke="#2EC4B6" stroke-width="4"/>
+        <circle cx="226" cy="198" r="19" fill="#EAF4F4" fill-opacity="0.2"/>
+        <path d="M193,196 Q200,192 207,196" fill="none" stroke="#2EC4B6" stroke-width="3.5"/>
+      </g>
+
+      <!-- Enthusiastic Eyebrows -->
+      <path d="M162,178 Q174,168 188,178" stroke="#212529" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,178 Q226,168 238,178" stroke="#212529" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Bright Hazel Eyes with Wonder -->
+      <g>
+        <ellipse cx="174" cy="198" rx="7.5" ry="6.5" fill="#FFFFFF"/>
+        <circle cx="174" cy="198" r="4.2" fill="#588157"/>
+        <circle cx="174" cy="198" r="1.8" fill="#000000"/>
+        <circle cx="175.5" cy="196.5" r="1.3" fill="#FFFFFF"/>
+
+        <ellipse cx="226" cy="198" rx="7.5" ry="6.5" fill="#FFFFFF"/>
+        <circle cx="226" cy="198" r="4.2" fill="#588157"/>
+        <circle cx="226" cy="198" r="1.8" fill="#000000"/>
+        <circle cx="227.5" cy="196.5" r="1.3" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Nose -->
+      <path d="M197,196 L195,222 Q200,226 205,222 L203,196" fill="#DDAF97" stroke="#8C5237" stroke-width="1.8"/>
+
+      <!-- Big Beaming Cheerful Smile -->
+      <path d="M174,242 Q200,268 226,242 Z" fill="#D90429" stroke="#7A0012" stroke-width="2"/>
+      <path d="M178,242 Q200,252 222,242" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round"/> <!-- Teeth -->
+
+      <!-- PROP: GIANT D20 (CRITICAL HIT!) HELD IN FOREGROUND -->
+      <g transform="translate(230, 360) rotate(8)">
+        <!-- Icosahedron Facets (Ruby Red) -->
+        <polygon points="40,6 74,26 74,68 40,88 6,68 6,26" fill="#9D0208" stroke="#370617" stroke-width="2.5"/>
+        <!-- Inner Triangles -->
+        <polygon points="40,6 40,46 6,26" fill="#BA181B" stroke="#370617" stroke-width="1.8"/>
+        <polygon points="40,6 74,26 40,46" fill="#D90429" stroke="#370617" stroke-width="1.8"/>
+        <polygon points="6,26 40,46 22,76" fill="#E5383B" stroke="#370617" stroke-width="1.8"/>
+        <polygon points="74,26 40,46 58,76" fill="#BA181B" stroke="#370617" stroke-width="1.8"/>
+        <polygon points="40,46 22,76 58,76" fill="#F5F3F4" stroke="#370617" stroke-width="1.8"/>
+
+        <!-- "20" (Critical Hit!) Number -->
+        <text x="40" y="70" font-family="Arial Black, Impact" font-size="16" font-weight="900" fill="#9D0208" text-anchor="middle">20</text>
+
+        <!-- Hand Gripping D20 Base -->
+        <g transform="translate(10, 60)">
+          <path d="M-6,0 C-10,12 12,18 20,10 L14,0 Z" fill="#FDE8DF" stroke="#4A3228" stroke-width="2"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

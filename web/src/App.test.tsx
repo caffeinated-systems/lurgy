@@ -269,7 +269,7 @@ test("a rejected declaration masks the coworker", async () => {
 	expect(tile("B1").getAttribute("aria-label")).toBe(
 		"B1, NameB1, HR, unknown, wearing a mask",
 	);
-	expect(tile("B1").textContent).toContain("😷");
+	expect(tile("B1").querySelector(".mask")).not.toBeNull();
 });
 
 test("a failed declaration says so and marks nothing", async () => {
@@ -280,7 +280,7 @@ test("a failed declaration says so and marks nothing", async () => {
 	expect(
 		await screen.findByText("Couldn't reach the office, try again."),
 	).toBeDefined();
-	expect(tile("B1").textContent).not.toContain("😷");
+	expect(tile("B1").querySelector(".mask")).toBeNull();
 });
 
 test("a revealed coworker can't be declared again", async () => {

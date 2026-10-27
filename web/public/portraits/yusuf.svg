@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Legal Charcoal Steel Partition -->
+    <linearGradient id="yusufPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4B515A"/>
+      <stop offset="100%" stop-color="#282C31"/>
+    </linearGradient>
+
+    <!-- Rigid Navy Suit Gradient -->
+    <linearGradient id="yusufSuit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1D2A44"/>
+      <stop offset="100%" stop-color="#0E1626"/>
+    </linearGradient>
+
+    <linearGradient id="yusufSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DEAC8A"/>
+      <stop offset="100%" stop-color="#BC7F57"/>
+    </linearGradient>
+
+    <filter id="softShadowYusuf" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="violetLanyardGlowY" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#9D4EDD" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="yusufClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Legal Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#888E96"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#yusufPartition)"/>
+
+    <!-- Printer Warning Note -->
+    <g transform="translate(48, 110) rotate(-4)">
+      <rect width="60" height="48" rx="2" fill="#FFFFFF" stroke="#8A9099" stroke-width="1"/>
+      <rect width="60" height="8" fill="#E63946"/>
+      <text x="30" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">PRINT DISPATCH</text>
+      <text x="30" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#1C1F1A" text-anchor="middle">14,000 PAGES</text>
+      <text x="30" y="29" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">PRINTED "JUST IN CASE"</text>
+      <text x="30" y="40" font-family="Arial" font-size="4.5" font-weight="bold" fill="#6C757D" text-anchor="middle">(FOR BERNADETTE)</text>
+      <circle cx="30" cy="3" r="1.8" fill="#9D4EDD"/>
+    </g>
+
+    <!-- CHARACTER: YUSUF (Shifted up, rigid panic) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowYusuf)">
+
+      <!-- Stiff Navy Suit Jacket -->
+      <path d="M50,560 L52,490 L60,374 C66,328 106,306 156,300 L244,300 C294,306 334,328 340,374 L348,490 L350,560 Z"
+            fill="url(#yusufSuit)" stroke="#0E1626" stroke-width="3"/>
+
+      <!-- White Formal Shirt V -->
+      <polygon points="170,300 230,300 200,400" fill="#FFFFFF" stroke="#CED4DA" stroke-width="1.5"/>
+
+      <!-- Crooked Red/Navy Tie pulled too tight -->
+      <polygon points="196,334 204,334 208,440 198,452 192,440" fill="#8B263E" stroke="#540B0E" stroke-width="1.8" transform="rotate(-3, 200, 334)"/>
+
+      <!-- Suit Lapels -->
+      <path d="M156,300 L136,366 L174,420 L200,420 L166,300 Z" fill="#1D2A44" stroke="#0E1626" stroke-width="2"/>
+      <path d="M244,300 L264,366 L226,420 L200,420 L234,300 Z" fill="#1D2A44" stroke="#0E1626" stroke-width="2"/>
+
+      <!-- Neck (Long, tensed) -->
+      <path d="M174,256 L174,306 C174,322 226,322 226,306 L226,256 Z" fill="#BC7F57" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- ROYAL VIOLET LEGAL LANYARD -->
+      <g filter="url(#violetLanyardGlowY)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#9D4EDD" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#9D4EDD" stroke-width="8" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#E0AAFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#E0AAFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base -->
+      <path d="M150,166 C150,132 250,132 250,166 L250,222 C250,260 226,282 200,282 C174,282 150,260 150,222 Z"
+            fill="url(#yusufSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Nervous Sweat Drops on Temple -->
+      <path d="M242,168 C244,164 248,164 248,168 C248,172 242,176 242,168 Z" fill="#00E5FF"/>
+      <path d="M246,182 C248,178 252,178 252,182 C252,186 246,190 246,182 Z" fill="#00E5FF"/>
+
+      <!-- Ears -->
+      <ellipse cx="144" cy="206" rx="8" ry="16" fill="#BC7F57" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="256" cy="206" rx="8" ry="16" fill="#BC7F57" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- Neat Short Black Hair -->
+      <path d="M146,170 C142,122 160,92 200,92 C240,92 258,122 254,170 C246,144 230,136 200,136 C170,136 154,144 146,170 Z"
+            fill="#1E1612" stroke="#0A0705" stroke-width="2"/>
+
+      <!-- Panicked Arched Eyebrows (Tilted in sheer worry) -->
+      <path d="M162,172 Q174,180 188,176" stroke="#1E1612" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,176 Q226,180 238,172" stroke="#1E1612" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Wide, Sweating, Terrified Eyes (Rabbit in Headlights) -->
+      <g>
+        <ellipse cx="174" cy="196" rx="9" ry="8" fill="#FFFFFF" stroke="#1E1612" stroke-width="2"/>
+        <circle cx="174" cy="196" r="4.2" fill="#3D2314"/>
+        <circle cx="174" cy="196" r="1.8" fill="#000000"/>
+        <circle cx="176" cy="194" r="1.5" fill="#FFFFFF"/>
+
+        <ellipse cx="226" cy="196" rx="9" ry="8" fill="#FFFFFF" stroke="#1E1612" stroke-width="2"/>
+        <circle cx="226" cy="196" r="4.2" fill="#3D2314"/>
+        <circle cx="226" cy="196" r="1.8" fill="#000000"/>
+        <circle cx="228" cy="194" r="1.5" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Nose -->
+      <path d="M197,194 L194,222 Q200,226 206,222 L203,194" fill="#A86A41" stroke="#7A4E39" stroke-width="1.8"/>
+
+      <!-- Trembling Polite Grimace (Desperate to Please Bernadette) -->
+      <path d="M180,248 Q200,242 220,248" stroke="#4A1E17" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <line x1="184" y1="248" x2="216" y2="248" stroke="#FFFFFF" stroke-width="2"/> <!-- Clenched teeth -->
+
+      <!-- PROP: FOOT-HIGH TOWERING STACK OF PRINTED A4 PAPER -->
+      <g transform="translate(100, 380)">
+        <!-- Massive Ream of Paper -->
+        <rect x="0" y="0" width="200" height="96" rx="2" fill="#FFFFFF" stroke="#6C757D" stroke-width="2"/>
+        <!-- Sheet edge divisions -->
+        <line x1="0" y1="20" x2="200" y2="20" stroke="#ADB5BD" stroke-width="1.5"/>
+        <line x1="0" y1="40" x2="200" y2="40" stroke="#ADB5BD" stroke-width="1.5"/>
+        <line x1="0" y1="60" x2="200" y2="60" stroke="#ADB5BD" stroke-width="1.5"/>
+        <line x1="0" y1="80" x2="200" y2="80" stroke="#ADB5BD" stroke-width="1.5"/>
+        <text x="100" y="14" font-family="monospace" font-size="7" font-weight="bold" fill="#000000" text-anchor="middle">LEGAL EXHIBIT A-ZZZ</text>
+
+        <!-- Yusuf's Trembling Hands Clamping Both Sides -->
+        <g>
+          <path d="M-8,30 C-14,40 -4,56 12,50 L12,30 Z" fill="#DEAC8A" stroke="#4A3228" stroke-width="2"/>
+          <path d="M208,30 C214,40 204,56 188,50 L188,30 Z" fill="#DEAC8A" stroke="#4A3228" stroke-width="2"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

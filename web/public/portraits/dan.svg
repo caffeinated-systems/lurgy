@@ -1,0 +1,287 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Fluorescent Glow -->
+    <linearGradient id="fluoGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EAF6FA" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#D8D3C6" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- IT Slate-Cyan Partition Gradient -->
+    <linearGradient id="itPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#587B87"/>
+      <stop offset="100%" stop-color="#3E5A64"/>
+    </linearGradient>
+
+    <!-- Olive Fleece Shading -->
+    <linearGradient id="fleeceGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5E6E4E"/>
+      <stop offset="100%" stop-color="#435037"/>
+    </linearGradient>
+
+    <!-- Skin Tone Gradient -->
+    <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EBB99B"/>
+      <stop offset="100%" stop-color="#D99E7E"/>
+    </linearGradient>
+
+    <!-- RAM Gold Pins Gradient -->
+    <linearGradient id="ramGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCE082"/>
+      <stop offset="100%" stop-color="#CFA034"/>
+    </linearGradient>
+
+    <!-- Subtle Plaid Pattern for Flannel Shirt -->
+    <pattern id="flannelPlaid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <rect width="24" height="24" fill="#A65A46"/>
+      <rect x="0" y="0" width="24" height="6" fill="#3B4F5E" opacity="0.45"/>
+      <rect x="0" y="0" width="6" height="24" fill="#3B4F5E" opacity="0.45"/>
+      <line x1="14" y1="0" x2="14" y2="24" stroke="#E8D2B5" stroke-width="1.5" opacity="0.6"/>
+      <line x1="0" y1="14" x2="24" y2="14" stroke="#E8D2B5" stroke-width="1.5" opacity="0.6"/>
+    </pattern>
+
+    <!-- Partition Fabric Texture -->
+    <pattern id="fabricDots" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="0.7" fill="#2C424A" opacity="0.35"/>
+      <circle cx="4.5" cy="4.5" r="0.7" fill="#7397A3" opacity="0.2"/>
+    </pattern>
+
+    <!-- Soft Drop Shadow -->
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#1D282C" flood-opacity="0.32"/>
+    </filter>
+
+    <!-- Neon Glow for IT Lanyard -->
+    <filter id="neonLanyardGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#00F0FF" flood-opacity="0.6"/>
+    </filter>
+
+    <!-- Clip frame to keep rounded corners tidy -->
+    <clipPath id="frameClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- ================= BACKGROUND: REDUCED CEILING & OFFICE ================= -->
+    <!-- Office Back Wall -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+
+    <!-- Acoustic Ceiling Tiles (Reduced height to cut top space by half) -->
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="0" y1="22" x2="400" y2="22" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="95" y1="0" x2="80" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="295" y1="0" x2="310" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Overhead Fluorescent Light Strip -->
+    <rect x="125" y="4" width="150" height="12" rx="3" fill="#C2BDB0"/>
+    <rect x="130" y="6" width="140" height="8" rx="2" fill="#F7FDFF"/>
+    <polygon points="120,16 280,16 320,70 80,70" fill="url(#fluoGlow)"/>
+
+    <!-- IT Slate-Cyan Hot-Desk Divider Screen (Raised up) -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9AA3A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#itPartition)"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#fabricDots)"/>
+
+    <!-- Sticky Note Pinned to Divider -->
+    <g transform="translate(48, 110) rotate(-4)">
+      <rect width="46" height="46" fill="#F2E279" stroke="#C9B852" stroke-width="1"/>
+      <path d="M8,14 Q18,12 34,15 M8,23 Q22,21 30,24 M8,32 Q16,32 24,31" stroke="#6B6443" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <circle cx="23" cy="6" r="3" fill="#C84B31"/>
+    </g>
+
+    <!-- ================= CHARACTER: DAN (IT, EARLY 50s) ================= -->
+    <!-- Shifted upward by 54px to eliminate dead top space -->
+    <g transform="translate(0, -54)" filter="url(#softShadow)">
+
+      <!-- Shoulders / Olive-Green Fleece Jacket -->
+      <path d="M50,560 L52,500 L64,376 C70,334 114,312 164,306 L236,306 C286,312 330,334 336,376 L348,500 L350,560 Z"
+            fill="url(#fleeceGrad)" stroke="#2C3624" stroke-width="3"/>
+
+      <!-- Fleece Raglan Sleeve Seams -->
+      <path d="M132,315 C112,355 98,415 90,560" stroke="#39452F" stroke-width="2.5" fill="none"/>
+      <path d="M268,315 C288,355 302,415 310,560" stroke="#39452F" stroke-width="2.5" fill="none"/>
+
+      <!-- Inner Washed Flannel Shirt V-Area -->
+      <polygon points="154,304 246,304 200,425" fill="url(#flannelPlaid)" stroke="#2C3624" stroke-width="2.5"/>
+
+      <!-- Flannel Shirt Collar Flaps -->
+      <polygon points="158,292 196,342 162,354 144,312" fill="url(#flannelPlaid)" stroke="#3B231B" stroke-width="2" stroke-linejoin="round"/>
+      <polygon points="242,292 204,342 238,354 256,312" fill="url(#flannelPlaid)" stroke="#3B231B" stroke-width="2" stroke-linejoin="round"/>
+
+      <!-- Fleece Stand Collar -->
+      <path d="M148,296 L132,326 L160,368 L196,422 L156,308 Z" fill="#4D5B3F" stroke="#2C3624" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M252,296 L268,326 L240,368 L204,422 L244,308 Z" fill="#4D5B3F" stroke="#2C3624" stroke-width="2.5" stroke-linejoin="round"/>
+
+      <!-- Fleece Center Zipper -->
+      <line x1="200" y1="420" x2="200" y2="560" stroke="#2A3025" stroke-width="4"/>
+      <rect x="196" y="424" width="8" height="16" rx="2" fill="#8C9688" stroke="#2A3025" stroke-width="1.5"/>
+
+      <!-- Neck -->
+      <path d="M168,266 L168,314 C168,332 232,332 232,314 L232,266 Z" fill="#D59A7A" stroke="#4A3228" stroke-width="2.5"/>
+      <!-- Neck Shadow under Beard -->
+      <ellipse cx="200" cy="286" rx="31" ry="14" fill="#B67B5C" opacity="0.65"/>
+
+      <!-- NEON BLUE IT LANYARD (Replacing Navy) -->
+      <g filter="url(#neonLanyardGlow)">
+        <path d="M158,302 C162,362 184,408 196,442" stroke="#00E5FF" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,302 C238,362 214,408 202,442" stroke="#00E5FF" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <!-- Neon Lanyard Inner Highlight Stripe -->
+      <path d="M158,302 C162,362 184,408 196,442" stroke="#B8F9FF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,302 C238,362 214,408 202,442" stroke="#B8F9FF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Lanyard Ring & Hanging Badge -->
+      <circle cx="199" cy="445" r="5" fill="#A4B2BA" stroke="#37474F" stroke-width="1.5"/>
+      <g transform="translate(182, 450)">
+        <rect width="34" height="48" rx="3" fill="#FFFFFF" stroke="#607D8B" stroke-width="1.5"/>
+        <rect width="34" height="12" rx="2" fill="#00E5FF"/>
+        <text x="17" y="9" font-family="Arial, sans-serif" font-weight="900" font-size="7" fill="#004D40" text-anchor="middle">IT</text>
+        <rect x="6" y="17" width="10" height="12" fill="#78909C"/>
+        <line x1="19" y1="20" x2="28" y2="20" stroke="#37474F" stroke-width="1.5"/>
+        <line x1="19" y1="25" x2="26" y2="25" stroke="#90A4AE" stroke-width="1"/>
+      </g>
+
+      <!-- Braided Glasses Neck Cord -->
+      <path d="M148,214 C140,285 152,350 178,382" stroke="#6B442A" stroke-width="3" stroke-dasharray="4,2" fill="none"/>
+      <path d="M252,214 C260,285 248,350 222,382" stroke="#6B442A" stroke-width="3" stroke-dasharray="4,2" fill="none"/>
+
+      <!-- Ears -->
+      <ellipse cx="141" cy="212" rx="11" ry="19" fill="#DFA383" stroke="#4A3228" stroke-width="2.5"/>
+      <path d="M139,204 C135,210 136,218 142,220" stroke="#B6795A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="259" cy="212" rx="11" ry="19" fill="#DFA383" stroke="#4A3228" stroke-width="2.5"/>
+      <path d="M261,204 C265,210 264,218 258,220" stroke="#B6795A" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <!-- Back/Side Hair Base -->
+      <path d="M138,198 C132,155 155,118 200,118 C245,118 268,155 262,198 Z" fill="#585F66" stroke="#2F353B" stroke-width="2.5"/>
+
+      <!-- Head / Face Base -->
+      <path d="M146,174 C146,136 254,136 254,174 L254,228 C254,268 228,288 200,288 C172,288 146,268 146,228 Z"
+            fill="url(#skinGrad)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Warm Rosy Cheeks -->
+      <ellipse cx="164" cy="224" rx="14" ry="8" fill="#DF8572" opacity="0.38"/>
+      <ellipse cx="236" cy="224" rx="14" ry="8" fill="#DF8572" opacity="0.38"/>
+
+      <!-- Forehead Expression Lines -->
+      <path d="M174,158 Q200,154 226,158" stroke="#C4886A" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M180,165 Q200,162 220,165" stroke="#C4886A" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+
+      <!-- Kind Crow's Feet / Laugh Crinkles -->
+      <path d="M149,198 L156,202 M148,205 L156,206 M150,212 L157,210" stroke="#B6795A" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M251,198 L244,202 M252,205 L244,206 M250,212 L243,210" stroke="#B6795A" stroke-width="1.6" stroke-linecap="round"/>
+
+      <!-- Eyes (Relaxed, Warm, Unhurried) -->
+      <g>
+        <path d="M164,204 Q175,197 186,204" stroke="#3D2B22" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="175" cy="205" r="4.2" fill="#4A3A28"/>
+        <circle cx="176.5" cy="203.5" r="1.3" fill="#FFFFFF"/>
+        <path d="M166,211 Q175,214 184,210" stroke="#C28668" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+        <path d="M214,204 Q225,197 236,204" stroke="#3D2B22" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="225" cy="205" r="4.2" fill="#4A3A28"/>
+        <circle cx="226.5" cy="203.5" r="1.3" fill="#FFFFFF"/>
+        <path d="M216,211 Q225,214 234,210" stroke="#C28668" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </g>
+
+      <!-- Bushy Salt-and-Pepper Eyebrows -->
+      <path d="M159,188 Q174,181 189,187" stroke="#5A6168" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+      <path d="M162,187 Q174,182 186,186" stroke="#AEB5BC" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M211,187 Q226,181 241,188" stroke="#5A6168" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+      <path d="M214,186 Q226,182 238,187" stroke="#AEB5BC" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <!-- Salt-and-Pepper Full Trimmed Beard -->
+      <path d="M146,212 L152,212 C154,232 162,242 174,242 L226,242 C238,242 246,232 248,212 L254,212
+               C255,248 242,288 200,290 C158,288 145,248 146,212 Z"
+            fill="#676F76" stroke="#33393F" stroke-width="2.5" stroke-linejoin="round"/>
+
+      <!-- Grey Highlights in Beard -->
+      <path d="M162,256 Q175,278 192,284 M208,284 Q225,278 238,256 M185,264 Q200,282 215,264"
+            stroke="#AEB6BD" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.65"/>
+
+      <!-- Mouth / Serene Smile -->
+      <path d="M180,249 Q200,261 220,249" fill="#8C483E" stroke="#4A241E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M185,250 Q200,255 215,250" stroke="#F5EFEA" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Moustache -->
+      <path d="M200,234 C186,233 173,240 169,249 C179,250 191,246 200,243 C209,246 221,250 231,249 C227,240 214,233 200,234 Z"
+            fill="#5C646B" stroke="#33393F" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M178,244 Q190,239 198,240 M202,240 Q210,239 222,244" stroke="#B8C0C7" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+      <!-- Nose -->
+      <path d="M196,202 L192,224 C190,232 210,232 208,224 L204,202" fill="#E3A383" stroke="#8C543A" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- Round Tortoiseshell Spectacles -->
+      <g>
+        <circle cx="174" cy="205" r="20" fill="#E6F4F8" opacity="0.18"/>
+        <circle cx="226" cy="205" r="20" fill="#E6F4F8" opacity="0.18"/>
+        <line x1="163" y1="195" x2="171" y2="213" stroke="#FFFFFF" stroke-width="2.5" opacity="0.45" stroke-linecap="round"/>
+        <line x1="215" y1="195" x2="223" y2="213" stroke="#FFFFFF" stroke-width="2.5" opacity="0.45" stroke-linecap="round"/>
+
+        <circle cx="174" cy="205" r="20" fill="none" stroke="#59351F" stroke-width="4.2"/>
+        <circle cx="174" cy="205" r="20" fill="none" stroke="#A66838" stroke-width="2" stroke-dasharray="7,9"/>
+        <circle cx="226" cy="205" r="20" fill="none" stroke="#59351F" stroke-width="4.2"/>
+        <circle cx="226" cy="205" r="20" fill="none" stroke="#A66838" stroke-width="2" stroke-dasharray="7,9"/>
+
+        <path d="M194,203 Q200,198 206,203" fill="none" stroke="#59351F" stroke-width="3.8"/>
+        <line x1="145" y1="203" x2="154" y2="205" stroke="#59351F" stroke-width="3.5"/>
+        <line x1="246" y1="205" x2="255" y2="203" stroke="#59351F" stroke-width="3.5"/>
+      </g>
+
+      <!-- Top Salt-and-Pepper Wavy Hair -->
+      <path d="M144,188 C140,162 152,135 178,126 C188,120 218,118 234,129 C254,140 260,164 255,188
+               C251,168 242,154 226,150 C208,146 184,154 166,146 C156,156 149,170 144,188 Z"
+            fill="#636B73" stroke="#2F353B" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M168,138 Q192,130 218,136 M182,144 Q208,139 234,146 M152,162 Q160,148 172,144"
+            stroke="#B4BCC4" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+
+      <!-- ================= PROP: STICK OF RAM & HANDS ================= -->
+      <g transform="translate(0, 30)">
+        <!-- Green RAM Circuit Board (Tilted gently in his hands) -->
+        <g transform="translate(86, 395) rotate(-5)">
+          <!-- Main PCB Board -->
+          <rect x="0" y="0" width="228" height="42" rx="3" fill="#2E7D32" stroke="#1B5E20" stroke-width="2.5"/>
+
+          <!-- Gold Contact Edge on Bottom -->
+          <rect x="6" y="34" width="216" height="6.5" fill="url(#ramGold)"/>
+          <!-- Gold pin divider lines -->
+          <line x1="6" y1="34" x2="222" y2="34" stroke="#8D6E1C" stroke-width="1"/>
+          <line x1="6" y1="37" x2="222" y2="37" stroke="#8D6E1C" stroke-width="0.8" stroke-dasharray="2,2"/>
+          <!-- Center Alignment Key Notch -->
+          <rect x="104" y="32" width="10" height="9" fill="#587B87"/>
+
+          <!-- Black RAM Microchips (8 chips in a row) -->
+          <rect x="12" y="8" width="18" height="20" rx="1.5" fill="#212529" stroke="#121416" stroke-width="1.2"/>
+          <rect x="34" y="8" width="18" height="20" rx="1.5" fill="#212529" stroke="#121416" stroke-width="1.2"/>
+          <rect x="56" y="8" width="18" height="20" rx="1.5" fill="#212529" stroke="#121416" stroke-width="1.2"/>
+          <rect x="78" y="8" width="18" height="20" rx="1.5" fill="#212529" stroke="#121416" stroke-width="1.2"/>
+          
+          <rect x="132" y="8" width="18" height="20" rx="1.5" fill="#212529" stroke="#121416" stroke-width="1.2"/>
+          <rect x="154" y="8" width="18" height="20" rx="1.5" fill="#212529" stroke="#121416" stroke-width="1.2"/>
+          <rect x="176" y="8" width="18" height="20" rx="1.5" fill="#212529" stroke="#121416" stroke-width="1.2"/>
+          <rect x="198" y="8" width="18" height="20" rx="1.5" fill="#212529" stroke="#121416" stroke-width="1.2"/>
+
+          <!-- RAM Spec Sticker -->
+          <rect x="88" y="10" width="52" height="15" rx="1" fill="#F8F9FA" stroke="#CFD8DC" stroke-width="1"/>
+          <text x="114" y="18" font-family="monospace" font-size="6.5" font-weight="bold" fill="#263238" text-anchor="middle">DDR4 16GB</text>
+          <line x1="94" y1="21" x2="134" y2="21" stroke="#37474F" stroke-width="1.8" stroke-dasharray="1.5,1.5"/>
+        </g>
+
+        <!-- Dan's Left Hand (Holding the left edge of RAM) -->
+        <g>
+          <path d="M72,434 C70,414 84,402 104,404 C112,405 116,412 110,418 C116,420 116,428 108,432 C114,435 110,444 100,446 L76,448 Z"
+                fill="#E5AE90" stroke="#4A3228" stroke-width="2.5" stroke-linejoin="round"/>
+          <ellipse cx="106" cy="406" rx="8" ry="5" fill="#EBB99B" stroke="#4A3228" stroke-width="1.5"/>
+        </g>
+
+        <!-- Dan's Right Hand (Holding the right edge of RAM) -->
+        <g>
+          <path d="M328,416 C330,396 316,384 296,386 C288,387 284,394 290,400 C284,402 284,410 292,414 C286,417 290,426 300,428 L324,430 Z"
+                fill="#E5AE90" stroke="#4A3228" stroke-width="2.5" stroke-linejoin="round"/>
+          <ellipse cx="294" cy="388" rx="8" ry="5" fill="#EBB99B" stroke="#4A3228" stroke-width="1.5"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

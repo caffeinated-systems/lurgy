@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Legal Charcoal Steel Partition -->
+    <linearGradient id="kellyPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4B515A"/>
+      <stop offset="100%" stop-color="#282C31"/>
+    </linearGradient>
+
+    <!-- Navy Cardigan Gradient -->
+    <linearGradient id="navyCardi" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#243447"/>
+      <stop offset="100%" stop-color="#141E2B"/>
+    </linearGradient>
+
+    <!-- Warm Early 50s Skin Tone Gradient -->
+    <linearGradient id="kellySkin2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCE5D8"/>
+      <stop offset="100%" stop-color="#EDBFA8"/>
+    </linearGradient>
+
+    <!-- Warm Honey Blonde Gradient (Strictly No Grey) -->
+    <linearGradient id="honeyBlondeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FAE596"/>
+      <stop offset="50%" stop-color="#E8C872"/>
+      <stop offset="100%" stop-color="#BA9135"/>
+    </linearGradient>
+
+    <filter id="softShadowKelly2" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="violetLanyardGlowK2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#9D4EDD" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="kellyClip2">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Legal Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#888E96"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#kellyPartition)"/>
+
+    <!-- Friendly NDA Notice -->
+    <g transform="translate(48, 110) rotate(-3)">
+      <rect width="64" height="48" rx="2" fill="#FFFFFF" stroke="#8A9099" stroke-width="1"/>
+      <rect width="64" height="8" fill="#9D4EDD"/>
+      <text x="32" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">LEGAL COMPLIANCE</text>
+      <text x="32" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#1A1C1E" text-anchor="middle">NO SIGNED NDA?</text>
+      <text x="32" y="30" font-family="Arial Black, Impact" font-size="6" fill="#D90429" text-anchor="middle">NO ENTRY :)</text>
+      <text x="32" y="41" font-family="Arial" font-size="4.5" font-weight="bold" fill="#6C757D" text-anchor="middle">HAVE A LOVELY DAY!</text>
+      <circle cx="32" cy="3" r="1.8" fill="#9D4EDD"/>
+    </g>
+
+    <!-- CHARACTER: KELLY (Shifted up, approachable office build) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowKelly2)">
+
+      <!-- Teal Scoop-Neck Base Top -->
+      <path d="M160,300 L240,300 L240,380 L160,380 Z" fill="#2A9D8F" stroke="#1D685F" stroke-width="1.5"/>
+
+      <!-- Navy Knitted Cardigan (Normal Office Proportions) -->
+      <path d="M54,560 L56,490 L64,374 C70,332 110,308 156,302 L244,302 C290,308 330,332 336,374 L344,490 L346,560 Z"
+            fill="url(#navyCardi)" stroke="#0E1722" stroke-width="3"/>
+
+      <!-- Cardigan V-Placket & Buttons -->
+      <path d="M156,302 L146,366 L180,440 L200,440 L166,302 Z" fill="#2F4259" stroke="#0E1722" stroke-width="2"/>
+      <path d="M244,302 L254,366 L220,440 L200,440 L234,302 Z" fill="#2F4259" stroke="#0E1722" stroke-width="2"/>
+      <circle cx="200" cy="460" r="3.5" fill="#D4A373" stroke="#8C5828" stroke-width="1"/>
+
+      <!-- Neck -->
+      <path d="M172,258 L172,306 C172,322 228,322 228,306 L228,258 Z" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- ROYAL VIOLET LEGAL LANYARD -->
+      <g filter="url(#violetLanyardGlowK2)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#9D4EDD" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#9D4EDD" stroke-width="8" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#E0AAFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#E0AAFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <!-- Compliance ID Badge -->
+      <g transform="translate(182, 442)">
+        <rect width="36" height="48" rx="3" fill="#FFFFFF" stroke="#495057" stroke-width="1.5"/>
+        <rect width="36" height="10" rx="2" fill="#9D4EDD"/>
+        <text x="18" y="7.5" font-family="Arial" font-size="5" font-weight="900" fill="#FFFFFF" text-anchor="middle">LEGAL</text>
+        <text x="18" y="24" font-family="Arial" font-size="6" font-weight="bold" fill="#212529" text-anchor="middle">KELLY</text>
+        <line x1="8" y1="34" x2="28" y2="34" stroke="#212529" stroke-width="2"/>
+      </g>
+
+      <!-- Head Base (Early 50s, Friendly Oval) -->
+      <path d="M148,168 C148,132 252,132 252,168 L252,224 C252,264 226,284 200,284 C174,284 148,264 148,224 Z"
+            fill="url(#kellySkin2)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Warm Apple Cheeks with Smile Creases -->
+      <circle cx="164" cy="226" r="14" fill="#FF758F" opacity="0.4"/>
+      <circle cx="236" cy="226" r="14" fill="#FF758F" opacity="0.4"/>
+
+      <!-- Ears -->
+      <ellipse cx="142" cy="208" rx="8" ry="16" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="258" cy="208" rx="8" ry="16" fill="#EDBFA8" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- HONEY BLONDE HAIR (Layered Chin-Length Bob, NO GREY) -->
+      <path d="M136,176 C128,122 148,86 200,86 C252,86 272,122 264,176 C274,208 270,248 256,260 C248,228 248,180 248,180 C234,152 220,144 200,144 C176,144 162,152 148,180 C148,180 148,228 140,260 C126,248 126,208 136,176 Z"
+            fill="url(#honeyBlondeGrad)" stroke="#7A5807" stroke-width="2.5"/>
+      <!-- Soft Blonde Strands & Highlights -->
+      <path d="M162,120 Q200,108 238,122" stroke="#FFF3B0" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M146,150 Q180,132 216,140" stroke="#FFF3B0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- STYLISH TORTOISESHELL GLASSES -->
+      <g>
+        <!-- Left Frame -->
+        <rect x="156" y="186" width="34" height="24" rx="5" fill="#EAF4F4" fill-opacity="0.25" stroke="#5E3013" stroke-width="3"/>
+        <!-- Right Frame -->
+        <rect x="210" y="186" width="34" height="24" rx="5" fill="#EAF4F4" fill-opacity="0.25" stroke="#5E3013" stroke-width="3"/>
+        <!-- Bridge -->
+        <path d="M190,194 Q200,190 210,194" stroke="#5E3013" stroke-width="3" fill="none"/>
+        <!-- Lens Glint -->
+        <line x1="160" y1="190" x2="170" y2="204" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <line x1="214" y1="190" x2="224" y2="204" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+      </g>
+
+      <!-- Warm, Friendly Eyebrows -->
+      <path d="M162,178 Q174,170 188,178" stroke="#9A6F1A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,178 Q226,170 238,178" stroke="#9A6F1A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Warm, Happy Laugh Crinkles & Blue/Grey Eyes -->
+      <g>
+        <path d="M150,196 L156,200 M148,204 L156,205" stroke="#BA856D" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M250,196 L244,200 M252,204 L244,205" stroke="#BA856D" stroke-width="1.8" stroke-linecap="round"/>
+
+        <!-- Eyes smiling/crinkling happily -->
+        <ellipse cx="173" cy="198" rx="7.5" ry="5.5" fill="#FFFFFF"/>
+        <circle cx="173" cy="198" r="3.8" fill="#468FAF"/>
+        <circle cx="173" cy="198" r="1.6" fill="#000000"/>
+        <circle cx="174" cy="197" r="1.2" fill="#FFFFFF"/>
+
+        <ellipse cx="227" cy="198" rx="7.5" ry="5.5" fill="#FFFFFF"/>
+        <circle cx="227" cy="198" r="3.8" fill="#468FAF"/>
+        <circle cx="227" cy="198" r="1.6" fill="#000000"/>
+        <circle cx="228" cy="197" r="1.2" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Friendly Soft Nose -->
+      <path d="M197,196 L195,222 Q200,226 205,222 L203,196" fill="#DB9F87" stroke="#8D5237" stroke-width="1.8"/>
+
+      <!-- GENUINE, BRIGHT SMILEY GRIN -->
+      <path d="M174,242 Q200,268 226,242 Z" fill="#D90429" stroke="#7A0012" stroke-width="2"/>
+      <path d="M178,242 Q200,250 222,242" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round"/> <!-- Warm white smile -->
+
+      <!-- Relaxed Hands Clasping Notebook/Pass -->
+      <g transform="translate(140, 396)">
+        <!-- Laminated Legal Sign-in Clipboard -->
+        <rect x="0" y="0" width="120" height="84" rx="4" fill="#F8F9FA" stroke="#6C757D" stroke-width="2"/>
+        <rect x="0" y="0" width="120" height="12" rx="2" fill="#9D4EDD"/>
+        <text x="60" y="9" font-family="Arial, sans-serif" font-weight="900" font-size="6" fill="#FFFFFF" text-anchor="middle">VISITOR COMPLIANCE LOG</text>
+        <line x1="10" y1="24" x2="110" y2="24" stroke="#CED4DA" stroke-width="2"/>
+        <line x1="10" y1="40" x2="110" y2="40" stroke="#CED4DA" stroke-width="2"/>
+        <line x1="10" y1="56" x2="110" y2="56" stroke="#CED4DA" stroke-width="2"/>
+
+        <!-- Friendly Hand Supporting Board -->
+        <path d="M-8,24 C-14,34 -4,48 10,42 L10,24 Z" fill="#FCE5D8" stroke="#4A3228" stroke-width="2"/>
+      </g>
+
+    </g>
+  </g>
+</svg>

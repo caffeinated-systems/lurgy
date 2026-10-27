@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Marketing Dusty Terracotta Partition -->
+    <linearGradient id="priyaPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9E6464"/>
+      <stop offset="100%" stop-color="#703E3E"/>
+    </linearGradient>
+
+    <!-- Warm South Asian Skin Tone Gradient -->
+    <linearGradient id="priyaSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DDA17B"/>
+      <stop offset="100%" stop-color="#C07E54"/>
+    </linearGradient>
+
+    <filter id="softShadowP" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="coralLanyardGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#FF5A5F" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="priyaClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Marketing Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#priyaPartition)"/>
+
+    <!-- Pinned Typography Rule Memo -->
+    <g transform="translate(48, 110) rotate(5)">
+      <rect width="60" height="48" rx="2" fill="#FFFFFF" stroke="#8E5B5B" stroke-width="1"/>
+      <rect width="60" height="8" fill="#FF5A5F"/>
+      <text x="30" y="6.5" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">TYPOGRAPHY</text>
+      <text x="30" y="22" font-family="'Comic Sans MS', cursive, sans-serif" font-size="7" fill="#C92A2A" text-anchor="middle">Comic Sans?</text>
+      <text x="30" y="32" font-family="Helvetica, Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">I will walk</text>
+      <text x="30" y="42" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="5.5" fill="#1C1F1A" text-anchor="middle">INTO THE SEA</text>
+      <circle cx="30" cy="3" r="1.8" fill="#FF5A5F"/>
+    </g>
+
+    <!-- CHARACTER: PRIYA (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowP)">
+
+      <!-- Artsy Geometric Blouse Shoulders -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="#F4F1DE" stroke="#3D405B" stroke-width="3"/>
+
+      <!-- Colourful Bold Graphic Blocks on Blouse -->
+      <polygon points="66,370 120,340 100,430 54,420" fill="#E07A5F"/>
+      <polygon points="120,340 160,380 130,460 90,440" fill="#3D405B"/>
+      <polygon points="160,304 200,340 170,410 130,370" fill="#F2CC8F"/>
+      <polygon points="240,304 200,340 230,410 270,370" fill="#81B29A"/>
+      <polygon points="280,340 334,370 346,420 300,430" fill="#E07A5F"/>
+      <polygon points="240,410 290,400 310,480 260,490" fill="#3D405B"/>
+
+      <!-- Blouse V-Neck -->
+      <path d="M174,302 L200,346 L226,302 Z" fill="#DDA17B" stroke="#3D405B" stroke-width="2"/>
+
+      <!-- Graceful Neck & Statement Brass Typography Earring -->
+      <path d="M170,256 L170,308 C170,324 230,324 230,308 L230,256 Z" fill="#C07E54" stroke="#4A3228" stroke-width="2"/>
+      <!-- Typographic Bracket Earring -->
+      <path d="M136,220 C130,220 126,226 126,234 C126,242 122,246 118,246 C122,246 126,250 126,258 C126,266 130,272 136,272"
+            fill="none" stroke="#DDA74A" stroke-width="3" stroke-linecap="round"/>
+
+      <!-- VIBRANT CORAL PINK MARKETING LANYARD -->
+      <g filter="url(#coralLanyardGlow)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#FF5A5F" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#FF5A5F" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFD8D9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFD8D9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base -->
+      <path d="M146,170 C146,132 254,132 254,170 L254,224 C254,262 226,282 200,282 C174,282 146,262 146,224 Z"
+            fill="url(#priyaSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Ears -->
+      <ellipse cx="141" cy="206" rx="9" ry="16" fill="#C07E54" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="259" cy="206" rx="9" ry="16" fill="#C07E54" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- Sleek Glossy Black French Twist Hair with Pen Pin -->
+      <path d="M136,176 C130,126 148,88 200,88 C252,88 270,126 264,176 C256,150 240,140 200,140 C160,140 144,150 136,176 Z"
+            fill="#1F2421" stroke="#0B0D0C" stroke-width="2"/>
+      <!-- Top French Twist Bun Volume -->
+      <path d="M168,92 C168,68 232,68 232,92 Z" fill="#2D312E" stroke="#0B0D0C" stroke-width="2"/>
+      <!-- Yellow Highlighter tucked into bun -->
+      <g transform="translate(154, 76) rotate(-22)">
+        <rect width="48" height="10" rx="2" fill="#FFE600" stroke="#B8A500" stroke-width="1.2"/>
+        <polygon points="48,1 56,5 48,9" fill="#00E5FF"/>
+      </g>
+
+      <!-- Expressive Arched Eyebrows -->
+      <path d="M160,180 Q174,170 190,180" stroke="#1F2421" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M210,180 Q226,170 240,180" stroke="#1F2421" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Warm, Sparkling Dark Eyes -->
+      <g>
+        <ellipse cx="174" cy="198" rx="8" ry="7" fill="#FFFFFF"/>
+        <circle cx="174" cy="198" r="4.8" fill="#3D2314"/>
+        <circle cx="175.5" cy="196.5" r="1.6" fill="#FFFFFF"/>
+
+        <ellipse cx="226" cy="198" rx="8" ry="7" fill="#FFFFFF"/>
+        <circle cx="226" cy="198" r="4.8" fill="#3D2314"/>
+        <circle cx="227.5" cy="196.5" r="1.6" fill="#FFFFFF"/>
+      </g>
+
+      <!-- BOLD CIRCULAR RED STATEMENT GLASSES -->
+      <g>
+        <!-- Left Frame -->
+        <circle cx="174" cy="198" r="19" fill="none" stroke="#D90429" stroke-width="4.5"/>
+        <circle cx="174" cy="198" r="19" fill="#FFFFFF" fill-opacity="0.1"/>
+        <!-- Right Frame -->
+        <circle cx="226" cy="198" r="19" fill="none" stroke="#D90429" stroke-width="4.5"/>
+        <circle cx="226" cy="198" r="19" fill="#FFFFFF" fill-opacity="0.1"/>
+        <!-- Bridge -->
+        <path d="M193,196 Q200,192 207,196" fill="none" stroke="#D90429" stroke-width="4"/>
+      </g>
+
+      <!-- Nose -->
+      <path d="M196,198 L193,222 Q200,227 207,222 L204,198" fill="#B36F45" stroke="#7A4E39" stroke-width="1.8"/>
+
+      <!-- Animated, Warm Chatty Smile (Berry Lipstick) -->
+      <path d="M176,242 Q200,266 224,242 Z" fill="#9D0208" stroke="#540B0E" stroke-width="2"/>
+      <path d="M180,243 Q200,250 220,243" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- PROP: PANTONE COLOR SWATCH FAN (Held in Hand) -->
+      <g transform="translate(140, 390)">
+        <!-- Swatch Leaf 1 (Teal) -->
+        <g transform="rotate(-30)">
+          <rect x="0" y="0" width="30" height="74" rx="2" fill="#2A9D8F" stroke="#264653" stroke-width="1.5"/>
+          <rect x="0" y="50" width="30" height="24" fill="#FFFFFF"/>
+          <text x="15" y="64" font-family="monospace" font-size="5" font-weight="bold" fill="#264653" text-anchor="middle">320 C</text>
+        </g>
+        <!-- Swatch Leaf 2 (Mustard) -->
+        <g transform="rotate(-10)">
+          <rect x="0" y="0" width="30" height="74" rx="2" fill="#E9C46A" stroke="#B08924" stroke-width="1.5"/>
+          <rect x="0" y="50" width="30" height="24" fill="#FFFFFF"/>
+          <text x="15" y="64" font-family="monospace" font-size="5" font-weight="bold" fill="#264653" text-anchor="middle">123 C</text>
+        </g>
+        <!-- Swatch Leaf 3 (Coral) -->
+        <g transform="rotate(12)">
+          <rect x="0" y="0" width="30" height="74" rx="2" fill="#FF5A5F" stroke="#C92A2A" stroke-width="1.5"/>
+          <rect x="0" y="50" width="30" height="24" fill="#FFFFFF"/>
+          <text x="15" y="64" font-family="monospace" font-size="5" font-weight="bold" fill="#264653" text-anchor="middle">1788 C</text>
+        </g>
+        <!-- Swatch Pivot Rivet -->
+        <circle cx="15" cy="62" r="4" fill="#D3D3D3" stroke="#555555" stroke-width="1.5"/>
+
+        <!-- Priya's Hand Holding Swatches -->
+        <path d="M22,46 C34,44 42,54 36,68 C30,78 18,78 10,72 Z" fill="#DDA17B" stroke="#4A3228" stroke-width="2"/>
+      </g>
+
+    </g>
+  </g>
+</svg>

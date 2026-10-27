@@ -8,7 +8,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!src/api/schema.d.ts"]
+		"includes": ["**", "!src/api/schema.d.ts", "!public/portraits"]
 	},
 	"formatter": {
 		"enabled": true,

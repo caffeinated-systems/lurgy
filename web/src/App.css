@@ -178,7 +178,8 @@ footer a {
 
 .board {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-template-columns: 0.9rem repeat(4, minmax(0, 1fr));
+	align-items: center;
 	gap: 4px;
 	position: sticky;
 	top: env(safe-area-inset-top);
@@ -189,62 +190,81 @@ footer a {
 .row {
 	display: contents;
 }
+div.axis {
+	display: contents;
+}
+.axis,
+.axis span {
+	font:
+		600 0.7rem / 1 ui-monospace,
+		monospace;
+	color: var(--muted);
+	text-align: center;
+}
 .tile {
 	position: relative;
-	aspect-ratio: 1 / 0.78;
+	aspect-ratio: 1;
 	min-width: 0;
-	border: 1px solid var(--line);
+	overflow: hidden;
+	border: 2px solid var(--line);
 	border-radius: 6px;
 	background: var(--surface);
-	display: grid;
-	place-items: center;
-	align-content: center;
-	gap: 2px;
-	padding: 2px;
+	padding: 0;
 	cursor: pointer;
+}
+/* The portraits are 400x500; cover crops them to head and shoulders, and the mask
+   shares the same box so it lands on every face. */
+.portrait {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: 50% 8%;
+}
+.tile .nm {
+	position: absolute;
+	inset: auto 0 0;
+	padding: 1px 2px;
+	background: color-mix(in srgb, var(--surface) 88%, transparent);
+	color: var(--ink);
+	font-weight: 600;
+	font-size: 0.74rem;
+	letter-spacing: -0.01em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 .tile[aria-selected="true"] {
 	outline: 3px solid var(--accent);
 	outline-offset: 1px;
 }
-.tile .nm {
-	font-weight: 600;
-	font-size: 0.82rem;
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-.coord {
-	font:
-		500 0.7rem / 1 ui-monospace,
-		monospace;
-	color: var(--muted);
-}
 .state {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	padding: 0 3px;
+	border-radius: 4px;
 	font-weight: 700;
-	font-size: 0.7rem;
+	font-size: 0.55rem;
 	text-transform: uppercase;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.06em;
 }
 .st-sick {
-	background: var(--sick);
+	border-color: var(--sick-ink);
 }
-.st-sick .state,
-.st-sick .coord {
+.st-sick .nm,
+.st-sick .state {
+	background: var(--sick);
 	color: var(--sick-ink);
 }
 .st-well {
+	border-color: var(--well-ink);
+}
+.st-well .nm,
+.st-well .state {
 	background: var(--well);
-}
-.st-well .state,
-.st-well .coord {
 	color: var(--well-ink);
-}
-.mask {
-	position: absolute;
-	top: 2px;
-	left: 4px;
-	font-size: 0.7rem;
 }
 
 .hint-clue {
@@ -274,7 +294,7 @@ footer a {
 	border: 2px dotted var(--ink);
 }
 .btn-hint {
-	min-height: 44px;
+	min-height: 36px;
 	border: 1px solid var(--line);
 	border-radius: 10px;
 	background: transparent;
@@ -364,12 +384,11 @@ footer a {
 	margin-inline: -16px;
 	z-index: 5;
 	display: grid;
-	gap: 6px;
+	gap: 4px;
 	background: var(--surface);
 	border-top: 1px solid var(--line);
-	padding: 10px max(16px, env(safe-area-inset-right))
-		calc(10px + env(safe-area-inset-bottom))
-		max(16px, env(safe-area-inset-left));
+	padding: 6px max(16px, env(safe-area-inset-right))
+		calc(6px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
 }
 .toast {
 	margin: 0;
@@ -379,14 +398,14 @@ footer a {
 .big {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 10px;
+	gap: 6px;
 }
 .big button {
-	min-height: 56px;
+	min-height: 44px;
 	border: 0;
 	border-radius: 10px;
 	font-weight: 700;
-	font-size: 1.05rem;
+	font-size: 1rem;
 	cursor: pointer;
 }
 .big button:disabled {
@@ -415,7 +434,7 @@ footer a {
 	font-style: italic;
 }
 .btn-share {
-	min-height: 56px;
+	min-height: 44px;
 	border: 0;
 	border-radius: 10px;
 	background: var(--accent);

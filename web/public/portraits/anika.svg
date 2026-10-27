@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Legal Charcoal Steel Partition -->
+    <linearGradient id="anikaPartitionBlonde" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4B515A"/>
+      <stop offset="100%" stop-color="#282C31"/>
+    </linearGradient>
+
+    <!-- Bottle-Green Jumper Gradient -->
+    <linearGradient id="greenJumperA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2D6A4F"/>
+      <stop offset="100%" stop-color="#1B4332"/>
+    </linearGradient>
+
+    <linearGradient id="anikaSkinA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCE5D8"/>
+      <stop offset="100%" stop-color="#EABCA4"/>
+    </linearGradient>
+
+    <!-- Anika Blonde Hair Gradient -->
+    <linearGradient id="anikaBlonde" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FAE89D"/>
+      <stop offset="50%" stop-color="#E2C268"/>
+      <stop offset="100%" stop-color="#B08D33"/>
+    </linearGradient>
+
+    <filter id="softShadowAnikaB" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="violetLanyardGlowAB" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#9D4EDD" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="anikaClipB">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Legal Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#888E96"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#anikaPartitionBlonde)"/>
+
+    <!-- Grammar Correction Post-it -->
+    <g transform="translate(48, 110) rotate(-3)">
+      <rect width="60" height="48" rx="2" fill="#FFFFFF" stroke="#8A9099" stroke-width="1"/>
+      <rect width="60" height="8" fill="#9D4EDD"/>
+      <text x="30" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">OFFICE GRAMMAR</text>
+      <text x="30" y="22" font-family="Arial" font-size="6" fill="#6C757D" text-anchor="middle">LESS BISCUITS</text>
+      <line x1="10" y1="20" x2="50" y2="20" stroke="#D90429" stroke-width="1.8"/>
+      <text x="30" y="32" font-family="Arial Black, Impact" font-size="6.5" fill="#D90429" text-anchor="middle">FEWER BISCUITS*</text>
+      <text x="30" y="42" font-family="monospace" font-size="4.5" fill="#212529" text-anchor="middle">*AS PER SUBSECTION 4</text>
+      <circle cx="30" cy="3" r="1.8" fill="#9D4EDD"/>
+    </g>
+
+    <!-- CHARACTER: ANIKA (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowAnikaB)">
+
+      <!-- Crisp White Shirt Collar -->
+      <polygon points="166,294 196,334 174,338 152,306" fill="#FFFFFF" stroke="#CED4DA" stroke-width="1.8"/>
+      <polygon points="234,294 204,334 226,338 248,306" fill="#FFFFFF" stroke="#CED4DA" stroke-width="1.8"/>
+      <circle cx="200" cy="328" r="2.5" fill="#FFFFFF" stroke="#ADB5BD" stroke-width="1"/>
+
+      <!-- Bottle-Green Crewneck Jumper -->
+      <path d="M50,560 L52,490 L62,374 C68,332 110,308 156,302 L244,302 C290,308 332,332 338,374 L348,490 L350,560 Z"
+            fill="url(#greenJumperA)" stroke="#081C15" stroke-width="3"/>
+      <!-- Crewneck Collar Rib -->
+      <path d="M162,304 C174,324 226,324 238,304 Z" fill="none" stroke="#081C15" stroke-width="2.5"/>
+
+      <!-- Neck -->
+      <path d="M172,258 L172,306 C172,322 228,322 228,306 L228,258 Z" fill="#EABCA4" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- ROYAL VIOLET LEGAL LANYARD -->
+      <g filter="url(#violetLanyardGlowAB)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#9D4EDD" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#9D4EDD" stroke-width="8" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#E0AAFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#E0AAFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <!-- Paralegal Badge -->
+      <g transform="translate(182, 442)">
+        <rect width="36" height="46" rx="3" fill="#FFFFFF" stroke="#495057" stroke-width="1.5"/>
+        <rect width="36" height="10" rx="2" fill="#9D4EDD"/>
+        <text x="18" y="7.5" font-family="Arial" font-size="5" font-weight="900" fill="#FFFFFF" text-anchor="middle">PARALEGAL</text>
+        <text x="18" y="24" font-family="Arial" font-size="6" font-weight="bold" fill="#212529" text-anchor="middle">ANIKA</text>
+      </g>
+
+      <!-- Head Base (Slightly tilted up chin) -->
+      <path d="M148,168 C148,132 252,132 252,168 L252,220 C252,258 226,278 200,278 C174,278 148,258 148,220 Z"
+            fill="url(#anikaSkinA)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Ears -->
+      <ellipse cx="142" cy="206" rx="8" ry="16" fill="#EABCA4" stroke="#4A3228" stroke-width="2"/>
+      <ellipse cx="258" cy="206" rx="8" ry="16" fill="#EABCA4" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- BLONDE HAIR (Sleek Straight Low Ponytail) -->
+      <path d="M142,172 C136,120 156,86 200,86 C244,86 264,120 258,172 C250,146 236,136 200,136 C164,136 150,146 142,172 Z"
+            fill="url(#anikaBlonde)" stroke="#7A5D19" stroke-width="2.5"/>
+      <!-- Blonde ponytail tail peeking out behind left neck -->
+      <path d="M146,230 C136,250 134,290 140,320 L152,320 C146,290 146,250 152,230 Z" fill="#D4B24B" stroke="#7A5D19" stroke-width="1.8"/>
+      <!-- Soft blonde hair highlight lines -->
+      <path d="M164,116 Q200,104 236,118" stroke="#FFF7C2" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- TORTOISESHELL SQUARE SPECTACLES -->
+      <g>
+        <rect x="158" y="186" width="30" height="22" rx="3" fill="#EAF4F4" fill-opacity="0.2" stroke="#5E3013" stroke-width="3"/>
+        <rect x="212" y="186" width="30" height="22" rx="3" fill="#EAF4F4" fill-opacity="0.2" stroke="#5E3013" stroke-width="3"/>
+        <line x1="188" y1="194" x2="212" y2="194" stroke="#5E3013" stroke-width="3"/>
+        <line x1="162" y1="190" x2="170" y2="204" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <line x1="216" y1="190" x2="224" y2="204" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+      </g>
+
+      <!-- Tailored Dark Blonde Eyebrows -->
+      <path d="M160,178 Q174,170 188,178" stroke="#8C6E23" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,178 Q226,170 240,178" stroke="#8C6E23" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Sharp Hazel/Blue Eyes -->
+      <g>
+        <ellipse cx="174" cy="196" rx="7.5" ry="6" fill="#FFFFFF"/>
+        <circle cx="174" cy="196" r="3.8" fill="#4B6B63"/>
+        <circle cx="174" cy="196" r="1.6" fill="#000000"/>
+        <circle cx="175" cy="195" r="1.2" fill="#FFFFFF"/>
+
+        <ellipse cx="226" cy="196" rx="7.5" ry="6" fill="#FFFFFF"/>
+        <circle cx="226" cy="196" r="3.8" fill="#4B6B63"/>
+        <circle cx="226" cy="196" r="1.6" fill="#000000"/>
+        <circle cx="227" cy="195" r="1.2" fill="#FFFFFF"/>
+      </g>
+
+      <!-- Straight Nose -->
+      <path d="M197,194 L194,220 Q200,224 206,220 L203,194" fill="#DB9F87" stroke="#8D5237" stroke-width="1.8"/>
+
+      <!-- Smug, Pedantic Smirk -->
+      <path d="M182,246 Q200,244 222,238" stroke="#8C3518" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M218,236 Q224,240 222,244" stroke="#8C3518" stroke-width="2" fill="none"/>
+
+      <!-- PROP: AGGRESSIVE RED EDITING PEN POISED LIKE A SCALPEL -->
+      <g transform="translate(236, 360) rotate(-15)">
+        <rect x="0" y="0" width="8" height="96" rx="2" fill="#D90429" stroke="#7A0012" stroke-width="1.5"/>
+        <polygon points="0,0 8,0 4,-12" fill="#CFD8DC" stroke="#7A0012" stroke-width="1.2"/>
+        <circle cx="4" cy="-12" r="1" fill="#D90429"/>
+
+        <!-- Anika's Hand Holding Pen Poised -->
+        <g transform="translate(-10, 40)">
+          <path d="M0,0 C-8,10 -6,22 4,28 L14,24 C8,18 8,8 14,0 Z" fill="#FCE5D8" stroke="#4A3228" stroke-width="1.8"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

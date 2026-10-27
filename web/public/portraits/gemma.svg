@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Marketing Dusty Terracotta Partition -->
+    <linearGradient id="gemmaPartition" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9E6464"/>
+      <stop offset="100%" stop-color="#703E3E"/>
+    </linearGradient>
+
+    <!-- Beige Blazer Gradient -->
+    <linearGradient id="blazerBeige" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E6D5B8"/>
+      <stop offset="100%" stop-color="#C7B198"/>
+    </linearGradient>
+
+    <linearGradient id="gemmaSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCE1D4"/>
+      <stop offset="100%" stop-color="#E7B6A0"/>
+    </linearGradient>
+
+    <filter id="softShadowGemma" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#192024" flood-opacity="0.32"/>
+    </filter>
+
+    <filter id="coralLanyardGlowG" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#FF5A5F" flood-opacity="0.6"/>
+    </filter>
+
+    <clipPath id="gemmaClip">
+      <rect x="6" y="6" width="388" height="488" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g>
+    <!-- BACKDROP -->
+    <rect width="400" height="500" fill="#D8D3C6"/>
+    <polygon points="0,0 400,0 400,46 0,46" fill="#E5E0D5"/>
+    <line x1="0" y1="46" x2="400" y2="46" stroke="#B7B0A2" stroke-width="2.5"/>
+    <line x1="85" y1="0" x2="70" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+    <line x1="305" y1="0" x2="320" y2="46" stroke="#C7C1B4" stroke-width="1.5"/>
+
+    <!-- Marketing Screen -->
+    <rect x="24" y="82" width="352" height="418" rx="14" fill="#9BA2A6"/>
+    <rect x="30" y="88" width="340" height="412" rx="10" fill="url(#gemmaPartition)"/>
+
+    <!-- Pinned Alibi Note -->
+    <g transform="translate(48, 110) rotate(3)">
+      <rect width="58" height="48" rx="2" fill="#FFFFFF" stroke="#8E5B5B" stroke-width="1"/>
+      <rect width="58" height="8" fill="#FF5A5F"/>
+      <text x="29" y="6.5" font-family="Arial, sans-serif" font-weight="900" font-size="5" fill="#FFFFFF" text-anchor="middle">LUNCH CALENDAR</text>
+      <text x="29" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">5K RUN (ALONE)</text>
+      <text x="29" y="30" font-family="Arial, sans-serif" font-weight="bold" font-size="5" fill="#1C1F1A" text-anchor="middle">DEFINITELY</text>
+      <text x="29" y="40" font-family="Arial, sans-serif" font-weight="900" font-size="5.5" fill="#C92A2A" text-anchor="middle">SOLITARY</text>
+      <circle cx="29" cy="3" r="1.8" fill="#FF5A5F"/>
+    </g>
+
+    <!-- CHARACTER: GEMMA (Shifted up) -->
+    <g transform="translate(0, -54)" filter="url(#softShadowGemma)">
+
+      <!-- Black Running Base-Layer Top -->
+      <path d="M150,300 L250,300 L250,420 L150,420 Z" fill="#1B1E21" stroke="#0E1012" stroke-width="2"/>
+      <!-- Running zip neck -->
+      <line x1="200" y1="300" x2="200" y2="350" stroke="#FF5A5F" stroke-width="2.5"/>
+
+      <!-- Tailored Beige Boyfriend Blazer -->
+      <path d="M50,560 L52,490 L60,374 C66,328 106,306 156,300 L244,300 C294,306 334,328 340,374 L348,490 L350,560 Z"
+            fill="url(#blazerBeige)" stroke="#6B5945" stroke-width="3"/>
+
+      <!-- Blazer Lapels (Double-Breasted Cut) -->
+      <path d="M156,300 L134,370 L180,440 L200,440 L166,300 Z" fill="#D9C5A7" stroke="#6B5945" stroke-width="2"/>
+      <path d="M244,300 L266,370 L220,440 L200,440 L234,300 Z" fill="#D9C5A7" stroke="#6B5945" stroke-width="2"/>
+      <!-- Tortoiseshell Buttons -->
+      <circle cx="186" cy="450" r="4.5" fill="#4A3423" stroke="#261A10" stroke-width="1.5"/>
+      <circle cx="186" cy="480" r="4.5" fill="#4A3423" stroke="#261A10" stroke-width="1.5"/>
+
+      <!-- Neck -->
+      <path d="M172,258 L172,306 C172,322 228,322 228,306 L228,258 Z" fill="#E7B6A0" stroke="#4A3228" stroke-width="2"/>
+
+      <!-- VIBRANT CORAL PINK MARKETING LANYARD -->
+      <g filter="url(#coralLanyardGlowG)">
+        <path d="M158,298 C162,356 182,408 196,442" stroke="#FF5A5F" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M242,298 C238,356 218,408 204,442" stroke="#FF5A5F" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M158,298 C162,356 182,408 196,442" stroke="#FFD8D9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M242,298 C238,356 218,408 204,442" stroke="#FFD8D9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Head Base (Sharp Cheekbones, Sculpted) -->
+      <path d="M148,168 C148,132 252,132 252,168 L252,222 C252,260 226,280 200,280 C174,280 148,260 148,222 Z"
+            fill="url(#gemmaSkin)" stroke="#4A3228" stroke-width="2.5"/>
+
+      <!-- Cheekbone Contours -->
+      <path d="M156,208 C158,226 168,238 178,244" stroke="#CF977E" stroke-width="2" fill="none"/>
+      <path d="M244,208 C242,226 232,238 222,244" stroke="#CF977E" stroke-width="2" fill="none"/>
+
+      <!-- Ears with Sleek Gold Huggie Hoops -->
+      <ellipse cx="142" cy="206" rx="8" ry="16" fill="#E7B6A0" stroke="#4A3228" stroke-width="2"/>
+      <circle cx="142" cy="214" r="5" fill="none" stroke="#E9C46A" stroke-width="2.5"/>
+      <ellipse cx="258" cy="206" rx="8" ry="16" fill="#E7B6A0" stroke="#4A3228" stroke-width="2"/>
+      <circle cx="258" cy="214" r="5" fill="none" stroke="#E9C46A" stroke-width="2.5"/>
+
+      <!-- SLEEK BRUNETTE BLOW-OUT (Polished Corporate Hair) -->
+      <path d="M136,176 C130,120 152,86 200,86 C248,86 270,120 264,176 C272,216 268,256 254,264 C248,240 248,190 248,190 C234,150 222,142 200,142 C178,142 166,150 152,190 C152,190 152,240 146,264 C132,256 128,216 136,176 Z"
+            fill="#4A3022" stroke="#26170E" stroke-width="2.5"/>
+      <!-- Silky Highlights -->
+      <path d="M164,124 Q196,110 236,124" stroke="#8A5A3D" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M152,156 Q170,136 190,144" stroke="#8A5A3D" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Immaculate Sharp Eyebrows -->
+      <path d="M160,180 Q174,168 188,178" stroke="#382115" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M212,178 Q226,168 240,180" stroke="#382115" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+      <!-- Vigilant, Darting Hazel Eyes (Looking sideways towards Finance) -->
+      <g>
+        <ellipse cx="174" cy="196" rx="8" ry="6.5" fill="#FFFFFF" stroke="#2B2D42" stroke-width="2"/>
+        <circle cx="171" cy="196" r="4.2" fill="#6B705C"/>
+        <circle cx="171" cy="196" r="1.8" fill="#000000"/>
+        <circle cx="172" cy="194" r="1.2" fill="#FFFFFF"/>
+        <!-- Winged Eyeliner -->
+        <path d="M182,194 L188,190" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+
+        <ellipse cx="226" cy="196" rx="8" ry="6.5" fill="#FFFFFF" stroke="#2B2D42" stroke-width="2"/>
+        <circle cx="223" cy="196" r="4.2" fill="#6B705C"/>
+        <circle cx="223" cy="196" r="1.8" fill="#000000"/>
+        <circle cx="224" cy="194" r="1.2" fill="#FFFFFF"/>
+        <!-- Winged Eyeliner -->
+        <path d="M234,194 L240,190" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+      </g>
+
+      <!-- Elegant Nose -->
+      <path d="M198,194 L195,220 Q200,224 205,220 L202,194" fill="#DB9F87" stroke="#7A4E39" stroke-width="1.8"/>
+
+      <!-- Rehearsed, High-Pressure Professional Smile -->
+      <path d="M178,244 Q200,256 222,244" stroke="#B84A5A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M182,244 Q200,250 218,244" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- PROP: TAKEAWAY COFFEE CUP ("OAT FLAT WHITE - GEMMA") -->
+      <g transform="translate(224, 370) rotate(-6)">
+        <polygon points="6,12 12,82 46,82 52,12" fill="#F8F9FA" stroke="#3D405B" stroke-width="2"/>
+        <!-- Cup Cardboard Sleeve -->
+        <polygon points="9,30 11,58 47,58 49,30" fill="#D4A373" stroke="#8C5828" stroke-width="1.5"/>
+        <!-- Hand-written Sharpie text: "OAT FW" -->
+        <text x="29" y="44" font-family="'Courier New', monospace" font-size="7" font-weight="900" fill="#1C140D" text-anchor="middle">OAT FW</text>
+        <text x="29" y="52" font-family="'Courier New', monospace" font-size="5.5" font-weight="bold" fill="#1C140D" text-anchor="middle">GEMMA</text>
+        <rect x="3" y="4" width="52" height="10" rx="3" fill="#2B2D42" stroke="#10121A" stroke-width="2"/>
+
+        <!-- Manicured Hand Gripping Cup -->
+        <g transform="translate(18, 36)">
+          <path d="M26,-6 C30,4 30,16 26,26 L16,26 C20,16 20,4 16,-6 Z" fill="#FCE1D4" stroke="#4A3228" stroke-width="1.8"/>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>
