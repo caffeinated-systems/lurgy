@@ -229,6 +229,9 @@ test("the board shows the logo, the date, the starting coworker and the first hi
 		"A1, NameA1, HR, well, says: Two in my row.",
 	);
 	expect(within(tile("A1")).getByText("HR")).toBeDefined();
+	// Declared tiles are washed in their state (App.css); the rest stay plain.
+	expect(tile("A1").classList).toContain("st-well");
+	expect(tile("B1").className).not.toMatch(/st-/);
 	expect(tile("B1").getAttribute("aria-selected")).toBe("true");
 	expect(tile("B1").tabIndex).toBe(0);
 	expect(tile("A1").tabIndex).toBe(-1);
@@ -252,6 +255,7 @@ test("an accepted declaration reveals the coworker and posts what came before", 
 	expect(tile("B1").getAttribute("aria-label")).toBe(
 		"B1, NameB1, HR, sick, says: Hi.",
 	);
+	expect(tile("B1").classList).toContain("st-sick");
 
 	fireEvent.click(tile("C1"));
 	fireEvent.click(screen.getByRole("button", { name: "Declare NameC1 well" }));

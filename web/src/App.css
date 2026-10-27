@@ -273,8 +273,11 @@ div.axis {
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
 }
+/* A declared tile is done: the face fades into a wash of its state, while the name
+   bar, badge, mask and marks stay full strength. */
 .st-sick {
 	border-color: var(--sick-ink);
+	background: var(--sick);
 }
 .st-sick .nm,
 .st-sick .state {
@@ -283,6 +286,11 @@ div.axis {
 }
 .st-well {
 	border-color: var(--well-ink);
+	background: var(--well);
+}
+.st-sick .portrait:not(.mask),
+.st-well .portrait:not(.mask) {
+	opacity: 0.35;
 }
 .st-well .nm,
 .st-well .state {
