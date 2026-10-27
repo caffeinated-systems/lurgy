@@ -72,9 +72,7 @@ function Timer({ progress }: { progress: Progress }) {
 }
 
 export function Play({ day, week }: { day: Day; week: ReactNode }) {
-	const [game, dispatch] = useReducer(reducer, day, (d) =>
-		start(d, Date.now()),
-	);
+	const [game, dispatch] = useReducer(reducer, day, start);
 	const { progress, selected } = game;
 	const coworkers = day.coworkers;
 	const index = coworkers.findIndex((c) => c.desk === selected);
@@ -95,7 +93,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 	async function declare(desk: Desk, state: State) {
 		if (revealOf(progress, desk)) return dispatch({ type: "already" });
 		if (game.pending) return;
-		dispatch({ type: "sent" });
+		dispatch({ type: "sent", at: Date.now() });
 		try {
 			const reveal = await post({
 				date: day.date,
@@ -121,7 +119,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 				?.focus();
 			return;
 		}
-		dispatch({ type: "sent" });
+		dispatch({ type: "sent", at: Date.now() });
 		try {
 			dispatch({
 				type: "hinted",

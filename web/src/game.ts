@@ -16,7 +16,8 @@ export type Progress = {
 	hints: Partial<Record<Desk, 1 | 2>>;
 	// Clues the player has dimmed, by who said them.
 	dimmed: Desk[];
-	startedAt: number;
+	// Set by the first declaration or hint; the clock holds at 00:00 until then.
+	startedAt?: number;
 	solvedAt?: number;
 };
 
@@ -37,7 +38,7 @@ export type Game = {
 
 export type Action =
 	| { type: "selected"; desk: Desk }
-	| { type: "sent" }
+	| { type: "sent"; at: number }
 	| { type: "accepted"; reveal: Reveal; at: number }
 	| { type: "rejected"; desk: Desk; state: State }
 	| { type: "hinted"; hint: Hint }
@@ -60,7 +61,7 @@ export function load(day: Day): Progress | undefined {
 		const fits =
 			saved?.reveals?.[0]?.desk === day.start.desk &&
 			Array.isArray(saved.masks) &&
-			typeof saved.startedAt === "number" &&
+			(saved.startedAt === undefined || typeof saved.startedAt === "number") &&
 			typeof hints === "object" &&
 			!Array.isArray(hints) &&
 			Array.isArray(dimmed);
@@ -80,13 +81,12 @@ export function save(date: string, progress: Progress): void {
 	}
 }
 
-export function start(day: Day, now: number): Game {
+export function start(day: Day): Game {
 	const progress = load(day) ?? {
 		reveals: [day.start],
 		masks: [],
 		hints: {},
 		dimmed: [],
-		startedAt: now,
 	};
 	const hidden = day.coworkers.find((c) => !revealOf(progress, c.desk));
 	return {
@@ -109,6 +109,7 @@ export function declared(progress: Progress): Declaration[] {
 }
 
 export function elapsed(progress: Progress, now: number): number {
+	if (progress.startedAt === undefined) return 0;
 	return (progress.solvedAt ?? now) - progress.startedAt;
 }
 
@@ -250,7 +251,11 @@ export function reducer(game: Game, action: Action): Game {
 			return { ...game, progress: { ...progress, dimmed } };
 		}
 		case "sent":
-			return { ...game, pending: true };
+			return {
+				...game,
+				progress: { ...progress, startedAt: progress.startedAt ?? action.at },
+				pending: true,
+			};
 		case "accepted": {
 			const { reveal, at } = action;
 			const reveals = [...progress.reveals, reveal];

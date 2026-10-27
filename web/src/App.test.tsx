@@ -588,17 +588,22 @@ test("a hint that can't reach the office says so", async () => {
 	).toBeDefined();
 });
 
-test("the timer ticks, stops on the solve and stays stopped after a reload", async () => {
+test("the timer waits for the first declaration, ticks, stops on the solve and stays stopped after a reload", async () => {
 	vi.useFakeTimers({ shouldAdvanceTime: true, now: MONDAY });
 	const answers = DESKS.slice(1).map((desk) => sick(desk));
 	await open(...answers);
 	const timer = screen.getByRole("timer");
+	await act(() => vi.advanceTimersByTimeAsync(30_000));
 	expect(timer.textContent).toBe("⏱ 00:00");
 
+	fireEvent.keyDown(tile("B1"), { key: "s" });
+	await waitFor(() =>
+		expect(tile("B1").getAttribute("aria-label")).toContain("sick"),
+	);
 	await act(() => vi.advanceTimersByTimeAsync(65_000));
 	expect(timer.textContent).toMatch(/⏱ 01:0[56]/);
 
-	for (const desk of DESKS.slice(1)) {
+	for (const desk of DESKS.slice(2)) {
 		fireEvent.click(tile(desk));
 		fireEvent.keyDown(tile(desk), { key: "s" });
 		await waitFor(() =>
