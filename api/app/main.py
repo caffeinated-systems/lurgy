@@ -1,6 +1,6 @@
 import os
 from contextlib import asynccontextmanager
-from datetime import UTC, date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from functools import cache
 from http import HTTPStatus
 from pathlib import Path
@@ -14,15 +14,10 @@ from app.board import DESKS, Board, Desk
 from app.clues import State
 from app.grade import hint
 from app.limits import limit
-from app.week import Day, Difficulty, load_days
+from app.week import EARLIEST, LATEST, Day, Difficulty, load_days, utc_now
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-
-# UTC+14 (Kiribati): where every day starts first.
-EARLIEST = timezone(timedelta(hours=14))
-# UTC-12 (Baker Island): where every day ends last.
-LATEST = timezone(timedelta(hours=-12))
 
 
 @cache
@@ -48,10 +43,6 @@ app = FastAPI(
     swagger_ui_oauth2_redirect_url=None,
     lifespan=lifespan,
 )
-
-
-def utc_now() -> datetime:
-    return datetime.now(UTC)
 
 
 type Now = Annotated[datetime, Depends(utc_now)]

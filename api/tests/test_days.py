@@ -4,8 +4,8 @@ from http import HTTPStatus
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, days, open_week, today_anywhere, utc_now
-from app.week import load_days
+from app.main import app, days, open_week, today_anywhere
+from app.week import load_days, utc_now
 from tests.factories import FIXTURES, MONDAY
 
 client = TestClient(app)

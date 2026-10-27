@@ -1,10 +1,11 @@
 import random
 import secrets
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, get_args
 
 import pytest
 
+from app import generate
 from app.board import DESKS, Row
 from app.cast import fits, load_cast, load_story
 from app.clues import (
@@ -102,6 +103,45 @@ def test_the_cli_writes_a_week_that_loads(
     assert capsys.readouterr().out == (
         f"wrote {out} (Easy, Medium, Medium, Hard, Hard)\n"
     )
+
+
+def test_the_cli_leaves_a_built_week_alone(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    out = tmp_path / "2026-W45.json"
+    out.write_text("built\n")
+
+    main(["2026-W45", "-o", str(out), "--stories", str(STORIES)])
+
+    assert out.read_text() == "built\n"
+    assert capsys.readouterr().out == "2026-W45 is already built\n"
+
+
+def test_the_cli_rebuilds_a_week_until_it_starts_anywhere(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    out = tmp_path / "2026-W45.json"
+    out.write_text("built\n")
+    args = ["2026-W45", "-o", str(out), "--stories", str(STORIES), "--rebuild"]
+    # Monday 2 November starts at 10:00 UTC on the Sunday, in UTC+14.
+    monkeypatch.setattr(
+        generate, "utc_now", lambda: datetime(2026, 11, 1, 9, 59, tzinfo=UTC)
+    )
+
+    main(args)
+
+    assert Week.model_validate_json(out.read_bytes()).days
+    monkeypatch.setattr(
+        generate, "utc_now", lambda: datetime(2026, 11, 1, 10, tzinfo=UTC)
+    )
+    out.write_text("built\n")
+    with pytest.raises(SystemExit) as refused:
+        main(args)
+    assert refused.value.code == 1
+    assert capsys.readouterr().err == "2026-W45 has started, so it can't be rebuilt\n"
+    assert out.read_text() == "built\n"
 
 
 def test_the_cli_builds_a_quiet_week_without_a_story(

@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from app import limits
-from app.main import app, days, utc_now
-from app.week import load_days
+from app.main import app, days
+from app.week import load_days, utc_now
 from tests.factories import FIXTURES, NOON
 
 if TYPE_CHECKING:

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import UTC, date, datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Annotated, Literal
 
 import numpy as np
@@ -10,6 +10,16 @@ from app.clues import BOARDS, Clue, State
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
+
+
+# UTC+14 (Kiribati): where every day starts first.
+EARLIEST = timezone(timedelta(hours=14))
+# UTC-12 (Baker Island): where every day ends last.
+LATEST = timezone(timedelta(hours=-12))
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
 
 
 type Difficulty = Literal["Easy", "Medium", "Hard"]

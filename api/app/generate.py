@@ -5,7 +5,7 @@ import random
 import secrets
 import subprocess
 from collections import Counter
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 from functools import cache
 from itertools import chain, combinations
 from pathlib import Path
@@ -59,7 +59,7 @@ from app.clues import (
     settled,
 )
 from app.grade import Grade, Step, grade, next_step
-from app.week import Day, Difficulty, Generator, Reveal, Week
+from app.week import EARLIEST, Day, Difficulty, Generator, Reveal, Week, utc_now
 from app.wording import explanation, wording
 
 if TYPE_CHECKING:
@@ -585,7 +585,19 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument(
         "--stories", type=Path, default=Path("../stories"), help="cast and stories"
     )
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="replace a built Week that hasn't started",
+    )
     args = parser.parse_args(argv)
+    name = args.out.stem
+    if args.out.exists() and not args.rebuild:
+        print(f"{name} is already built")  # noqa: T201
+        return
+    # Players' saved progress depends on a Week once it starts anywhere (ADR 0002).
+    if args.out.exists() and utc_now() >= datetime.combine(args.week, time(), EARLIEST):
+        parser.exit(1, f"{name} has started, so it can't be rebuilt\n")
 
     cast = load_cast(args.stories / "cast.md")
     path = story_path(args.stories, args.week)
