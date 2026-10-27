@@ -8,7 +8,7 @@
 
     <!-- 90s Vintage Windbreaker Gradient -->
     <linearGradient id="windbreakerGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#2EC4B6"/>
+      <stop offset="0%" stop-color="#F72585"/>
       <stop offset="100%" stop-color="#7209B7"/>
     </linearGradient>
 
@@ -70,30 +70,14 @@
       <!-- Neck -->
       <path d="M172,258 L172,306 C172,322 228,322 228,306 L228,258 Z" fill="#F0C2B0" stroke="#4A3228" stroke-width="2"/>
 
-      <!-- THE ABSURD NEST OF EIGHT MULTI-COLOURED LANYARDS -->
-      <!-- 1. Mint Teal (HR) -->
+      <!-- MINT TEAL HR LANYARD -->
       <path d="M154,298 C158,356 182,418 196,450" stroke="#2EC4B6" stroke-width="7" fill="none" stroke-linecap="round"/>
       <path d="M246,298 C242,356 218,418 204,450" stroke="#2EC4B6" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <!-- 2. Neon Electric Blue (IT) -->
-      <path d="M158,296 C164,364 178,414 192,446" stroke="#00E5FF" stroke-width="6" fill="none" stroke-linecap="round"/>
-      <path d="M242,296 C236,364 222,414 208,446" stroke="#00E5FF" stroke-width="6" fill="none" stroke-linecap="round"/>
-      <!-- 3. Flame Rust Orange (Procurement) -->
-      <path d="M162,298 C170,370 186,410 198,444" stroke="#FB8500" stroke-width="6" fill="none" stroke-linecap="round"/>
-      <path d="M238,298 C230,370 214,410 202,444" stroke="#FB8500" stroke-width="6" fill="none" stroke-linecap="round"/>
-      <!-- 4. Vibrant Coral Pink (Marketing) -->
-      <path d="M166,298 C160,374 180,422 194,454" stroke="#FF5A5F" stroke-width="6" fill="none" stroke-linecap="round"/>
-      <path d="M234,298 C240,374 220,422 206,454" stroke="#FF5A5F" stroke-width="6" fill="none" stroke-linecap="round"/>
-      <!-- 5. Royal Violet (Legal) -->
-      <path d="M150,302 C156,380 184,426 198,458" stroke="#9D4EDD" stroke-width="5" fill="none" stroke-linecap="round"/>
-      <path d="M250,302 C244,380 216,426 202,458" stroke="#9D4EDD" stroke-width="5" fill="none" stroke-linecap="round"/>
-      <!-- 6. Claret Crimson (Sales) -->
-      <path d="M170,304 C166,384 188,430 200,460" stroke="#E63946" stroke-width="5" fill="none" stroke-linecap="round"/>
-      <path d="M230,304 C234,384 212,430 200,460" stroke="#E63946" stroke-width="5" fill="none" stroke-linecap="round"/>
 
-      <!-- Giant clump of steel clips & tangled badges at the bottom -->
+      <!-- Clip and badge -->
       <circle cx="200" cy="456" r="10" fill="#CFD8DC" stroke="#37474F" stroke-width="2"/>
       <rect x="180" y="466" width="40" height="30" rx="3" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
-      <text x="200" y="484" font-family="Arial Black, Impact" font-size="7" fill="#D90429" text-anchor="middle">ALL-ACCESS</text>
+      <text x="200" y="484" font-family="Arial Black, Impact" font-size="7" fill="#D90429" text-anchor="middle">HR</text>
 
       <!-- Head Base (Youthful, Chaotic) -->
       <path d="M148,168 C148,132 252,132 252,168 L252,222 C252,260 226,282 200,282 C174,282 148,260 148,222 Z"
@@ -136,7 +120,7 @@
       <path d="M174,242 Q200,270 226,242 Z" fill="#D90429" stroke="#7A0012" stroke-width="2"/>
       <path d="M178,242 Q200,252 222,242" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round"/> <!-- Big white smile -->
 
-      <!-- Hand Clasping Lanyards Enthusiastically -->
+      <!-- Hand Clasping Lanyard -->
       <g transform="translate(230, 430)">
         <path d="M0,0 C-10,10 -4,24 10,20 L10,0 Z" fill="#FDE8DF" stroke="#4A3228" stroke-width="2"/>
       </g>

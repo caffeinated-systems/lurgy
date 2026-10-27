@@ -224,10 +224,20 @@ test("the board shows the logo, the date, the starting coworker and the first hi
 	expect(tile("A1").getAttribute("aria-label")).toBe(
 		"A1, NameA1, HR, well, says: Two in my row.",
 	);
+	expect(within(tile("A1")).getByText("HR")).toBeDefined();
 	expect(tile("B1").getAttribute("aria-selected")).toBe("true");
 	expect(tile("B1").tabIndex).toBe(0);
 	expect(tile("A1").tabIndex).toBe(-1);
 	expect(screen.getByText("Two in my row.")).toBeDefined();
+});
+
+test("a department the board doesn't know shows its first three letters", async () => {
+	const coworkers = DAY.coworkers.map((c) => ({ ...c, department: "Payroll" }));
+	serve(Response.json({ ...DAY, coworkers }));
+	render(<App />);
+	await screen.findByRole("grid", { name: /office floor/i });
+
+	expect(within(tile("A1")).getByText("PAY")).toBeDefined();
 });
 
 test("an accepted declaration reveals the coworker and posts what came before", async () => {
