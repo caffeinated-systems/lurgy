@@ -25,16 +25,30 @@ const reveal = (desk: (typeof DESKS)[number]) =>
 	({ desk, state: "sick", kind: "clue", text: "Hi." }) as const;
 
 test("a new day starts with the starting coworker and selects the first hidden desk", () => {
-	const game = start(DAY, 1000);
+	const game = start(DAY);
 
 	expect(game.progress).toEqual({
 		reveals: [DAY.start],
 		masks: [],
 		hints: {},
 		dimmed: [],
-		startedAt: 1000,
 	});
 	expect(game.selected).toBe("B1");
+});
+
+test("the clock waits for the first declaration or hint, then keeps its start", () => {
+	const fresh = start(DAY);
+	expect(elapsed(fresh.progress, 5_000)).toBe(0);
+	// A reload before the first move still waits.
+	save(DAY.date, fresh.progress);
+	expect(load(DAY)).toEqual(fresh.progress);
+
+	const first = reducer(fresh, { type: "sent", at: 7_000 });
+	expect(first.progress.startedAt).toBe(7_000);
+	expect(elapsed(first.progress, 9_000)).toBe(2_000);
+
+	const second = reducer(first, { type: "sent", at: 8_000 });
+	expect(second.progress.startedAt).toBe(7_000);
 });
 
 test("a saved day resumes where it left off", () => {
@@ -47,7 +61,7 @@ test("a saved day resumes where it left off", () => {
 	};
 	save(DAY.date, progress);
 
-	const game = start(DAY, 1000);
+	const game = start(DAY);
 
 	expect(game.progress).toEqual(progress);
 	expect(game.selected).toBe("C1");
@@ -63,7 +77,7 @@ test("a solved day resumes with the starting coworker selected", () => {
 		solvedAt: 9,
 	});
 
-	expect(start(DAY, 1000).selected).toBe("A1");
+	expect(start(DAY).selected).toBe("A1");
 });
 
 test("broken or foreign storage starts the day afresh", () => {
@@ -74,7 +88,7 @@ test("broken or foreign storage starts the day afresh", () => {
 		{ reveals: 3 },
 		{ reveals: [], masks: [], startedAt: 0 },
 		{ reveals: [DAY.start], masks: 3, startedAt: 0 },
-		{ reveals: [DAY.start], masks: [] },
+		{ reveals: [DAY.start], masks: [], startedAt: "oops" },
 		{ reveals: [DAY.start], masks: [], startedAt: 0, hints: "oops" },
 		{ reveals: [DAY.start], masks: [], startedAt: 0, hints: [] },
 		{ reveals: [DAY.start], masks: [], startedAt: 0, dimmed: "oops" },
@@ -96,7 +110,7 @@ test("a day saved before hints or dimming existed loads with none of either", ()
 });
 
 test("reading a clue toggles it, and reading another moves on", () => {
-	const game = start(DAY, 0);
+	const game = start(DAY);
 
 	const read = reducer(game, { type: "read", desk: "A1" });
 	expect(read.reading).toBe("A1");
@@ -105,7 +119,7 @@ test("reading a clue toggles it, and reading another moves on", () => {
 });
 
 test("dimming a clue toggles it in the saved progress", () => {
-	const game = start(DAY, 0);
+	const game = start(DAY);
 
 	const dimmed = reducer(game, { type: "dimmed", desk: "A1" });
 	expect(dimmed.progress.dimmed).toEqual(["A1"]);
@@ -122,7 +136,7 @@ const HINT = {
 
 test("a first hint points at its clues and marks its coworker once", () => {
 	const game = reducer(
-		{ ...start(DAY, 0), pending: true },
+		{ ...start(DAY), pending: true },
 		{ type: "hinted", hint: HINT },
 	);
 
@@ -135,7 +149,7 @@ test("a first hint points at its clues and marks its coworker once", () => {
 });
 
 test("a second press names and selects the coworker, and marks them twice", () => {
-	const first = reducer(start(DAY, 0), { type: "hinted", hint: HINT });
+	const first = reducer(start(DAY), { type: "hinted", hint: HINT });
 
 	const game = reducer(first, { type: "hinted-again" });
 
@@ -146,18 +160,15 @@ test("a second press names and selects the coworker, and marks them twice", () =
 });
 
 test("a second press with no open hint does nothing", () => {
-	const game = start(DAY, 0);
+	const game = start(DAY);
 
 	expect(reducer(game, { type: "hinted-again" })).toBe(game);
 });
 
 test("asking again keeps the strongest mark", () => {
-	const twice = reducer(
-		reducer(start(DAY, 0), { type: "hinted", hint: HINT }),
-		{
-			type: "hinted-again",
-		},
-	);
+	const twice = reducer(reducer(start(DAY), { type: "hinted", hint: HINT }), {
+		type: "hinted-again",
+	});
 
 	const again = reducer(twice, { type: "hinted", hint: HINT });
 
@@ -165,7 +176,7 @@ test("asking again keeps the strongest mark", () => {
 });
 
 test("the hint closes when its coworker is declared, and not before", () => {
-	const hinted = reducer(start(DAY, 0), { type: "hinted", hint: HINT });
+	const hinted = reducer(start(DAY), { type: "hinted", hint: HINT });
 
 	const other = reducer(hinted, {
 		type: "accepted",
@@ -200,12 +211,12 @@ test("blocked storage neither loads nor throws", () => {
 	});
 
 	expect(load(DAY)).toBeUndefined();
-	expect(() => save(DAY.date, start(DAY, 0).progress)).not.toThrow();
+	expect(() => save(DAY.date, start(DAY).progress)).not.toThrow();
 	vi.restoreAllMocks();
 });
 
 test("declared leaves out the starting coworker", () => {
-	const game = reducer(start(DAY, 0), {
+	const game = reducer(start(DAY), {
 		type: "accepted",
 		reveal: reveal("B1"),
 		at: 1,
@@ -215,7 +226,7 @@ test("declared leaves out the starting coworker", () => {
 });
 
 test("an accepted declaration reveals the coworker and says so", () => {
-	const game = reducer(start(DAY, 0), {
+	const game = reducer(start(DAY), {
 		type: "accepted",
 		reveal: reveal("B1"),
 		at: 1,
@@ -227,7 +238,7 @@ test("an accepted declaration reveals the coworker and says so", () => {
 });
 
 test("the last reveal solves the day and stops the timer", () => {
-	let game = start(DAY, 0);
+	let game = reducer(start(DAY), { type: "sent", at: 0 });
 	for (const desk of DESKS.slice(1)) {
 		game = reducer(game, {
 			type: "accepted",
@@ -246,7 +257,7 @@ test("the last reveal solves the day and stops the timer", () => {
 test("a rejection masks the coworker once and they answer back", () => {
 	const remark = (said: number) =>
 		`Not enough evidence. NameB1 says: “${pick(REMARKS, DAY.date, "B1", "well", said)}”`;
-	let game = reducer(start(DAY, 0), {
+	let game = reducer(start(DAY), {
 		type: "rejected",
 		desk: "B1",
 		state: "well",
@@ -262,7 +273,7 @@ test("a rejection masks the coworker once and they answer back", () => {
 
 test("a remark depends only on what the player did, so it can't tell wrong from unforced", () => {
 	const remark = (desk: "B1" | "C1", state: "sick" | "well") =>
-		reducer(start(DAY, 0), { type: "rejected", desk, state }).message;
+		reducer(start(DAY), { type: "rejected", desk, state }).message;
 
 	// The same declaration at the same point always gets the same remark, and the
 	// action carries nothing about whether it was wrong.
@@ -279,14 +290,14 @@ test("a remark depends only on what the player did, so it can't tell wrong from 
 });
 
 test("a network failure says so without a mask", () => {
-	const game = reducer(start(DAY, 0), { type: "failed" });
+	const game = reducer(start(DAY), { type: "failed" });
 
 	expect(game.progress.masks).toEqual([]);
 	expect(game.message).toBe("Couldn't reach the office, try again.");
 });
 
 test("a declaration is pending until its answer", () => {
-	const sent = reducer(start(DAY, 0), { type: "sent" });
+	const sent = reducer(start(DAY), { type: "sent", at: 0 });
 	expect(sent.pending).toBe(true);
 
 	for (const action of [
@@ -299,15 +310,15 @@ test("a declaration is pending until its answer", () => {
 });
 
 test("declaring a revealed coworker says so", () => {
-	expect(reducer(start(DAY, 0), { type: "already" }).message).toBe(
+	expect(reducer(start(DAY), { type: "already" }).message).toBe(
 		"Already declared.",
 	);
 });
 
 test("selecting moves the selection", () => {
-	expect(
-		reducer(start(DAY, 0), { type: "selected", desk: "D5" }).selected,
-	).toBe("D5");
+	expect(reducer(start(DAY), { type: "selected", desk: "D5" }).selected).toBe(
+		"D5",
+	);
 });
 
 test("times are always mm:ss", () => {
