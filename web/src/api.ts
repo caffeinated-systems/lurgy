@@ -3,7 +3,20 @@ import type { Day, Hint, Reveal } from "./game.ts";
 
 type Schemas = components["schemas"];
 
+/** Over the API's limit for the minute: try again after `seconds`. */
+export class Busy extends Error {
+	readonly seconds: number;
+
+	constructor(seconds: number) {
+		super("Too many requests");
+		this.seconds = seconds;
+	}
+}
+
 async function ok(response: Response): Promise<Response> {
+	// ponytail: Retry-After in seconds only; the API never sends an HTTP date.
+	if (response.status === 429)
+		throw new Busy(Number(response.headers.get("Retry-After")) || 60);
 	if (!response.ok) throw new Error(`HTTP ${response.status}`);
 	return response;
 }

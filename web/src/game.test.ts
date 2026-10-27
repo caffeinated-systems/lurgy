@@ -1,4 +1,5 @@
 import { beforeEach, expect, test, vi } from "vitest";
+import { Busy } from "./api.ts";
 import { DAY, DESKS } from "./fixture.ts";
 import {
 	type Desk,
@@ -290,10 +291,23 @@ test("a remark depends only on what the player did, so it can't tell wrong from 
 });
 
 test("a network failure says so without a mask", () => {
-	const game = reducer(start(DAY), { type: "failed" });
+	const game = reducer(start(DAY), {
+		type: "failed",
+		error: new Error("down"),
+	});
 
 	expect(game.progress.masks).toEqual([]);
 	expect(game.message).toBe("Couldn't reach the office, try again.");
+});
+
+test("over the API's limit, the office asks the player to wait as long as it said", () => {
+	const told = (seconds: number) =>
+		reducer(start(DAY), { type: "failed", error: new Busy(seconds) }).message;
+
+	expect(told(20)).toBe(
+		"Steady on, the whole office is asking at once. Try again in 20 seconds.",
+	);
+	expect(told(1)).toMatch(/Try again in 1 second\.$/);
 });
 
 test("a declaration is pending until its answer", () => {
@@ -303,7 +317,7 @@ test("a declaration is pending until its answer", () => {
 	for (const action of [
 		{ type: "accepted", reveal: reveal("B1"), at: 1 },
 		{ type: "rejected", desk: "B1", state: "well" },
-		{ type: "failed" },
+		{ type: "failed", error: new Error("down") },
 	] as const) {
 		expect(reducer(sent, action).pending).toBe(false);
 	}

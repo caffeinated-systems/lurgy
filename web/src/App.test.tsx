@@ -12,7 +12,7 @@ import { App, countdown, localToday, nextMonday, weekOf } from "./App.tsx";
 import { DAY, DESKS } from "./fixture.ts";
 import type { Hint, Reveal } from "./game.ts";
 
-type Answer = Reveal | Hint | "rejected" | "down" | Promise<Response>;
+type Answer = Reveal | Hint | "rejected" | "down" | "busy" | Promise<Response>;
 
 /** Stubs fetch: the day comes back as given, each declaration takes the next answer. */
 function serve(day: Response | Error, ...answers: Answer[]) {
@@ -23,6 +23,7 @@ function serve(day: Response | Error, ...answers: Answer[]) {
 		if (answer instanceof Promise) return answer;
 		if (answer === "down")
 			return Promise.resolve(new Response(null, { status: 500 }));
+		if (answer === "busy") return Promise.resolve(busy());
 		if (typeof answer === "object" && "coworker" in answer)
 			return Promise.resolve(Response.json(answer));
 		return Promise.resolve(
@@ -36,6 +37,9 @@ function serve(day: Response | Error, ...answers: Answer[]) {
 	vi.stubGlobal("fetch", fetch);
 	return fetch;
 }
+
+const busy = (headers: HeadersInit = { "Retry-After": "20" }) =>
+	new Response(null, { status: 429, headers });
 
 const sick = (desk: (typeof DESKS)[number], text = "Hi."): Reveal => ({
 	desk,
@@ -576,6 +580,33 @@ test("no hint while a declaration is waiting", async () => {
 	expect(button()).toHaveProperty("disabled", true);
 	respond(Response.json({ accepted: false }));
 	await waitFor(() => expect(button()).toHaveProperty("disabled", false));
+});
+
+test.each([
+	["a declaration", "Declare NameB1 sick"],
+	["a hint", "Hint"],
+])("%s over the limit asks the player to wait", async (_, button) => {
+	await open("busy");
+
+	fireEvent.click(screen.getByRole("button", { name: button }));
+
+	expect(
+		await screen.findByText(
+			"Steady on, the whole office is asking at once. Try again in 20 seconds.",
+		),
+	).toBeDefined();
+	expect(tile("B1").getAttribute("aria-label")).not.toContain("mask");
+});
+
+test("loading a day over the limit asks the player to wait, a minute if it doesn't say", async () => {
+	serve(busy({}));
+	render(<App />);
+
+	expect(
+		await screen.findByText(
+			"Steady on, the whole office is asking at once. Try again in 60 seconds.",
+		),
+	).toBeDefined();
 });
 
 test("a hint that can't reach the office says so", async () => {

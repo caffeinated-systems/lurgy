@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from app.board import DESKS, Board, Desk
 from app.clues import State
 from app.grade import hint
+from app.limits import limit
 from app.week import Day, Difficulty, load_days
 
 if TYPE_CHECKING:
@@ -75,6 +76,11 @@ type Today = Annotated[date, Depends(today_anywhere)]
 type OpenWeek = Annotated[date, Depends(open_week)]
 NOT_FOUND: dict[int | str, dict[str, Any]] = {
     HTTPStatus.NOT_FOUND: {"description": "No puzzle for that day yet."}
+}
+TOO_MANY: dict[int | str, dict[str, Any]] = {
+    HTTPStatus.TOO_MANY_REQUESTS: {
+        "description": "Over this IP's limit for the minute; `Retry-After` says when."
+    }
 }
 
 
@@ -271,7 +277,11 @@ def health() -> Health:
     return Health()
 
 
-@app.get("/api/days/{day}", responses=NOT_FOUND)
+@app.get(
+    "/api/days/{day}",
+    responses={**NOT_FOUND, **TOO_MANY},
+    dependencies=[Depends(limit("days", 300))],
+)
 def get_day(day: date, days: Days, today: Today, week: OpenWeek) -> DayResponse:
     """A day's board and its starting coworker's clue.
 
@@ -290,7 +300,11 @@ def get_day(day: date, days: Days, today: Today, week: OpenWeek) -> DayResponse:
     )
 
 
-@app.post("/api/declarations", responses=NOT_FOUND)
+@app.post(
+    "/api/declarations",
+    responses={**NOT_FOUND, **TOO_MANY},
+    dependencies=[Depends(limit("declarations", 120))],
+)
 def declare(
     request: DeclarationRequest, days: Days, today: Today, week: OpenWeek
 ) -> Accepted | Rejected:
@@ -310,9 +324,11 @@ def declare(
     "/api/hints",
     responses={
         **NOT_FOUND,
+        **TOO_MANY,
         HTTPStatus.BAD_REQUEST: {"description": "Not enough evidence."},
         HTTPStatus.CONFLICT: {"description": "Everyone is already declared."},
     },
+    dependencies=[Depends(limit("hints", 30))],
 )
 def get_hint(request: HintRequest, days: Days, today: Today, week: OpenWeek) -> Hint:
     """The fewest revealed clues that force some coworker, and that coworker.
