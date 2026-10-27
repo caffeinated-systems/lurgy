@@ -62,11 +62,13 @@ export function Logo() {
 function Timer({ progress }: { progress: Progress }) {
 	const [now, setNow] = useState(Date.now);
 
+	// Ticks in step with the start, so the display never lags a second behind.
 	useEffect(() => {
-		if (progress.solvedAt !== undefined) return;
+		if (progress.startedAt === undefined || progress.solvedAt !== undefined)
+			return;
 		const id = setInterval(() => setNow(Date.now()), 1000);
 		return () => clearInterval(id);
-	}, [progress.solvedAt]);
+	}, [progress.startedAt, progress.solvedAt]);
 
 	return <span role="timer">⏱ {formatTime(elapsed(progress, now))}</span>;
 }
