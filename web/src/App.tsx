@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { fetchDay } from "./api.ts";
 import { type Day, dayLabel, failure } from "./game.ts";
+import { HowToPlay } from "./HowToPlay.tsx";
 import { Logo, Play } from "./Play.tsx";
 
 /** The player's local date as YYYY-MM-DD. */
@@ -151,6 +152,7 @@ function Closed({ week, onOpen }: { week: ReactNode; onOpen: () => void }) {
 			<p>
 				Back Monday in <span role="timer">{countdown(opens - now)}</span>
 			</p>
+			<HowToPlay />
 		</main>
 	);
 }
