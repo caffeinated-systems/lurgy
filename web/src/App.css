@@ -294,7 +294,7 @@ div.axis {
 	border: 2px dotted var(--ink);
 }
 .btn-hint {
-	min-height: 36px;
+	min-height: 32px;
 	border: 1px solid var(--line);
 	border-radius: 10px;
 	background: transparent;
@@ -392,7 +392,6 @@ div.axis {
 }
 .toast {
 	margin: 0;
-	min-height: 1.45em;
 	font-weight: 700;
 }
 .big {
@@ -401,7 +400,7 @@ div.axis {
 	gap: 6px;
 }
 .big button {
-	min-height: 44px;
+	min-height: 38px;
 	border: 0;
 	border-radius: 10px;
 	font-weight: 700;
