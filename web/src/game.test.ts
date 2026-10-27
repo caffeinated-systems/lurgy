@@ -378,7 +378,7 @@ test("a square shows the strongest mark: 🟠 over 🟡 over 😷 over 🟩", ()
 test("the result has the day, difficulty, time, verdict, grid and link", () => {
 	const p = progress(["B1", "D5"], { A2: 1, C3: 2 });
 
-	expect(result(DAY, p, "https://lurgy.caffeinated.systems")).toBe(
+	expect(result(DAY, p, "https://lurgy.app")).toBe(
 		[
 			"Office Lurgy · Mon 19 Oct (Medium) · ⏱ 04:43",
 			`"${verdict(p, DAY.date)}"`,
@@ -387,7 +387,7 @@ test("the result has the day, difficulty, time, verdict, grid and link", () => {
 			"🟩🟩🟠🟩",
 			"🟩🟩🟩🟩",
 			"🟩🟩🟩😷",
-			"https://lurgy.caffeinated.systems",
+			"https://lurgy.app",
 		].join("\n"),
 	);
 });

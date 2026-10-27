@@ -13,6 +13,8 @@
 
 A daily deduction puzzle: a bug is doing the rounds of an open-plan office, and you work out who has caught it using only what the coworkers already found have said.
 
+**Play at [lurgy.app](https://lurgy.app).**
+
 ## How to play
 
 - Twenty coworkers sit at a 4 × 5 grid of desks, seated alphabetically by the hot-desking system. One starts revealed.
