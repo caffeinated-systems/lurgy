@@ -1,0 +1,81 @@
+name: Weekly build
+# Builds next Week's puzzles into the private puzzles repo, then redeploys (ADR 0002).
+# This repo's logs are public: no step may print puzzle content or the seed, nothing
+# is uploaded, and only dependencies are cached.
+on:
+  schedule:
+    - cron: "0 6 * * 3" # Wednesday
+    - cron: "0 6 * * 5" # Friday: a retry, which skips a Week already built
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "ISO week, e.g. 2026-W48 (default: next week)"
+        required: false
+      rebuild:
+        description: "Replace it if built (refused once it has started)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency: weekly-build
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Limited to main; holds the puzzles repo's write key.
+    environment: puzzles
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: lurgy
+      # Beside this repo, not inside it, so the generator's commit isn't "-dirty".
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: caffeinated-systems/lurgy-puzzles
+          ssh-key: ${{ secrets.PUZZLES_DEPLOY_KEY }}
+          path: puzzles
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          working-directory: lurgy/api
+      - run: uv sync --locked
+        working-directory: lurgy/api
+      - name: Build the Week
+        working-directory: lurgy/api
+        env:
+          WEEK: ${{ inputs.week }}
+          REBUILD: ${{ inputs.rebuild && '--rebuild' || '' }}
+        # A traceback could quote a puzzle, so errors go nowhere: rerun locally to see.
+        run: |
+          WEEK="${WEEK:-$(date -u -d '+7 days' +%G-W%V)}"
+          echo "WEEK=$WEEK" >> "$GITHUB_ENV"
+          uv run python -m app.generate "$WEEK" -o "../../puzzles/$WEEK.json" $REBUILD 2>/dev/null \
+            || { echo "::error::Building $WEEK failed; run the build locally to see why."; exit 1; }
+      - name: Publish
+        id: publish
+        working-directory: puzzles
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then exit 0; fi
+          git config user.name "lurgy weekly build"
+          git config user.email "actions@users.noreply.github.com"
+          git add "$WEEK.json"
+          git commit --quiet -m "build: $WEEK"
+          git push --quiet
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    # Limited to main; holds the Laravel Cloud deploy hook, whose URL is the credential.
+    environment: production
+    steps:
+      - name: Deploy to Laravel Cloud
+        env:
+          HOOK: ${{ secrets.LARAVEL_CLOUD_DEPLOY_HOOK }}
+        # -o /dev/null: Cloud's reply would land in this public repo's log.
+        run: curl --fail --silent --show-error --max-time 60 -o /dev/null -X POST "$HOOK?commit_hash=$GITHUB_SHA"
