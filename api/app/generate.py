@@ -5,7 +5,7 @@ import random
 import secrets
 import subprocess
 from collections import Counter
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from functools import cache
 from itertools import chain, combinations
 from pathlib import Path
@@ -59,8 +59,7 @@ from app.clues import (
     settled,
 )
 from app.grade import Grade, Step, grade, next_step
-from app.main import EARLIEST
-from app.week import Day, Difficulty, Generator, Reveal, Week
+from app.week import EARLIEST, Day, Difficulty, Generator, Reveal, Week, utc_now
 from app.wording import explanation, wording
 
 if TYPE_CHECKING:
@@ -613,10 +612,6 @@ def main(argv: Sequence[str] | None = None) -> None:
     tiers = ", ".join(str(d.difficulty) for d in week.days)
     quiet = "" if story else ", a quiet week"
     print(f"wrote {args.out} ({tiers}{quiet})")  # noqa: T201 (the CLI's one line)
-
-
-def utc_now() -> datetime:
-    return datetime.now(UTC)
 
 
 def _git(*args: str) -> str:

@@ -27,23 +27,23 @@ jobs:
     runs-on: ubuntu-latest
     # Limited to main; holds the puzzles repo's write key.
     environment: puzzles
-    outputs:
-      published: ${{ steps.publish.outputs.published }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: lurgy
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          working-directory: lurgy/api
+      # Before the write key is on disk, so install scripts never see it.
+      - run: uv sync --locked
+        working-directory: lurgy/api
       # Beside this repo, not inside it, so the generator's commit isn't "-dirty".
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: caffeinated-systems/lurgy-puzzles
           ssh-key: ${{ secrets.PUZZLES_DEPLOY_KEY }}
           path: puzzles
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
-        with:
-          working-directory: lurgy/api
-      - run: uv sync --locked
-        working-directory: lurgy/api
       - name: Build the Week
         working-directory: lurgy/api
         env:
@@ -52,11 +52,11 @@ jobs:
         # A traceback could quote a puzzle, so errors go nowhere: rerun locally to see.
         run: |
           WEEK="${WEEK:-$(date -u -d '+7 days' +%G-W%V)}"
+          [[ "$WEEK" =~ ^[0-9]{4}-W[0-9]{2}$ ]] || { echo "::error::week must look like 2026-W48"; exit 1; }
           echo "WEEK=$WEEK" >> "$GITHUB_ENV"
           uv run python -m app.generate "$WEEK" -o "../../puzzles/$WEEK.json" $REBUILD 2>/dev/null \
             || { echo "::error::Building $WEEK failed; run the build locally to see why."; exit 1; }
       - name: Publish
-        id: publish
         working-directory: puzzles
         run: |
           if [ -z "$(git status --porcelain)" ]; then exit 0; fi
@@ -65,11 +65,10 @@ jobs:
           git add "$WEEK.json"
           git commit --quiet -m "build: $WEEK"
           git push --quiet
-          echo "published=true" >> "$GITHUB_OUTPUT"
 
+  # After every successful build, published or not, so Friday retries a failed deploy.
   deploy:
     needs: build
-    if: needs.build.outputs.published == 'true'
     runs-on: ubuntu-latest
     # Limited to main; holds the Laravel Cloud deploy hook, whose URL is the credential.
     environment: production
@@ -77,5 +76,6 @@ jobs:
       - name: Deploy to Laravel Cloud
         env:
           HOOK: ${{ secrets.LARAVEL_CLOUD_DEPLOY_HOOK }}
+        # No commit_hash: Cloud deploys main's head, never rolling back a newer push.
         # -o /dev/null: Cloud's reply would land in this public repo's log.
-        run: curl --fail --silent --show-error --max-time 60 -o /dev/null -X POST "$HOOK?commit_hash=$GITHUB_SHA"
+        run: curl --fail --silent --show-error --max-time 60 -o /dev/null -X POST "$HOOK"
