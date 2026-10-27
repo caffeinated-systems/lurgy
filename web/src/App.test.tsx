@@ -231,6 +231,15 @@ test("the board shows the logo, the date, the starting coworker and the first hi
 	expect(screen.getByText("Two in my row.")).toBeDefined();
 });
 
+test("a department the board doesn't know shows its first three letters", async () => {
+	const coworkers = DAY.coworkers.map((c) => ({ ...c, department: "Payroll" }));
+	serve(Response.json({ ...DAY, coworkers }));
+	render(<App />);
+	await screen.findByRole("grid", { name: /office floor/i });
+
+	expect(within(tile("A1")).getByText("PAY")).toBeDefined();
+});
+
 test("an accepted declaration reveals the coworker and posts what came before", async () => {
 	const fetch = await open(sick("B1"), sick("C1", "Bye."));
 
