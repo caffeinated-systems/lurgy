@@ -237,7 +237,9 @@ div.axis {
 	display: flex;
 	gap: 3px;
 	padding: 0 2px;
-	border: 3px solid;
+	/* A thick top edge reads as the lanyard without narrowing the name. */
+	border: 2px solid;
+	border-top-width: 4px;
 	border-radius: 0 0 4px 4px;
 	background: color-mix(in srgb, var(--surface) 88%, transparent);
 	color: var(--ink);
