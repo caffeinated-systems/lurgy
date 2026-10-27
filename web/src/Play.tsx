@@ -34,7 +34,7 @@ const DEPARTMENTS: Record<string, [code: string, colour: string]> = {
 	Finance: ["FIN", "#F4A261"],
 	HR: ["HR", "#2EC4B6"],
 	IT: ["IT", "#00E5FF"],
-	Legal: ["LEG", "#9D4EDD"],
+	Legal: ["LGL", "#9D4EDD"],
 	Marketing: ["MKT", "#FF5A5F"],
 	Procurement: ["PRO", "#FB8500"],
 	Reception: ["REC", "#52B788"],

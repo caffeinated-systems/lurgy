@@ -41,7 +41,7 @@ One position on the office floor. Every coworker sits at exactly one desk, and t
 _Avoid_: cell, seat, tile
 
 **Department**:
-The group a coworker works in (Sales, IT, HR, Finance…). Clues can refer to everyone in a department. Each has a lanyard colour, worn in its coworkers' portraits, and a short code (FIN, LEG…); a tile shows both.
+The group a coworker works in (Sales, IT, HR, Finance…). Clues can refer to everyone in a department. Each has a lanyard colour, worn in its coworkers' portraits, and a short code (FIN, LGL…); a tile shows both.
 _Avoid_: profession, team, role
 
 **Neighbours**:
