@@ -118,15 +118,16 @@ test("the week strip links every day so far and marks the one open", async () =>
 	serve(Response.json(DAY));
 	render(<App />);
 
-	const week = await screen.findByRole("navigation", { name: "This week" });
+	const week = await screen.findByRole("navigation", {
+		name: "The week's puzzles",
+	});
 	const links = within(week).getAllByRole("link");
 	expect(links.map((a) => a.textContent)).toEqual(["Mon", "Tue", "Wed"]);
 	expect(links[0]?.getAttribute("href")).toBe("?day=2026-10-19");
 	expect(links[0]?.getAttribute("aria-current")).toBe("page");
 	expect(links[2]?.getAttribute("aria-current")).toBeNull();
-	expect(within(week).getByText("Thu").getAttribute("aria-disabled")).toBe(
-		"true",
-	);
+	expect(links[0]?.getAttribute("aria-label")).toBe("Mon 19 Oct");
+	expect(week.textContent).toContain("Thu, not open yet");
 });
 
 test.each([
@@ -137,21 +138,20 @@ test.each([
 	const fetch = serve(Response.json(DAY));
 	render(<App />);
 
-	expect(
-		screen.getByText(/^No puzzle for that day: the office is closed/),
-	).toBeDefined();
+	expect(screen.getByText(/^That day isn't open/)).toBeDefined();
 	expect(fetch).not.toHaveBeenCalled();
 });
 
 test("at the weekend the office is closed, counting down to Monday", () => {
-	vi.setSystemTime(new Date(2026, 9, 24, 12));
+	// Not 24 Oct: 25 Oct is when European clocks go back, so that weekend has 37 hours.
+	vi.setSystemTime(new Date(2026, 9, 17, 12));
 	history.replaceState(null, "", "/");
 	const fetch = serve(Response.json(DAY));
 	render(<App />);
 
 	expect(screen.getByText(/^Office closed for the weekend/)).toBeDefined();
 	expect(screen.getByRole("timer").textContent).toBe("36:00:00");
-	const week = screen.getByRole("navigation", { name: "This week" });
+	const week = screen.getByRole("navigation", { name: "The week's puzzles" });
 	expect(within(week).getAllByRole("link")).toHaveLength(5);
 	expect(fetch).not.toHaveBeenCalled();
 });

@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { fetchDay } from "./api.ts";
-import type { Day } from "./game.ts";
+import { type Day, dayLabel } from "./game.ts";
 import { Logo, Play } from "./Play.tsx";
 
 /** The player's local date as YYYY-MM-DD. */
@@ -32,6 +32,9 @@ export function countdown(ms: number): string {
 }
 
 export function App() {
+	// ponytail: "now" moves only when the weekend countdown ends, so a tab left open
+	// past a weekday midnight keeps yesterday's strip until reloaded; add a midnight
+	// timeout if players notice.
 	const [now, setNow] = useState(() => new Date());
 	const [day, setDay] = useState<Day | "missing" | "offline">();
 	const today = localToday(now);
@@ -56,7 +59,12 @@ export function App() {
 		<>
 			{weekend ? (
 				<Closed week={week} onOpen={() => setNow(new Date())} />
-			) : !open || day === "missing" ? (
+			) : !open ? (
+				<Notice week={week}>
+					That day isn't open: the office only does this week's puzzles, Monday
+					to Friday.
+				</Notice>
+			) : day === "missing" ? (
 				<Notice week={week}>
 					No puzzle for that day: the office is closed for a deep clean. Back
 					soon.
@@ -93,7 +101,7 @@ function Week({
 	current: string;
 }) {
 	return (
-		<nav className="week" aria-label="This week">
+		<nav className="week" aria-label="The week's puzzles">
 			{days.map((d) => {
 				const name = new Date(`${d}T00:00`).toLocaleDateString("en-GB", {
 					weekday: "short",
@@ -102,13 +110,15 @@ function Week({
 					<a
 						key={d}
 						href={`?day=${d}`}
+						aria-label={dayLabel(d)}
 						aria-current={d === current ? "page" : undefined}
 					>
 						{name}
 					</a>
 				) : (
-					<span key={d} aria-disabled="true">
+					<span key={d} className="later">
 						{name}
+						<span className="sr-only">, not open yet</span>
 					</span>
 				);
 			})}

@@ -1,6 +1,6 @@
 import os
 from contextlib import asynccontextmanager
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta, timezone
 from functools import cache
 from http import HTTPStatus
 from pathlib import Path
@@ -49,17 +49,24 @@ app = FastAPI(
 )
 
 
-def today_anywhere() -> date:
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+type Now = Annotated[datetime, Depends(utc_now)]
+
+
+def today_anywhere(now: Now) -> date:
     """The latest date anywhere on Earth right now."""
-    return datetime.now(EARLIEST).date()
+    return now.astimezone(EARLIEST).date()
 
 
-def open_week() -> date:
+def open_week(now: Now) -> date:
     """The Monday of the oldest Week still open somewhere: the earliest date's Week.
 
     Weeks run Monday to Sunday, so the Week just ended stays open all weekend.
     """
-    today = datetime.now(LATEST).date()
+    today = now.astimezone(LATEST).date()
     return today - timedelta(days=today.weekday())
 
 

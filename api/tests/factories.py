@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from app.board import DESKS, Board, Coworker, Desk
@@ -6,6 +6,7 @@ from app.board import DESKS, Board, Coworker, Desk
 FIXTURES = Path(__file__).parent / "fixtures" / "puzzles"
 STORIES = Path(__file__).parent / "fixtures" / "stories"
 MONDAY = date(2026, 10, 19)  # the Monday sample's day in the fixture Week
+NOON = datetime(2026, 10, 19, 12, tzinfo=UTC)  # midday UTC that Monday
 
 # The Monday sample from the voice prototype: names run A to T across the floor.
 DEPARTMENTS = (

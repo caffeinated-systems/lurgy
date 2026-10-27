@@ -50,7 +50,7 @@ test("solves the fixture day by keyboard and keeps it after a reload", async ({
 	await expect(tile(page, "A1")).toBeVisible();
 	// Past Monday's link in the week strip, the one day open so far.
 	await page.keyboard.press("Tab");
-	await expect(page.getByRole("link", { name: "Mon" })).toBeFocused();
+	await expect(page.getByRole("link", { name: "Mon 19 Oct" })).toBeFocused();
 	await page.keyboard.press("Tab");
 	await expect(tile(page, "A1")).toBeFocused();
 
