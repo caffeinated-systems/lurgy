@@ -636,14 +636,14 @@ test("the timer waits for the first declaration, ticks, stops on the solve and s
 	await open(...answers);
 	const timer = screen.getByRole("timer");
 	await act(() => vi.advanceTimersByTimeAsync(30_000));
-	expect(timer.textContent).toBe("⏱ 00:00");
+	expect(timer.textContent).toBe("00:00");
 
 	fireEvent.keyDown(tile("B1"), { key: "s" });
 	await waitFor(() =>
 		expect(tile("B1").getAttribute("aria-label")).toContain("sick"),
 	);
 	await act(() => vi.advanceTimersByTimeAsync(65_000));
-	expect(timer.textContent).toMatch(/⏱ 01:0[56]/);
+	expect(timer.textContent).toMatch(/^01:0[56]$/);
 
 	for (const desk of DESKS.slice(2)) {
 		fireEvent.click(tile(desk));
@@ -682,12 +682,12 @@ test.each([
 	await open(answer);
 	const timer = screen.getByRole("timer");
 	await act(() => vi.advanceTimersByTimeAsync(30_000));
-	expect(timer.textContent).toBe("⏱ 00:00");
+	expect(timer.textContent).toBe("00:00");
 
 	fireEvent.click(screen.getByRole("button", { name: button }));
 	await act(() => vi.advanceTimersByTimeAsync(5_000));
 
-	expect(timer.textContent).not.toBe("⏱ 00:00");
+	expect(timer.textContent).not.toBe("00:00");
 });
 
 test("a reload rebuilds the board from the browser", async () => {
