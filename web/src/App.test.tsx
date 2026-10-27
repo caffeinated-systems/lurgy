@@ -628,6 +628,26 @@ test("the timer waits for the first declaration, ticks, stops on the solve and s
 	expect(document.activeElement).toBe(document.body);
 });
 
+test.each([
+	[
+		"a hint",
+		{ clues: ["A1"], coworker: "B3", explanations: [] } as Hint,
+		"Hint",
+	],
+	["a refused declaration", "rejected" as const, "Declare NameB1 well"],
+])("%s also starts the timer", async (_, answer, button) => {
+	vi.useFakeTimers({ shouldAdvanceTime: true, now: MONDAY });
+	await open(answer);
+	const timer = screen.getByRole("timer");
+	await act(() => vi.advanceTimersByTimeAsync(30_000));
+	expect(timer.textContent).toBe("⏱ 00:00");
+
+	fireEvent.click(screen.getByRole("button", { name: button }));
+	await act(() => vi.advanceTimersByTimeAsync(5_000));
+
+	expect(timer.textContent).not.toBe("⏱ 00:00");
+});
+
 test("a reload rebuilds the board from the browser", async () => {
 	const first = await open(sick("B1"));
 	fireEvent.keyDown(tile("B1"), { key: "s" });
