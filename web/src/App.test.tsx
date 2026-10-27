@@ -224,6 +224,7 @@ test("the board shows the logo, the date, the starting coworker and the first hi
 	expect(tile("A1").getAttribute("aria-label")).toBe(
 		"A1, NameA1, HR, well, says: Two in my row.",
 	);
+	expect(within(tile("A1")).getByText("HR")).toBeDefined();
 	expect(tile("B1").getAttribute("aria-selected")).toBe("true");
 	expect(tile("B1").tabIndex).toBe(0);
 	expect(tile("A1").tabIndex).toBe(-1);

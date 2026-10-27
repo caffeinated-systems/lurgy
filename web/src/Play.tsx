@@ -27,6 +27,20 @@ import "./App.css";
 
 const COLUMNS = 4;
 
+/** Each department's code on a tile, and its lanyard colour in the portraits. */
+const DEPARTMENTS: Record<string, [code: string, colour: string]> = {
+	"Customer Services": ["CS", "#C77DFF"],
+	Facilities: ["FAC", "#FFB703"],
+	Finance: ["FIN", "#F4A261"],
+	HR: ["HR", "#2EC4B6"],
+	IT: ["IT", "#00E5FF"],
+	Legal: ["LEG", "#9D4EDD"],
+	Marketing: ["MKT", "#FF5A5F"],
+	Procurement: ["PRO", "#FB8500"],
+	Reception: ["REC", "#52B788"],
+	Sales: ["SAL", "#E63946"],
+};
+
 /** The tile an arrow key moves to from tile i, or undefined at an edge. */
 function move(i: number, key: string, count: number): number | undefined {
 	const column = i % COLUMNS;
@@ -209,6 +223,10 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 								game.hint?.presses === 2 && game.hint.coworker === c.desk;
 							const speaker = game.reading === c.desk;
 							const inClue = explained?.desks.includes(c.desk);
+							const [code, colour] = DEPARTMENTS[c.department] ?? [
+								c.department.slice(0, 3).toUpperCase(),
+								"var(--line)",
+							];
 							const label = [
 								c.desk,
 								c.name,
@@ -248,7 +266,10 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 											alt=""
 										/>
 									)}
-									<span className="nm">{c.name}</span>
+									<span className="nm" style={{ borderColor: colour }}>
+										<span className="name">{c.name}</span>
+										<span className="dept">{code}</span>
+									</span>
 									{reveal && <span className="state">{reveal.state}</span>}
 									{hints && (
 										<span className="mark" aria-hidden="true">

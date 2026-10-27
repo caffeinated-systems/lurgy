@@ -230,18 +230,33 @@ div.axis {
 		aspect-ratio: 1 / 0.8;
 	}
 }
+/* The name gives way to the department code, and the border is the lanyard colour. */
 .tile .nm {
 	position: absolute;
 	inset: auto 0 0;
-	padding: 1px 2px;
+	display: flex;
+	gap: 3px;
+	padding: 0 2px;
+	border: 2px solid;
+	border-radius: 0 0 4px 4px;
 	background: color-mix(in srgb, var(--surface) 88%, transparent);
 	color: var(--ink);
 	font-weight: 600;
 	font-size: 0.74rem;
 	letter-spacing: -0.01em;
+	white-space: nowrap;
+}
+.tile .nm .name {
+	flex: 1;
+	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	white-space: nowrap;
+	text-align: left;
+}
+.tile .nm .dept {
+	font-weight: 700;
+	font-size: 0.62rem;
+	align-self: center;
 }
 .tile[aria-selected="true"] {
 	outline: 3px solid var(--accent);
