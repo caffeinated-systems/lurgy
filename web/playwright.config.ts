@@ -6,7 +6,7 @@ export default defineConfig({
 	use: { baseURL: "http://localhost:8123", trace: "retain-on-failure" },
 	webServer: {
 		command:
-			"npm run build && uv run --directory ../api uvicorn app.main:app --port 8123",
+			"npm run build && uv run --directory ../api uvicorn tests.e2e:app --port 8123",
 		url: "http://localhost:8123/api/health",
 		env: { PUZZLES_DIR: "tests/fixtures/puzzles" },
 		reuseExistingServer: !process.env.CI,

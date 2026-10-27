@@ -36,6 +36,11 @@ async function goTo(page: Page, desk: string) {
 	await expect(tile(page, desk)).toBeFocused();
 }
 
+// The fixture Monday's Week is open only during that Week (tests/e2e.py pins the API).
+test.beforeEach(async ({ page }) => {
+	await page.clock.setFixedTime(new Date("2026-10-19T12:00"));
+});
+
 test("solves the fixture day by keyboard and keeps it after a reload", async ({
 	page,
 }) => {
@@ -43,6 +48,9 @@ test("solves the fixture day by keyboard and keeps it after a reload", async ({
 	const status = page.getByRole("status");
 
 	await expect(tile(page, "A1")).toBeVisible();
+	// Past Monday's link in the week strip, the one day open so far.
+	await page.keyboard.press("Tab");
+	await expect(page.getByRole("link", { name: "Mon" })).toBeFocused();
 	await page.keyboard.press("Tab");
 	await expect(tile(page, "A1")).toBeFocused();
 

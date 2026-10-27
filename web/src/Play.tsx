@@ -1,5 +1,6 @@
 import {
 	type KeyboardEvent,
+	type ReactNode,
 	useEffect,
 	useReducer,
 	useRef,
@@ -56,7 +57,7 @@ function Timer({ progress }: { progress: Progress }) {
 	return <span role="timer">⏱ {formatTime(elapsed(progress, now))}</span>;
 }
 
-export function Play({ day }: { day: Day }) {
+export function Play({ day, week }: { day: Day; week: ReactNode }) {
 	const [game, dispatch] = useReducer(reducer, day, (d) =>
 		start(d, Date.now()),
 	);
@@ -175,6 +176,7 @@ export function Play({ day }: { day: Day }) {
 					<p className="date">{dayLabel(day.date)}</p>
 					<Timer progress={progress} />
 				</div>
+				{week}
 			</header>
 
 			{/* biome-ignore lint/a11y/useSemanticElements: an ARIA grid, not a data table, so screen readers pass arrows and S/W to the page */}
