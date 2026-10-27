@@ -736,3 +736,32 @@ test("the footer links to Caffeinated Systems and Wordis", async () => {
 		screen.getByRole("link", { name: "Wordis" }).getAttribute("href"),
 	).toBe("https://wordis.caffeinated.systems");
 });
+
+// jsdom has no showModal; the browser does the rest (Esc, the Close form).
+function stubDialog() {
+	HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+		this.open = true;
+	};
+}
+
+test("how to play opens over the board", async () => {
+	stubDialog();
+	serve(Response.json(DAY));
+	render(<App />);
+
+	fireEvent.click(await screen.findByRole("button", { name: "How to play" }));
+	const help = screen.getByRole("dialog", { name: "How to play" });
+	expect(within(help).getByText("Reading the clues")).toBeDefined();
+	expect(within(help).getByText("Keys")).toBeDefined();
+});
+
+test("how to play is on the weekend screen too", () => {
+	stubDialog();
+	vi.setSystemTime(new Date(2026, 9, 17, 12));
+	history.replaceState(null, "", "/");
+	serve(Response.json(DAY));
+	render(<App />);
+
+	fireEvent.click(screen.getByRole("button", { name: "How to play" }));
+	expect(screen.getByRole("dialog", { name: "How to play" })).toBeDefined();
+});

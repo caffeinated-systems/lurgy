@@ -23,6 +23,7 @@ import {
 	start,
 	verdict,
 } from "./game.ts";
+import { HowToPlay } from "./HowToPlay.tsx";
 import "./App.css";
 
 const COLUMNS = 4;
@@ -189,6 +190,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 				<div className="today">
 					<p className="date">{dayLabel(day.date)}</p>
 					<Timer progress={progress} />
+					<HowToPlay />
 				</div>
 				{week}
 			</header>
