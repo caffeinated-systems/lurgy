@@ -290,6 +290,23 @@ test("a rejected declaration masks the coworker", async () => {
 	expect(tile("B1").querySelector(".mask")).not.toBeNull();
 });
 
+test("a message can be dismissed until the next one", async () => {
+	await open(sick("B1"), sick("C1"));
+	expect(screen.queryByRole("button", { name: "Dismiss message" })).toBeNull();
+
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 sick" }));
+	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
+	fireEvent.click(screen.getByRole("button", { name: "Dismiss message" }));
+	expect(screen.getByRole("status").textContent).toBe("");
+	expect(screen.queryByRole("button", { name: "Dismiss message" })).toBeNull();
+
+	fireEvent.click(tile("C1"));
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameC1 sick" }));
+	expect(
+		await screen.findByRole("button", { name: "Dismiss message" }),
+	).toBeDefined();
+});
+
 test("a failed declaration says so and marks nothing", async () => {
 	await open("down");
 

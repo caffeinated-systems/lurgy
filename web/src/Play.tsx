@@ -339,6 +339,17 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 				<p className="toast" role="status">
 					<span key={game.said}>{game.message}</span>
 				</p>
+				{/* Outside the live region, so it isn't read out with every message. */}
+				{game.message && (
+					<button
+						type="button"
+						className="dismiss"
+						aria-label="Dismiss message"
+						onClick={() => dispatch({ type: "dismissed" })}
+					>
+						×
+					</button>
+				)}
 				{progress.solvedAt !== undefined ? (
 					<div className="result">
 						<p className="verdict">{verdict(progress, day.date)}</p>
@@ -354,29 +365,12 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 				) : (
 					<>
 						{chosen && (
-							<>
-								<span className="who">
-									{chosen.desk} · {chosen.name} · {chosen.department}
-									{revealOf(progress, chosen.desk) && " · Already declared"}
-								</span>
-								<div className="big">
-									{(["sick", "well"] as const).map((state) => (
-										<button
-											type="button"
-											key={state}
-											className={`btn-${state}`}
-											disabled={
-												game.pending || !!revealOf(progress, chosen.desk)
-											}
-											aria-label={`Declare ${chosen.name} ${state}`}
-											onClick={() => declare(chosen.desk, state)}
-										>
-											{state === "sick" ? "Sick" : "Well"}
-										</button>
-									))}
-								</div>
-							</>
+							<span className="who">
+								{chosen.desk} · {chosen.name} · {chosen.department}
+								{revealOf(progress, chosen.desk) && " · Already declared"}
+							</span>
 						)}
+						{/* Beside the chosen coworker, so the bar is two rows and the log gets the room. */}
 						<button
 							type="button"
 							className="btn-hint"
@@ -385,6 +379,22 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 						>
 							{game.hint ? "Who do they settle?" : "Hint"}
 						</button>
+						{chosen && (
+							<div className="big">
+								{(["sick", "well"] as const).map((state) => (
+									<button
+										type="button"
+										key={state}
+										className={`btn-${state}`}
+										disabled={game.pending || !!revealOf(progress, chosen.desk)}
+										aria-label={`Declare ${chosen.name} ${state}`}
+										onClick={() => declare(chosen.desk, state)}
+									>
+										{state === "sick" ? "Sick" : "Well"}
+									</button>
+								))}
+							</div>
+						)}
 					</>
 				)}
 			</div>

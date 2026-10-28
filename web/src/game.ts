@@ -48,6 +48,7 @@ export type Action =
 	| { type: "dimmed"; desk: Desk }
 	| { type: "failed"; error: unknown }
 	| { type: "already" }
+	| { type: "dismissed" }
 	| { type: "shared"; copied: boolean };
 
 const key = (date: string) => `office-bug:${date}`;
@@ -346,6 +347,8 @@ export function reducer(game: Game, action: Action): Game {
 		}
 		case "failed":
 			return answer(game, failure(action.error));
+		case "dismissed":
+			return { ...game, message: "" };
 		case "already":
 			return say(game, "Already declared.");
 		case "shared":
