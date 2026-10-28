@@ -299,6 +299,8 @@ test("a message can be dismissed until the next one", async () => {
 	fireEvent.click(screen.getByRole("button", { name: "Dismiss message" }));
 	expect(screen.getByRole("status").textContent).toBe("");
 	expect(screen.queryByRole("button", { name: "Dismiss message" })).toBeNull();
+	// Focus goes to the selected desk, not back to the page.
+	expect(document.activeElement).toBe(tile("B1"));
 
 	fireEvent.click(tile("C1"));
 	fireEvent.click(screen.getByRole("button", { name: "Declare NameC1 sick" }));

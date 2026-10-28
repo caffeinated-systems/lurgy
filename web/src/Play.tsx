@@ -87,6 +87,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 	// isn't dropped. Not on reloading a solved day.
 	const shareButton = useRef<HTMLButtonElement>(null);
 	const wasSolved = useRef(progress.solvedAt !== undefined);
+	const board = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		if (progress.solvedAt === undefined || wasSolved.current) return;
 		wasSolved.current = true;
@@ -197,6 +198,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 
 			{/* biome-ignore lint/a11y/useSemanticElements: an ARIA grid, not a data table, so screen readers pass arrows and S/W to the page */}
 			<div
+				ref={board}
 				className="board"
 				role="grid"
 				aria-label="Office floor, 4 desks across, 5 rows"
@@ -336,20 +338,28 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 			</ul>
 
 			<div className="thumb">
-				<p className="toast" role="status">
-					<span key={game.said}>{game.message}</span>
-				</p>
-				{/* Outside the live region, so it isn't read out with every message. */}
-				{game.message && (
-					<button
-						type="button"
-						className="dismiss"
-						aria-label="Dismiss message"
-						onClick={() => dispatch({ type: "dismissed" })}
-					>
-						×
-					</button>
-				)}
+				<div className="message">
+					<p className="toast" role="status">
+						<span key={game.said}>{game.message}</span>
+					</p>
+					{/* Outside the live region, so it isn't read out with every message. */}
+					{game.message && (
+						<button
+							type="button"
+							className="dismiss"
+							aria-label="Dismiss message"
+							onClick={() => {
+								dispatch({ type: "dismissed" });
+								// The button goes with the message; focus the selected desk, not the page.
+								board.current
+									?.querySelector<HTMLElement>('[tabindex="0"]')
+									?.focus();
+							}}
+						>
+							×
+						</button>
+					)}
+				</div>
 				{progress.solvedAt !== undefined ? (
 					<div className="result">
 						<p className="verdict">{verdict(progress, day.date)}</p>

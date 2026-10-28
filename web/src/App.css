@@ -489,21 +489,25 @@ main.notice .btn-help {
 		calc(6px + env(safe-area-inset-bottom))
 		max(var(--gutter), env(safe-area-inset-left));
 }
+/* The message and its × get their own full-width row, clear of Hint's column. */
+.message {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+}
 .toast {
+	flex: 1;
 	margin: 0;
 	font-weight: 700;
 }
 .thumb > * {
 	grid-column: 1 / -1;
 }
-.thumb > .who,
-.thumb > .toast {
+.thumb > .who {
 	grid-column: 1;
 }
 .dismiss {
-	grid-column: 2;
-	justify-self: end;
-	align-self: start;
+	flex-shrink: 0;
 	width: 32px;
 	height: 32px;
 	border: 1px solid var(--line);
