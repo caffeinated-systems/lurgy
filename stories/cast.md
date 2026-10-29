@@ -321,7 +321,7 @@ The office's news service. Knows everything, never says how, and pushes the tea 
 - I hear things, that's all.
 - The tea trolley sees everything.
 - I won't say who, but you can guess.
-- Kettle's on, this one's good.
+- Don't quote me, I'm only the source.
 
 ## Steve
 Department: HR
