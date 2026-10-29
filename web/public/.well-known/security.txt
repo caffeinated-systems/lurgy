@@ -1,3 +1,4 @@
+# Expires is restamped on every deploy by api/bin/cloud-build.sh.
 Contact: https://github.com/caffeinated-systems/lurgy/security/advisories/new
 Expires: 2027-10-29T00:00:00Z
 Preferred-Languages: en
