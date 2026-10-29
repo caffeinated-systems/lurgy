@@ -16,9 +16,12 @@ A main character. Has been here since the building was fields, or says so. Calls
 - I'm not saying it was better in my day, but the biscuits were.
 
 ### Jokes
-- Take it from Barry.
-- Seen it all, chief.
-- Write that down.
+- Take it from Barry, chief, I've seen it all.
+- That's going in my memoirs, chief.
+- They don't make stepladders like this any more.
+- The old boiler would have had something to say about that.
+- I remember when all this was fields, chief.
+- Every ceiling tile in this place has a story, chief.
 
 ## Carol
 Department: HR
@@ -32,9 +35,12 @@ A main character. Kind, relentless and armed with a handbook. Believes every pro
 - Let's take that offline, and by offline I mean a meeting room, now.
 
 ### Jokes
-- I'll be minuting that.
-- Per the handbook.
+- I'll be minuting that, for everyone's benefit.
+- That's all in the handbook, lovely.
 - That's going in your file, positively.
+- Let's all share a fun fact about ourselves.
+- I'd suggest a quick ice-breaker before we go further.
+- I've laminated a reminder about that.
 
 ## Milla
 Department: Marketing
@@ -48,9 +54,12 @@ Social media manager who speaks fluent buzzword and has rebranded most of the st
 - I don't have opinions, I have a content strategy.
 
 ### Jokes
-- Let's circle back.
-- That's on-brand.
-- Huge, frankly.
+- Let's circle back on that synergy later.
+- Honestly, that's so on-brand for this office.
+- Huge, frankly, I'm putting it on the grid.
+- I'm calling that a content moment.
+- I've already drafted the hashtag for that.
+- That's a whole campaign, honestly.
 
 ## Erin
 Department: IT
@@ -64,9 +73,12 @@ Deadpan, headphones on, ticket queue always empty because she closes things with
 - Your password can't be password, even with an exclamation mark.
 
 ### Jokes
-- Ticket closed.
-- Working as intended.
-- You're welcome.
+- Ticket closed, with prejudice.
+- Working as intended, sadly.
+- You're welcome, and no, I won't explain.
+- The printer started it.
+- Headphones on, conversation over.
+- Have you tried reading the error message?
 
 ## Fergus
 Department: Facilities
@@ -80,9 +92,12 @@ A main character. Soft-spoken Glaswegian fixer who can mend anything except a co
 - I wrote a wee poem about the photocopier, it's nothing, forget it.
 
 ### Jokes
-- Anyway.
-- No reason.
-- Glad to help, honestly.
+- Anyway, I'll get back to my hinges.
+- No reason, I was just in the area.
+- Glad to help, honestly, it's nothing.
+- I've got a spanner if anyone needs one.
+- That squeak's been bothering me all week.
+- It's not a poem, it's just a list that rhymes.
 
 ## Gemma
 Department: Marketing
@@ -96,9 +111,12 @@ A main character. Sharp, ambitious and always mid-campaign. Changes the subject 
 - Oat flat white, extra hot, and no, I don't know who else orders that.
 
 ### Jokes
-- Anyway, moving on.
-- Strictly professional.
-- Don't read into that.
+- Anyway, moving on, nothing to see.
+- Strictly professional, as always.
+- Don't read into that, please.
+- That's a campaign idea, write it down.
+- I had a very quiet weekend, thanks for asking.
+- I'm far too busy for gossip, honestly.
 
 ## Henry
 Department: Finance
@@ -112,9 +130,12 @@ A main character. Meticulous, colour-codes everything and treats a rounding erro
 - I've switched to oat milk, for no particular reason.
 
 ### Jokes
-- Reconciled.
-- To the penny.
-- Audit-proof.
+- Reconciled, to the penny.
+- That's audit-proof, I checked it myself.
+- I've colour-coded that in a calm green.
+- A rounding error is never just a rounding error.
+- I'll need a receipt for that remark.
+- Purple tab for that one, I'm afraid.
 
 ## Imogen
 Department: IT
@@ -128,9 +149,12 @@ Cheerful sci-fi nerd who names the servers and runs a lunchtime board game club.
 - I just updated everything, so if it stops working, that's progress.
 
 ### Jokes
-- Critical hit.
-- Science!
-- Loading complete.
+- Critical hit, nobody move.
+- Science! That's all I'm saying.
+- Loading complete, carry on.
+- Gandalf the server approves.
+- Rolling for initiative on that one.
+- That's a proper plot twist, that.
 
 ## Jas
 Department: HR
@@ -143,9 +167,12 @@ Carol's junior, relentlessly upbeat and fluent in a language Carol is still lear
 - Carol says I can't call the appraisal a vibe check, so it's an appraisal.
 
 ### Jokes
-- No notes.
-- Slay, professionally.
-- It's giving accurate.
+- No notes, honestly.
+- Slay, but professionally.
+- It's giving accurate, not going to lie.
+- That's a vibe check pass from me.
+- Main character energy, respectfully.
+- Carol says I can't say iconic, so: noteworthy.
 
 ## Kev
 Department: IT
@@ -160,8 +187,11 @@ A main character. Self-appointed office legend with a theory for everything, mos
 
 ### Jokes
 - You didn't hear it from me.
-- Mark my words.
-- Kev out.
+- Mark my words, it's the booking system.
+- I've logged that, timestamped and everything.
+- Someone's had my yoghurt again, I can feel it.
+- I've got a theory about that, and it's a good one.
+- Kev has spoken.
 
 ## Linda
 Department: Sales
@@ -175,9 +205,12 @@ A main character. Top seller since before email, calls everyone "love" and keeps
 - Back in my day we had a fax machine and we were grateful.
 
 ### Jokes
-- Trust me, love.
-- Sold.
-- That's a closer.
+- Trust me, love, I've been doing this for years.
+- Sold, love, and I didn't even try.
+- That's a closer, that is.
+- That's going in the Filofax, love.
+- I'd sell that with a straight face, love.
+- No need for a video call, love.
 
 ## Mo
 Department: Finance
@@ -190,9 +223,12 @@ Laid-back, runs the office fantasy football league and is the only person who ca
 - I'd love to help, but I'm in a spreadsheet and it's gone emotional.
 
 ### Jokes
-- Balanced.
-- Back of the net.
-- Done and dusted.
+- Balanced, no drama.
+- Back of the net, that.
+- Done and dusted, no rush.
+- That's a transfer window decision, mate.
+- My fantasy team could've told you that.
+- Nobody panic, it's only a spreadsheet.
 
 ## Nadia
 Department: Sales
@@ -205,9 +241,12 @@ Quietly ruthless, competitive and openly gunning for Linda's crown. Her monitor 
 - I've put up a motivational poster and it's of me.
 
 ### Jokes
-- Closed it.
-- Next.
-- Easy.
+- Closed it, obviously.
+- Easy, frankly.
+- That's going on my quote wall.
+- Linda wishes she'd said that.
+- I'm not bragging, I'm reporting.
+- Winning, as usual.
 
 ## Ollie
 Department: Sales
@@ -221,9 +260,12 @@ The intern who never left. Earnest, eager and posting about it on LinkedIn. Lind
 - Is it still networking if it's just me at the vending machine?
 
 ### Jokes
-- Learning every day!
-- Thought leadership.
-- Grateful for this journey.
+- Learning every day, honestly!
+- That's real thought leadership.
+- So grateful for this journey.
+- I'm posting that on LinkedIn, it'll resonate.
+- Linda says that's natural talent.
+- Networking opportunity, spotted!
 
 ## Priya
 Department: Marketing
@@ -237,9 +279,12 @@ A main character. Creative lead, font obsessive, sworn enemy of Comic Sans. Chat
 - I've done a mood board for the office party and the mood is beige.
 
 ### Jokes
-- Chef's kiss.
-- That's the brief.
+- Chef's kiss, honestly.
+- That's the brief, nailed.
 - Kerned to perfection.
+- Please tell me that wasn't in Comic Sans.
+- I'm adding that to the mood board.
+- My chair just creaked in agreement.
 
 ## Quentin
 Department: Finance
@@ -253,9 +298,12 @@ A main character. Finance Director, guardian of the stationery cupboard and the 
 - If you need a pen, please submit a pen request form, in pencil.
 
 ### Jokes
-- Non-negotiable.
+- Non-negotiable, I'm afraid.
 - Approved, reluctantly.
-- Itemised.
+- Itemised, as it should be.
+- That will need a form, in pencil.
+- The stationery cupboard stays locked.
+- That's coming out of the party budget.
 
 ## Rosa
 Department: Sales
@@ -268,9 +316,12 @@ The office's news service. Knows everything, never says how, and pushes the tea 
 - Someone in Finance is moving house, and I won't say who, but it's Mo.
 
 ### Jokes
-- Pass it on.
-- Mum's the word.
-- Hot off the press.
+- Mum's the word, but you'll hear soon.
+- I didn't tell you, but you heard it here first.
+- I hear things, that's all.
+- The tea trolley sees everything.
+- I won't say who, but you can guess.
+- Kettle's on, this one's good.
 
 ## Steve
 Department: HR
@@ -284,8 +335,11 @@ Lovely, harmless and the owner of the longest anecdotes in the building, usually
 
 ### Jokes
 - Anyway, that's my news.
-- Long story.
+- Long story, I'll tell you at lunch.
 - Steady as she goes.
+- That reminds me of my shed.
+- The ring road was a saga again this morning.
+- I've brought in a sponge, if anyone's interested.
 
 ## Tania
 Department: IT
@@ -298,9 +352,12 @@ Security-minded to the point of paranoia. Sends fake phishing emails to test eve
 - I've put a password on the biscuit tin.
 
 ### Jokes
-- Encrypted.
-- Verified.
+- Encrypted, obviously.
+- Verified, for now.
 - Trust, but verify.
+- You all clicked it again.
+- I've put a password on that.
+- Don't write that on a sticky note.
 
 ## Bernadette
 Department: Legal
@@ -314,9 +371,12 @@ A main character. Head of Legal, terrifying, drafts a disclaimer for everything 
 - I don't make small talk, I make statements.
 
 ### Jokes
-- Without prejudice.
+- That's without prejudice, of course.
 - So stipulated.
-- Let the record show.
+- Let the record show I said nothing.
+- I'll draft a disclaimer for that.
+- That's not small talk, it's a statement.
+- I object, on principle.
 
 ## Anika
 Department: Legal
@@ -329,9 +389,12 @@ Paralegal and pedant. Corrects the posters, the minutes and the menu at the leav
 - Fewer biscuits, not less biscuits, and I will keep saying it.
 
 ### Jokes
-- Technically correct.
-- Footnoted.
-- As per.
+- Technically correct, I've checked.
+- Footnoted, with sources.
+- As per my annotations.
+- Fewer, not less.
+- I've corrected the poster again.
+- Strictly speaking, that's a meeting room.
 
 ## Yusuf
 Department: Legal
@@ -344,9 +407,12 @@ Trainee solicitor, anxious and eager, terrified of Bernadette and quietly desper
 - I've printed the internet, just in case.
 
 ### Jokes
-- Pending review.
-- I double-checked.
-- Subject to Bernadette.
+- Pending review by Bernadette.
+- I double-checked, then checked again.
+- Subject to Bernadette, obviously.
+- I've printed that, just in case.
+- Am I allowed an opinion on that yet?
+- I've highlighted that, in every colour.
 
 ## Cheryl
 Department: Reception
@@ -359,9 +425,12 @@ Sees everyone come and go and remembers all of it. Guards the visitor book and t
 - I've named the reception plant Gary and Gary is thriving.
 
 ### Jokes
-- Next, please.
 - Gary agrees.
-- Signed in.
+- Please sign the visitor book.
+- Mind the pen, it's on a chain.
+- Gary's having a lovely day.
+- I remember everything, you know.
+- That's going in the visitor book.
 
 ## Kelly
 Department: Legal
@@ -374,9 +443,12 @@ Ex-bouncer turned compliance officer, unshakeable, takes contracts and lanyards 
 - I've seen things in the small print I can't unsee.
 
 ### Jokes
-- You're on the list.
-- Moving along.
-- Read the terms.
+- You're on the list, this time.
+- Moving along, please.
+- Read the terms, all of them.
+- No lanyard, no chat.
+- No NDA, no entry.
+- I've seen worse at closing time.
 
 ## Ffion
 Department: Procurement
@@ -390,8 +462,11 @@ Unflappable Welsh negotiator who could get a discount from a vending machine. Bu
 
 ### Jokes
 - Lovely, that.
-- Done deal.
-- Bargain.
+- Done deal, cheers.
+- Bargain, that is.
+- I'd have got that cheaper.
+- Everything's negotiable, mind.
+- We've paper towels for years, don't worry.
 
 ## Ursula
 Department: Procurement
@@ -404,9 +479,12 @@ Stern, thorough and Quentin's only true ally. Nothing enters the building withou
 - The vending machine is a supplier, and it is on a warning.
 
 ### Jokes
-- On file.
-- Processed.
-- Raised and approved.
+- That's on file now.
+- Processed, as required.
+- Raised and approved, eventually.
+- I'll need a purchase order for that.
+- The vending machine remains on a warning.
+- I've given that a long look.
 
 ## Aiden
 Department: HR
@@ -419,9 +497,12 @@ Junior HR officer, chaotic, keen and bad at forms. The pallet of lanyards in the
 - If anyone needs a lanyard, and I mean anyone, come and see me.
 
 ### Jokes
-- Nailed it.
-- Sorted.
+- Nailed it, I think.
+- Sorted, probably.
 - Absolute scenes.
+- Anyone need a lanyard?
+- I'll do a form for that, eventually.
+- That's going in my new policy.
 
 ## Keisha
 Department: Customer Services
@@ -434,9 +515,12 @@ The calmest voice on the phone and the most savage one off it. Takes her headset
 - A customer called me darling today, so he's on hold until further notice.
 
 ### Jokes
-- Resolved.
+- Resolved, and I'm hanging up.
 - Thanks for holding.
 - Is there anything else I can help with?
+- I completely understand your frustration.
+- The headset's coming down for this one.
+- You're on hold until further notice.
 
 ## Dan
 Department: IT
@@ -449,9 +533,12 @@ Came out of early retirement because the garden wasn't taking his calls. Old-sch
 - In my day a computer filled a room and we were glad of it.
 
 ### Jokes
-- Cheerio.
+- Cheerio, then.
 - Right you are.
 - Lovely stuff.
+- I'll pop that in a letter.
+- No rush, these things take time.
+- That's like my garden, it needs patience.
 
 ## Sophia
 Department: Finance
@@ -465,5 +552,8 @@ Accounts team lead, relentlessly sunny, runs her ledgers on positivity, biscuits
 
 ### Jokes
 - Happy to help!
-- Approved!
+- Approved, with a smile!
 - Balanced, beautifully.
+- Would you rate that experience for me?
+- Positivity, biscuits and a firm budget!
+- That's a gold-star expense claim!
