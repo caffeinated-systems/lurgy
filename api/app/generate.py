@@ -63,7 +63,7 @@ from app.week import EARLIEST, Day, Difficulty, Generator, Reveal, Week, utc_now
 from app.wording import explanation, wording
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping, Sequence
+    from collections.abc import Container, Iterable, Iterator, Mapping, Sequence
 
     from app.cast import Cast, Member, Story
     from app.clues import Boards, Mask
@@ -78,6 +78,8 @@ ATTEMPTS = 2_000
 QUIET_LINES = 2
 # Clues that get a joke after them on each day: one or two.
 JOKES = (1, 2)
+# What an idle coworker's reveal holds until its flavour is chosen.
+IDLE = "..."
 FAMILIES: tuple[Literal["rows", "columns", "departments"], ...] = (
     "rows", "columns", "departments",
 )  # fmt: skip
@@ -123,44 +125,62 @@ def generate_day(  # noqa: PLR0913
     *,
     flavour: Mapping[Desk, str] | None = None,
     jokes: Mapping[Desk, Sequence[str]] | None = None,
+    lines: Mapping[Desk, Sequence[str]] | None = None,
+    told: set[str] | None = None,
 ) -> Day:
     """A day at this difficulty, replayed from scratch before it's returned.
 
     Coworkers with flavour say it in place of a clue; never the starting one, who
-    has to give the office manager something to go on. Jokes are each coworker's
-    pool, for one or two clues.
+    has to give the office manager something to go on. Jokes and lines are each
+    coworker's pools: a joke after one or two clues, and a joke or line from
+    anyone with nothing new to tell. Told is what the week has said so far.
     """
-    flavour = flavour or {}
+    flavour, jokes, lines = flavour or {}, jokes or {}, lines or {}
+    told = set() if told is None else told
+    chatty = {d for d in DESKS if jokes.get(d) or lines.get(d)}
     for _ in range(attempts):
-        if (built := _attempt(board, day, difficulty, rng, flavour)) is None:
+        if (
+            built := _attempt(
+                board, day, difficulty, rng, flavour=flavour, chatty=chatty
+            )
+        ) is None:
             continue
-        puzzle, order, graded = built
+        puzzle, order, graded, idle = built
         if graded.difficulty != difficulty:
             continue
+        puzzle = puzzle.model_copy(
+            update={
+                "difficulty": difficulty,
+                "reveals": _speak(
+                    puzzle.reveals, idle, jokes=jokes, lines=lines, told=told, rng=rng
+                ),
+            }
+        )
         # Guards against generator bugs: a fresh replay, and the grader agreeing.
         if (
             not puzzle.accepts(board, order) or grade(board, puzzle) != graded
         ):  # pragma: no cover
             msg = "a generated day failed its replay"
             raise AssertionError(msg)
-        return puzzle.model_copy(
-            update={
-                "difficulty": difficulty,
-                "reveals": _joke(puzzle.reveals, jokes or {}, rng),
-            }
-        )
+        return puzzle
     msg = f"no {difficulty} day for {day} in {attempts} attempts"
     raise GenerationError(msg)
 
 
-def _attempt(
+def _attempt(  # noqa: PLR0913
     board: Board,
     day: date,
     difficulty: Difficulty,
     rng: random.Random,
+    *,
     flavour: Mapping[Desk, str],
-) -> tuple[Day, list[tuple[Desk, State]], Grade] | None:
-    """One try: reveal coworkers in order until everyone is declared, or stuck."""
+    chatty: Container[Desk],
+) -> tuple[Day, list[tuple[Desk, State]], Grade, set[Desk]] | None:
+    """One try: reveal coworkers in order until everyone is declared, or stuck.
+
+    Chatty coworkers with nothing new to tell are idle: they say no clue, and get
+    their flavour once the day is kept.
+    """
     sick = frozenset(rng.sample(DESKS, rng.randint(FEWEST_SICK, MOST_SICK)))
     solution = sum(1 << DESKS.index(d) for d in sick)
     catalogue = _true_clues(board, solution, rng)
@@ -179,19 +199,27 @@ def _attempt(
     steps: list[Step] = []
     new = [start]
     said: list[Clue] = []
+    idle: set[Desk] = set()
     # Rounds as the grader plays them: everyone just declared speaks, then the
     # fewest clues that force anyone decide who's declared next.
     while True:
         for desk in (d for d in new if d not in flavour):
-            clues[desk] = clue = _choose(
+            drawn = _candidates(catalogue, rng)
+            clue = _choose(
                 board,
-                _candidates(catalogue, rng),
+                drawn,
+                catalogue,
                 known=known,
                 alive=alive,
                 declared=declared,
                 rng=rng,
                 easy=difficulty == "Easy",
             )
+            if clue is None and desk in chatty:
+                idle.add(desk)
+                continue
+            # Someone with nothing else to say gives a true clue, even a stale one.
+            clues[desk] = clue = clue or rng.choice(drawn)
             said.append(clue)
             catalogue[_form(clue)].remove(clue)  # no one says it twice
             alive = alive[clue.mask(board, alive)]
@@ -212,6 +240,8 @@ def _attempt(
     reveals = tuple(
         Reveal(text=flavour[d])
         if d in flavour
+        else Reveal(text=IDLE)
+        if d in idle
         else Reveal(
             clue=clues[d],
             text=wording(board, d, clues[d]),
@@ -223,20 +253,25 @@ def _attempt(
         Day(date=day, start=start, sick=sick, reveals=reveals),
         order,
         Grade(tuple(steps)),
+        idle,
     )
 
 
 def _choose(  # noqa: PLR0913
     board: Board,
     candidates: list[Clue],
+    catalogue: Catalogue,
     *,
     known: Boards,
     alive: Boards,
     declared: dict[Desk, bool],
     rng: random.Random,
     easy: bool,
-) -> Clue:
-    """A clue that forces someone new.
+) -> Clue | None:
+    """A clue that tells the office manager something new, and forces someone new.
+
+    The candidates first, then anything left in the catalogue; None when no true
+    clue tells anything new, which late in a day is common.
 
     Easy wants it to force on its own. Harder days want clues that don't: single-
     clue progress has to stall for a step to need two. Once someone is settled
@@ -248,8 +283,13 @@ def _choose(  # noqa: PLR0913
         # settled after the clue is new.
         return bool(settled(boards[clue.mask(board, boards)], declared))
 
-    # A clue true on every board the declarations allow tells the player nothing.
-    candidates = [c for c in candidates if not c.mask(board, known).all()] or candidates
+    def new(clues: Iterable[Clue]) -> list[Clue]:
+        # True on every board everything said so far allows: it tells nothing.
+        return [c for c in clues if not c.mask(board, alive).all()]
+
+    candidates = new(candidates) or new(chain.from_iterable(catalogue.values()))
+    if not candidates:
+        return None
     # Declarations alone never settle anyone undeclared.
     alone = [c for c in candidates if forces(c, known)]
     if easy:
@@ -511,16 +551,37 @@ def _groups(board: Board) -> tuple[Group, ...]:
     return tuple(g for g in groups if board.bits(g).bit_count() > 1)
 
 
-def _joke(
-    reveals: tuple[Reveal, ...], jokes: Mapping[Desk, Sequence[str]], rng: random.Random
+def _speak(  # noqa: PLR0913
+    reveals: tuple[Reveal, ...],
+    idle: Container[Desk],
+    *,
+    jokes: Mapping[Desk, Sequence[str]],
+    lines: Mapping[Desk, Sequence[str]],
+    told: set[str],
+    rng: random.Random,
 ) -> tuple[Reveal, ...]:
-    """The reveals, with a joke after one or two clues from their speakers' pools."""
-    funny = [d for d, r in zip(DESKS, reveals, strict=True) if r.clue and jokes.get(d)]
-    chosen = rng.sample(funny, min(rng.choice(JOKES), len(funny)))
-    return tuple(
-        r.model_copy(update={"joke": rng.choice(jokes[d])}) if d in chosen else r
+    """The reveals with their flavour: idle coworkers say a joke or a line, and one
+    or two clues get a joke after them. Nobody repeats what the week has told until
+    they've nothing new: an untold joke, then an untold line, then a joke again.
+    """
+
+    def say(*pools: Sequence[str]) -> str:
+        fresh = [[x for x in pool if x not in told] for pool in pools]
+        text = rng.choice(next(p for p in [*fresh, *pools] if p))
+        told.add(text)
+        return text
+
+    spoken = [
+        Reveal(text=say(jokes.get(d, ()), lines.get(d, ()))) if d in idle else r
         for d, r in zip(DESKS, reveals, strict=True)
-    )
+    ]
+    funny = [d for d, r in zip(DESKS, spoken, strict=True) if r.clue and jokes.get(d)]
+    # Someone with an untold joke tells it; only when nobody has one is one retold.
+    funny = [d for d in funny if set(jokes[d]) - told] or funny
+    for d in rng.sample(funny, min(rng.choice(JOKES), len(funny))):
+        i = DESKS.index(d)
+        spoken[i] = spoken[i].model_copy(update={"joke": say(jokes[d])})
+    return tuple(spoken)
 
 
 # Monday to Friday.
@@ -550,6 +611,7 @@ def generate_week(
     board = seat(who)
     desk = {c.name: d for d, c in zip(DESKS, board.coworkers, strict=True)}
     days = []
+    told: set[str] = set()  # nobody repeats a joke or line until they run out
     for i, difficulty in enumerate(SCHEDULE):
         rng = rngs[i]
         if story:
@@ -557,9 +619,10 @@ def generate_week(
         else:
             chatty = [m for m in who if m.lines]
             said = {
-                m.name: rng.choice(m.lines)
+                m.name: rng.choice([x for x in m.lines if x not in told] or m.lines)
                 for m in rng.sample(chatty, min(QUIET_LINES, len(chatty)))
             }
+            told.update(said.values())
         days.append(
             generate_day(
                 board,
@@ -568,6 +631,8 @@ def generate_week(
                 rng,
                 flavour={desk[name]: line for name, line in said.items()},
                 jokes={desk[m.name]: m.jokes for m in who},
+                lines={desk[m.name]: m.lines for m in who},
+                told=told,
             )
         )
     return Week(
