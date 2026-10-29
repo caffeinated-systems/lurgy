@@ -576,6 +576,8 @@ def _speak(  # noqa: PLR0913
         for d, r in zip(DESKS, reveals, strict=True)
     ]
     funny = [d for d, r in zip(DESKS, spoken, strict=True) if r.clue and jokes.get(d)]
+    # Someone with an untold joke tells it; only when nobody has one is one retold.
+    funny = [d for d in funny if set(jokes[d]) - told] or funny
     for d in rng.sample(funny, min(rng.choice(JOKES), len(funny))):
         i = DESKS.index(d)
         spoken[i] = spoken[i].model_copy(update={"joke": say(jokes[d])})
@@ -617,7 +619,7 @@ def generate_week(
         else:
             chatty = [m for m in who if m.lines]
             said = {
-                m.name: rng.choice(m.lines)
+                m.name: rng.choice([x for x in m.lines if x not in told] or m.lines)
                 for m in rng.sample(chatty, min(QUIET_LINES, len(chatty)))
             }
             told.update(said.values())

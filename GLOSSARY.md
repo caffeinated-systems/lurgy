@@ -53,7 +53,7 @@ A true statement a revealed coworker makes about who is sick or well: one cowork
 _Avoid_: hint, statement, evidence
 
 **Flavour**:
-What a revealed coworker says that is not a clue: a joke or a line of the week's story in place of a clue, or a short joke after one. Flavour never carries or suggests logic.
+What a revealed coworker says that is not a clue: a joke, a general line or a line of the week's story in place of a clue, or a short joke after one. A coworker with nothing new to tell says a joke or general line in place of a clue. Flavour never carries or suggests logic.
 _Avoid_: banter, filler
 
 **Group**:

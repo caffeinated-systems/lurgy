@@ -34,8 +34,8 @@ class StoryError(ValueError):
 class Member:
     name: str
     department: str
-    lines: tuple[str, ...] = ()  # said in place of a clue in a quiet week
-    jokes: tuple[str, ...] = ()  # said after a clue
+    lines: tuple[str, ...] = ()  # said in place of a clue in a quiet week, or idle
+    jokes: tuple[str, ...] = ()  # said after a clue, or in place of one when idle
 
 
 @dataclass(frozen=True)

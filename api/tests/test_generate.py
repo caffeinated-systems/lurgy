@@ -1,5 +1,6 @@
 import random
 import secrets
+from dataclasses import replace
 from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, get_args
 
@@ -289,6 +290,29 @@ def _fits(
     for clue in said:
         boards = boards[clue.mask(board, boards)]
     return boards
+
+
+def test_nobody_repeats_themselves_in_a_week() -> None:
+    # Someone speaks once a day, so five things each means no repeat is ever needed.
+    cast = {
+        name: replace(
+            m,
+            jokes=tuple(f"{name}'s joke {i}." for i in range(2)),
+            lines=tuple(f"{name}'s line {i}." for i in range(3)),
+        )
+        for name, m in CAST.items()
+    }
+
+    week = generate_week(cast, date(2026, 11, 9), 1, "0" * 40)
+
+    names = [c.name for c in week.board.coworkers]
+    said: dict[str, list[str]] = {name: [] for name in names}
+    for day in week.days:
+        for d, r in zip(DESKS, day.reveals, strict=True):
+            said[names[DESKS.index(d)]] += [r.text] * (r.clue is None) + [r.joke or ""]
+    for name, texts in said.items():
+        spoken = [t for t in texts if t]
+        assert len(spoken) == len(set(spoken)), name
 
 
 def test_nobody_repeats_themselves_until_they_run_out() -> None:

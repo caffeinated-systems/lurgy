@@ -466,7 +466,7 @@ Unflappable Welsh negotiator who could get a discount from a vending machine. Bu
 - Bargain, that is.
 - I'd have got that cheaper.
 - Everything's negotiable, mind.
-- We've paper towels for years, don't worry.
+- We've got paper towels for years, don't worry.
 
 ## Ursula
 Department: Procurement
