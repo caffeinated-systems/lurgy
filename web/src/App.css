@@ -35,6 +35,8 @@
 	--hint: #c75a12;
 	--accent: #2b4c7e;
 	color-scheme: light;
+	/* The page's side margin; the thumb bar cancels it to run edge to edge. */
+	--gutter: 8px;
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme="light"]) {
@@ -78,8 +80,8 @@ body {
 		16px / 1.45 Poppins,
 		system-ui,
 		sans-serif;
-	padding: 12px max(16px, env(safe-area-inset-right)) 0
-		max(16px, env(safe-area-inset-left));
+	padding: 12px max(var(--gutter), env(safe-area-inset-right)) 0
+		max(var(--gutter), env(safe-area-inset-left));
 }
 main,
 footer {
@@ -185,7 +187,9 @@ footer a {
 	top: env(safe-area-inset-top);
 	z-index: 4;
 	background: var(--bg);
+	/* As wide as the row numbers' column and its gap, so the tiles sit centred. */
 	padding-block: 6px;
+	padding-inline-end: calc(0.9rem + 4px);
 }
 .row {
 	display: contents;
@@ -224,10 +228,16 @@ div.axis {
 	/* Taps and long presses belong to the tile, not the picture. */
 	pointer-events: none;
 }
-/* Square tiles on a short screen (an old small phone) leave no room for the clue log. */
+/* Square tiles leave the clue log little room on phones and laptops, so tiles get
+   wider than tall as the screen gets shorter; tall monitors keep squares. */
+@media (max-height: 900px) {
+	.tile {
+		aspect-ratio: 5 / 4;
+	}
+}
 @media (max-height: 620px) {
 	.tile {
-		aspect-ratio: 1 / 0.8;
+		aspect-ratio: 4 / 3;
 	}
 }
 /* The name gives way to the department code, and the border is the lanyard colour. */
@@ -466,18 +476,50 @@ main.notice .btn-help {
 .thumb {
 	position: sticky;
 	bottom: 0;
-	margin-inline: -16px;
+	margin-inline: calc(-1 * var(--gutter));
 	z-index: 5;
 	display: grid;
-	gap: 4px;
+	/* The chosen coworker on the left, Hint on the right; everything else spans both. */
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 4px 8px;
 	background: var(--surface);
 	border-top: 1px solid var(--line);
-	padding: 6px max(16px, env(safe-area-inset-right))
-		calc(6px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+	padding: 6px max(var(--gutter), env(safe-area-inset-right))
+		calc(6px + env(safe-area-inset-bottom))
+		max(var(--gutter), env(safe-area-inset-left));
+}
+/* The message and its × get their own full-width row, clear of Hint's column. */
+.message {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
 }
 .toast {
+	flex: 1;
 	margin: 0;
 	font-weight: 700;
+}
+.thumb > * {
+	grid-column: 1 / -1;
+}
+.thumb > .who {
+	grid-column: 1;
+}
+.dismiss {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	background: transparent;
+	font-size: 1.1rem;
+	line-height: 1;
+	cursor: pointer;
+}
+.thumb > .btn-hint {
+	grid-column: 2;
+	padding-inline: 12px;
 }
 .big {
 	display: grid;
