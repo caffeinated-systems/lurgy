@@ -92,8 +92,12 @@ def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
         generate_day(SAMPLE_BOARD, MONDAY, "Hard", random.Random(seed))
         for seed in count(2026)
     )
+    # Hard by a whole-board clue, with a step that combines clues too.
     day = next(
-        d for d in days if any(s.whole_board for s in grade(SAMPLE_BOARD, d).steps)
+        d
+        for d in days
+        if any(s.whole_board for s in grade(SAMPLE_BOARD, d).steps)
+        and any(s.hardness > 1 for s in grade(SAMPLE_BOARD, d).steps)
     )
     steps: list[tuple[Desk, State]] = []
     sizes = []

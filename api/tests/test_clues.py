@@ -224,6 +224,10 @@ ROW_3: set[Desk] = {"A3", "B3", "C3", "D3"}
             Directly(group=Department(name="HR"), direction="left", n=1),
             {"C1", "B3", "C5", "B1", "A3", "B5"},
         ),
+        (  # nobody's to the left of column A
+            Directly(group=Column(column="A"), direction="left", n=0),
+            {"A1", "A2", "A3", "A4", "A5"},
+        ),
         (OnlyOne(family="rows", n=1), set(DESKS)),
         (Most(group=Row(row=3)), set(DESKS)),
     ],

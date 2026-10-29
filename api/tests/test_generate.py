@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, get_args
 import pytest
 
 from app import generate
-from app.board import DESKS, Row
+from app.board import DESKS, Board, Desk, Row
 from app.cast import fits, load_cast, load_story
 from app.clues import (
     BOARDS,
@@ -33,18 +33,20 @@ from app.generate import (
     _form,
     _how_many,
     _overlaps,
+    _speak,
     _true_clues,
     generate_day,
     generate_week,
     main,
 )
-from app.grade import grade
-from app.week import Week, load_days
+from app.grade import grade, next_step
+from app.week import Reveal, Week, load_days
 from tests.factories import MONDAY, SAMPLE_BOARD, STORIES, board_index, desks
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from app.clues import Boards
     from app.week import Difficulty
 
 CAST = load_cast(STORIES / "cast.md")
@@ -156,8 +158,9 @@ def test_the_cli_builds_a_quiet_week_without_a_story(
     assert fits(CAST[c.name] for c in week.board.coworkers)
     for day in week.days:
         flavour = [r.text for r in day.reveals if r.clue is None]
-        assert len(flavour) == QUIET_LINES
-        assert all(line.endswith("'s line.") for line in flavour)
+        # Idle coworkers add jokes and lines to the two quiet lines.
+        assert len([x for x in flavour if x.endswith("'s line.")]) >= QUIET_LINES
+        assert all(x.endswith(("'s line.", "'s joke.")) for x in flavour)
 
 
 def test_the_same_seed_builds_the_same_week() -> None:
@@ -178,7 +181,9 @@ def _seats_the_story_and_gives_speakers_their_lines(week: Week) -> None:
             for d in DESKS
             if day.reveal(d).clue is None
         }
-        assert flavour == said
+        assert flavour.items() >= said.items()
+        for name, text in flavour.items() - said.items():  # idle: a joke or line
+            assert text in {f"{name}'s joke.", f"{name}'s line."}
         assert names[DESKS.index(day.start)] not in said
         jokes = [(d, r.joke) for d, r in zip(DESKS, day.reveals, strict=True) if r.joke]
         assert 1 <= len(jokes) <= 2  # noqa: PLR2004
@@ -219,6 +224,7 @@ def test_a_clue_that_tells_nothing_new_is_never_chosen() -> None:
         chosen = _choose(
             SAMPLE_BOARD,
             [said, news],
+            {},
             known=known,
             alive=known,
             declared={"A1": True},
@@ -226,6 +232,83 @@ def test_a_clue_that_tells_nothing_new_is_never_chosen() -> None:
             easy=True,
         )
         assert chosen == news
+
+
+def test_a_clue_that_tells_nothing_new_is_swapped_for_one_that_does() -> None:
+    known = BOARDS[(BOARDS & 1) == 1]  # Aisha (A1) is declared sick
+    alive = known[Parity(group=Row(row=2), parity="odd").mask(SAMPLE_BOARD, known)]
+    stale = Parity(group=Row(row=2), parity="odd")  # already said
+    news = Parity(group=Row(row=3), parity="odd")
+
+    def choose(catalogue: dict[str, list[Clue]]) -> Clue | None:
+        return _choose(
+            SAMPLE_BOARD,
+            [stale],
+            catalogue,
+            known=known,
+            alive=alive,
+            declared={"A1": True},
+            rng=random.Random(1),
+            easy=False,
+        )
+
+    assert choose({"parity": [stale, news]}) == news
+    assert choose({"parity": [stale]}) is None
+
+
+def test_every_clue_tells_something_new_when_it_is_said() -> None:
+    week = generate_week(CAST, date(2026, 11, 2), 1, "0" * 40, STORY)
+
+    for day in week.days:
+        declared, said, new = {day.start}, list[Clue](), [day.start]
+        while True:
+            for desk in new:
+                if clue := day.reveal(desk).clue:
+                    alive = _fits(week.board, declared, day.sick, said)
+                    assert not clue.mask(week.board, alive).all(), (day.date, desk)
+                    said.append(clue)
+            if len(declared) == len(DESKS):
+                break
+            known = _fits(week.board, declared, day.sick, [])
+            masks = [c.mask(week.board, known) for c in said]
+            _, forced = next_step(said, masks, known, declared)
+            new = sorted(forced)
+            declared |= forced
+    # The fixture cast has a joke and a line each, so someone is always idle.
+    idle = [r.text for d in week.days for r in d.reveals if r.clue is None]
+    assert any(text.endswith("'s joke.") for text in idle)
+
+
+def _fits(
+    board: Board, declared: set[Desk], sick: frozenset[Desk], said: list[Clue]
+) -> Boards:
+    """The boards the declarations and the clues said so far allow."""
+    bits = sum(1 << DESKS.index(d) for d in declared)
+    sick_bits = sum(1 << DESKS.index(d) for d in declared & sick)
+    boards: Boards = BOARDS[(BOARDS & bits) == sick_bits]
+    for clue in said:
+        boards = boards[clue.mask(board, boards)]
+    return boards
+
+
+def test_nobody_repeats_themselves_until_they_run_out() -> None:
+    reveal = Reveal(text="...")
+    told: set[str] = set()
+    jokes: dict[Desk, tuple[str, ...]] = {"A1": ("a", "b")}
+    lines: dict[Desk, tuple[str, ...]] = {"A1": ("l",)}
+
+    def say(seed: int) -> str:
+        reveals = (reveal,) * len(DESKS)
+        rng = random.Random(seed)
+        return _speak(reveals, {"A1"}, jokes=jokes, lines=lines, told=told, rng=rng)[
+            0
+        ].text
+
+    said = [say(i) for i in range(4)]
+
+    assert sorted(said[:2]) == ["a", "b"]
+    assert said[2] == "l"
+    assert said[3] in {"a", "b"}
 
 
 def test_overlaps_never_give_a_coworker_away_or_hide_a_count() -> None:
