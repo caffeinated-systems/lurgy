@@ -93,7 +93,7 @@ A main character. Soft-spoken Glaswegian fixer who can mend anything except a co
 
 ### Jokes
 - Anyway, I'll get back to my hinges.
-- No reason, I was just in the area.
+- I might write a wee poem about that, or I might not.
 - Glad to help, honestly, it's nothing.
 - I've got a spanner if anyone needs one.
 - That squeak's been bothering me all week.
@@ -149,7 +149,7 @@ Cheerful sci-fi nerd who names the servers and runs a lunchtime board game club.
 - I just updated everything, so if it stops working, that's progress.
 
 ### Jokes
-- Critical hit, nobody move.
+- Critical hit, and I didn't even roll.
 - Science! That's all I'm saying.
 - Loading complete, carry on.
 - Gandalf the server approves.
@@ -228,7 +228,7 @@ Laid-back, runs the office fantasy football league and is the only person who ca
 - Done and dusted, no rush.
 - That's a transfer window decision, mate.
 - My fantasy team could've told you that.
-- Nobody panic, it's only a spreadsheet.
+- Relax, it's only a spreadsheet.
 
 ## Nadia
 Department: Sales
