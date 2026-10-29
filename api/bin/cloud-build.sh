@@ -18,3 +18,12 @@ cd ../web
 # vite and typescript are devDependencies, needed even if NODE_ENV=production.
 npm ci --include=dev
 npm run build
+
+# RFC 9116 caps Expires at a year; the weekly redeploy keeps it there. A failed stamp
+# mustn't block a Week going live: the committed date is the fallback.
+if expires=$(date -u -d '+364 days' +%Y-%m-%dT00:00:00Z); then
+	sed -i "s/^Expires: .*/Expires: $expires/" ../api/static/.well-known/security.txt \
+		|| echo "warning: security.txt Expires not restamped"
+else
+	echo "warning: security.txt Expires not restamped"
+fi
