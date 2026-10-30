@@ -21,7 +21,7 @@ from app.board import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Container, Iterable, Mapping
+    from collections.abc import Container, Iterable, Mapping, Sequence
 
 # Every possible board: bit i set means the coworker at desk i is sick.
 BOARDS = np.arange(2 ** len(DESKS), dtype=np.uint32)
@@ -411,6 +411,27 @@ def forced(
     alive &= (BOARDS & np.uint32(known)) == sick
 
     return settled(BOARDS[alive], declared)
+
+
+def fits(
+    masks: Sequence[Mask], liars: Sequence[bool], *, elsewhere: Mask | bool = True
+) -> Mask:
+    """The boards where the fibber is lying, wherever they are.
+
+    Each mask is a clue said, at least one; a liar is a sick speaker, who could be
+    the fibber. Exactly one of their clues is false, or none is and the fibber is
+    elsewhere: someone whose clue isn't among these. Everyone else's is true.
+    On a day with no fibber, nobody is a liar and every clue is true.
+    """
+    honest = np.ones_like(masks[0])
+    lies = np.zeros(masks[0].shape, dtype=np.uint8)
+    for mask, liar in zip(masks, liars, strict=True):
+        if liar:
+            lies += ~mask
+        else:
+            honest &= mask
+    fit: Mask = honest & ((lies == 1) | ((lies == 0) & elsewhere))
+    return fit
 
 
 def settled(boards: Boards, declared: Container[Desk]) -> dict[Desk, bool]:

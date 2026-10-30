@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
@@ -29,6 +30,7 @@ from app.clues import (
     Parity,
     SickVsWell,
     Total,
+    fits,
     forced,
 )
 from tests.factories import SAMPLE_BOARD, board_index, desks
@@ -310,3 +312,29 @@ def test_contradiction_raises() -> None:
 def test_invalid_clues(data: dict[str, object]) -> None:
     with pytest.raises(ValidationError):
         TypeAdapter(Clue).validate_python(data)
+
+
+def test_fits_keeps_boards_where_exactly_one_liar_lies() -> None:
+    honest = np.array([True, True, True, False])
+    a = np.array([True, False, True, True])
+    b = np.array([True, True, False, False])
+
+    # A board fits with one liar's clue false; both false, or the honest one, doesn't.
+    assert fits([honest, a, b], [False, True, True], elsewhere=False).tolist() == [
+        False, True, True, False,
+    ]  # fmt: skip
+
+
+def test_fits_lets_every_clue_be_true_while_the_fibber_is_elsewhere() -> None:
+    a = np.array([True, False])
+    elsewhere = np.array([True, False])
+
+    assert fits([a], [True], elsewhere=elsewhere).tolist() == [True, True]
+    assert fits([a, a], [True, True], elsewhere=False).tolist() == [False, False]
+
+
+def test_with_no_liars_fits_is_every_clue_true() -> None:
+    a = np.array([True, False, True])
+    b = np.array([True, True, False])
+
+    assert fits([a, b], [False, False]).tolist() == [True, False, False]
