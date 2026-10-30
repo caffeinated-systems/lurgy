@@ -3,26 +3,40 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from app.board import DESKS, Column, Corners, Desk, Direction, Neighbours, Row
+from app.board import (
+    DESKS,
+    Between,
+    Column,
+    Corners,
+    Desk,
+    Direction,
+    Neighbours,
+    Row,
+)
 from app.clues import Clue, Count, Total
-from app.grade import Step, grade, next_step
+from app.grade import Step, Suspects, grade, hint, next_step, suspects
 from app.week import Day, Reveal, load_days
 from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from app.week import Call
+
 # Says nothing new once row 2 is known: the filler for desks a test doesn't need.
 NOTHING = Count(group=Row(row=2), n=0)
 
 
-def day(sick: set[Desk], clues: Mapping[Desk, Clue | None]) -> Day:
+def day(
+    sick: set[Desk], clues: Mapping[Desk, Clue | None], fibber: Desk | None = None
+) -> Day:
     """A day starting at A1, with these clues (None: flavour) and NOTHING elsewhere."""
     return Day(
         date=MONDAY,
         start="A1",
         sick=frozenset(sick),
         reveals=tuple(Reveal(clue=clues.get(d, NOTHING), text="…") for d in DESKS),
+        fibber=fibber,
     )
 
 
@@ -110,7 +124,7 @@ def test_more_than_three_clues_at_once_counts_as_three() -> None:
     a, b, c, d = ((boards >> i & 1).astype(np.bool_) for i in range(4))
     masks = [a | b, ~b | c, ~c | d, ~d | a]
 
-    step, forced = next_step([NOTHING] * 4, masks, boards, set(DESKS[4:]))
+    step, forced, _ = next_step([NOTHING] * 4, masks, boards, set(DESKS[4:]))
 
     assert step == Step(hardness=3, breadth=1, whole_board=False)
     assert forced == {"A1"}
@@ -127,3 +141,82 @@ def test_the_monday_sample_declares_everyone_once() -> None:
     graded = grade(board, sample)
 
     assert sum(s.breadth for s in graded.steps) == len(DESKS) - 1
+
+
+def overtime() -> Day:
+    """Everyone is well but D5, the fibber, who says nobody is ill: a lie caught
+    as soon as D5 is found. Rows 1 to 4 clear the row below; row 4 finds D5."""
+    clues: dict[Desk, Clue] = {
+        d: Count(group=Row(row=DESKS.index(d) // 4 + 2), n=0) for d in DESKS[:12]
+    }
+    clues |= {
+        "A1": Count(group=Row(row=1), n=0),
+        "A4": Count(group=Between(a="A5", b="D5"), n=0),
+        "B4": Count(group=Column(column="A"), n=0),
+        "C4": Count(group=Row(row=5), n=1),
+        "D5": Total(n=0),
+    }
+    return day({"D5"}, clues, fibber="D5")
+
+
+def test_calling_bs_is_a_step_of_its_own() -> None:
+    graded = grade(SAMPLE_BOARD, overtime())
+
+    # D5 is found sick, then their whole-board lie is caught on its own.
+    assert graded.steps[-2:] == (
+        Step(hardness=1, breadth=1, whole_board=False),
+        Step(hardness=1, breadth=1, whole_board=True),
+    )
+
+
+def test_hints_lead_to_calling_bs_on_the_fibber() -> None:
+    puzzle = overtime()
+    steps: list[tuple[Desk, Call]] = []
+    while len(steps) < len(DESKS):  # everyone but A1, and BS
+        clues, coworker = hint(SAMPLE_BOARD, puzzle, steps)
+        declared = coworker in {d for d, _ in steps}
+        steps.append((coworker, "fibber" if declared else puzzle.state(coworker)))
+
+    assert (clues, coworker) == (["D5"], "D5")
+    assert steps[-1] == ("D5", "fibber")
+    assert puzzle.accepts(SAMPLE_BOARD, steps)
+
+
+def test_a_suspect_alone_forces_no_one_while_the_fibber_could_be_elsewhere() -> None:
+    boards = np.arange(16, dtype=np.uint32)
+    a = (boards & 1).astype(np.bool_)
+    fibber = Suspects(liars=frozenset({0}), unspoken=True, caught=False)
+
+    with pytest.raises(ValueError, match="guessing"):
+        next_step([NOTHING], [a], boards, set(DESKS[4:]), fibber)
+
+
+def test_two_suspects_who_disagree_dont_say_which_is_lying() -> None:
+    boards = np.arange(16, dtype=np.uint32)
+    a = (boards & 1).astype(np.bool_)
+    fibber = Suspects(liars=frozenset({0, 1}), unspoken=False, caught=False)
+
+    with pytest.raises(ValueError, match="guessing"):
+        next_step([NOTHING] * 2, [a, ~a], boards, set(DESKS[4:]), fibber)
+
+
+def test_a_suspect_who_contradicts_the_truth_is_caught() -> None:
+    # A well coworker says A1 or B1 is sick; a sick one says neither is.
+    boards = np.arange(16, dtype=np.uint32)
+    a, b = ((boards >> i & 1).astype(np.bool_) for i in range(2))
+    fibber = Suspects(liars=frozenset({1}), unspoken=True, caught=False)
+
+    step, forced, caught = next_step(
+        [NOTHING] * 2, [a | b, ~a & ~b], boards, set(DESKS[4:]), fibber
+    )
+
+    assert (step, forced, caught) == (Step(2, 1, whole_board=False), set(), 1)
+
+
+def test_once_bs_is_called_only_the_fibbers_clue_is_a_lie() -> None:
+    boards = np.arange(4, dtype=np.uint32)
+
+    known = suspects("D5", {"D5"}, ["A1", "B1", "D5"], boards, {"A1"}, caught=True)
+
+    assert known == Suspects(liars=frozenset({2}))
+    assert known.unspoken is False  # not compared: it can be a mask

@@ -272,7 +272,7 @@ def test_every_clue_tells_something_new_when_it_is_said() -> None:
                 break
             known = _fits(week.board, declared, day.sick, [])
             masks = [c.mask(week.board, known) for c in said]
-            _, forced = next_step(said, masks, known, declared)
+            _, forced, _ = next_step(said, masks, known, declared)
             new = sorted(forced)
             declared |= forced
     # The fixture cast has a joke and a line each, so someone is always idle.

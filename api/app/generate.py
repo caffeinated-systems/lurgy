@@ -226,7 +226,7 @@ def _attempt(  # noqa: PLR0913
         if len(declared) == len(DESKS):
             break
         try:
-            step, forced = next_step(
+            step, forced, _ = next_step(
                 said, [c.mask(board, known) for c in said], known, declared
             )
         except ValueError:
