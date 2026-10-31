@@ -454,6 +454,20 @@ main.notice .btn-help {
 		margin: 0;
 	}
 }
+/* Wider still: the rules on the left, the clue words on the right. */
+@media (min-width: 1200px) {
+	.help {
+		max-width: min(72rem, calc(100vw - 64px));
+	}
+	.help-columns {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 40px;
+	}
+	.help-columns section > :first-child {
+		margin-top: 0;
+	}
+}
 
 .log-title {
 	font:
