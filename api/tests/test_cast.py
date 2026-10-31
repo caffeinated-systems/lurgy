@@ -5,7 +5,16 @@ from pathlib import Path
 
 import pytest
 
-from app.cast import Member, StoryError, fits, load_cast, load_story, main, quiet_week
+from app.cast import (
+    Member,
+    StoryError,
+    fits,
+    load_cast,
+    load_overtime,
+    load_story,
+    main,
+    quiet_week,
+)
 from tests.factories import STORIES
 
 CAST = load_cast(STORIES / "cast.md")
@@ -123,7 +132,8 @@ def test_a_cast_that_cant_make_a_board_fails() -> None:
 
 
 def _stories(tmp_path: Path, **weeks: str) -> Path:
-    (tmp_path / "cast.md").write_text((STORIES / "cast.md").read_text())
+    for name in ("cast.md", "overtime.md"):
+        (tmp_path / name).write_text((STORIES / name).read_text())
     for week, text in weeks.items():
         (tmp_path / f"{week}.md").write_text(text)
     return tmp_path
@@ -165,6 +175,31 @@ def test_check_fails_on_a_broken_story(
 
     assert exit_.value.code == 1
     assert error in capsys.readouterr().err
+
+
+def test_overtime_reads_lines_and_jokes() -> None:
+    pool = load_overtime(STORIES / "overtime.md")
+
+    assert (pool.lines, pool.jokes) == (("An overtime line.",), ("An overtime joke.",))
+
+
+@pytest.mark.parametrize(
+    ("overtime", "error"),
+    [
+        ("## Lines\n- A line.\n## Sayings\n- A saying.\n", ":3: unknown section"),
+        ("## Lines\n- A line.\n", ":1: needs both Lines and Jokes"),
+    ],
+)
+def test_check_fails_on_a_broken_overtime(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], overtime: str, error: str
+) -> None:
+    stories = _stories(tmp_path)
+    (stories / "overtime.md").write_text(overtime)
+
+    with pytest.raises(SystemExit):
+        main(["check", "--stories", str(stories)], today=date(2026, 10, 28))
+
+    assert f"overtime.md{error}" in capsys.readouterr().err
 
 
 def test_check_fails_on_a_cast_too_small_for_a_quiet_week(

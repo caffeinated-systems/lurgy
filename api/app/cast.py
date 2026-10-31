@@ -17,6 +17,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+# What anyone may say at the weekend, beside the cast and the stories.
+OVERTIME = "overtime.md"
 # Every speaker costs the generator a clue.
 MOST_SPEAKERS = 3
 DEPARTMENTS = range(5, 8)  # departments on a board
@@ -202,6 +204,18 @@ def quiet_week(cast: Cast, rng: random.Random, attempts: int = 2_000) -> list[Me
     raise ValueError(msg)
 
 
+def load_overtime(path: Path) -> Member:
+    """`overtime.md`: the lines and jokes anyone may say at the weekend."""
+    pools: dict[str, list[str]] = {"Lines": [], "Jokes": []}
+    for heading, number, body in _sections(_lines(path), "## "):
+        if heading not in pools:
+            raise StoryError(path, number, f"unknown section {heading!r}")
+        pools[heading] += [text for _, text in _bullets(path, body)]
+    if not all(pools.values()):
+        raise StoryError(path, 1, "needs both Lines and Jokes")
+    return Member("Overtime", "", tuple(pools["Lines"]), tuple(pools["Jokes"]))
+
+
 def story_path(stories: Path, monday: date) -> Path:
     year, week, _ = monday.isocalendar()
     return stories / f"{year}-W{week:02d}.md"
@@ -231,8 +245,9 @@ def main(argv: Sequence[str] | None = None, today: date | None = None) -> None:
             quiet_week(cast, random.Random(0))  # noqa: S311 (any pick will do)
         except ValueError as e:
             raise StoryError(cast_path, 1, f"{e} for a quiet week") from None
+        load_overtime(args.stories / OVERTIME)
         for path in sorted(args.stories.glob("*.md")):
-            if path != cast_path:
+            if path.name not in {cast_path.name, OVERTIME}:
                 load_story(_named_for_a_week(path), cast)
     except StoryError as e:
         parser.exit(1, f"{e}\n")
