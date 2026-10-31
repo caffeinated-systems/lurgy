@@ -113,8 +113,12 @@ How hard a puzzle is: Easy, Medium or Hard, set by its hardest step, the most cl
 _Avoid_: level, rating
 
 **Mask**:
-What a declaration rejected with "Not enough evidence" leaves on a coworker: they answer back with a remark and put on a face mask. A wrong declaration and one not yet forced get the same mask and the same kind of remark, so neither reveals which it was. A coworker wears at most one.
+What a sick or well declaration rejected with "Not enough evidence" leaves on a coworker: they answer back with a remark and put on a face mask. A wrong declaration and one not yet forced get the same mask and the same kind of remark, so neither reveals which it was. A coworker wears at most one.
 _Avoid_: mistake, error, strike, wrong guess
+
+**Complaint**:
+What calling BS rejected with "Not enough evidence" leaves on a coworker: they answer back indignantly and make a complaint. Like a mask, a wrong call and one not yet forced look the same. A coworker makes at most one.
+_Avoid_: mask, strike, grievance
 
 **Remark**:
 What a coworker says back when they get a mask. Like flavour, a remark never carries or suggests logic.
@@ -125,9 +129,9 @@ The game's own jab at the office manager, after a hint or a solve. A masked cowo
 _Avoid_: diss, insult, banter
 
 **Verdict**:
-The taunt on solving a puzzle, chosen by how many coworkers wear a mask or carry a hint: none, a few, or many.
+The taunt on solving a puzzle, chosen by how many coworkers wear a mask, make a complaint or carry a hint: none, a few, or many.
 _Avoid_: score, grade, rating
 
 **Result**:
-What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers wear a mask or carry a hint, and on Overtime where the fibber sat.
+What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers wear a mask, make a complaint or carry a hint, and on Overtime where the fibber sat.
 _Avoid_: score, scorecard
