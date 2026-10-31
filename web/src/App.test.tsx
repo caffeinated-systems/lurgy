@@ -796,7 +796,7 @@ test("on a revealed sick coworker, BS takes the place of Sick and Well", async (
 
 	expect(
 		screen.getByRole("button", { name: "Call BS on NameA1" }).textContent,
-	).toBe("Call BS");
+	).toBe("Call BS on NameA1");
 	expect(screen.queryByRole("button", { name: /^Declare NameA1/ })).toBeNull();
 });
 
@@ -810,7 +810,7 @@ test("a rejected BS call makes a complaint, not a mask", async () => {
 	// Still a suspect: the button invites calling BS on them again.
 	expect(
 		screen.getByRole("button", { name: "Call BS again on NameA1" }).textContent,
-	).toBe("Call BS again");
+	).toBe("Call BS again on NameA1");
 	expect(tile("A1").getAttribute("aria-label")).toContain("made a complaint");
 	expect(tile("A1").getAttribute("aria-label")).not.toContain("wearing a mask");
 	expect(tile("A1").querySelector(".flush")).not.toBeNull();

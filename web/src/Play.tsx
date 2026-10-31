@@ -433,11 +433,10 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 									type="button"
 									className="btn-bs"
 									disabled={game.pending}
-									aria-label={`Call BS ${again ? "again " : ""}on ${chosen.name}`}
 									aria-keyshortcuts="B"
 									onClick={() => declare(chosen.desk, "fibber")}
 								>
-									{again ? "Call BS again" : "Call BS"}
+									{`Call BS ${again ? "again " : ""}on ${chosen.name}`}
 								</button>
 							</div>
 						)}
