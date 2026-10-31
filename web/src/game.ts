@@ -292,7 +292,9 @@ export function result(day: Day, progress: Progress, url: string): string {
 	const n = progress.complaints.length;
 	const hinted =
 		progress.fibberHint === 2 ? " 🟠" : progress.fibberHint ? " 🟡" : "";
-	const fibber = `🤥 Fibber caught${hinted} · ${COMPLAINT} ${n} complaint${n === 1 ? "" : "s"}`;
+	const complaints =
+		n === 0 ? "" : ` · ${COMPLAINT} ${n} complaint${n === 1 ? "" : "s"}`;
+	const fibber = `🤥 Fibber caught${hinted}${complaints}`;
 	return [
 		`Office Lurgy${overtime} · ${dayLabel(day.date)}${difficulty} · ⏱ ${time}`,
 		`"${verdict(progress, day.date)}"`,

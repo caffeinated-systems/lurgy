@@ -509,6 +509,8 @@ test("an Overtime result says so, and sums up the fibber without any position", 
 	expect(lines[7]).toBe("🤥 Fibber caught · 💢 2 complaints");
 	const one = result(OVERTIME, { ...p, complaints: ["B1"] }, "x").split("\n");
 	expect(one[7]).toBe("🤥 Fibber caught · 💢 1 complaint");
+	const none = result(OVERTIME, { ...p, complaints: [] }, "x").split("\n");
+	expect(none[7]).toBe("🤥 Fibber caught");
 });
 
 test("a hint toward calling BS stays off the fibber's tile and square, but still counts", () => {
@@ -533,11 +535,9 @@ test("a hint toward calling BS stays off the fibber's tile and square, but still
 	expect(game.progress.fibberHint).toBe(2);
 
 	const p = { ...progress([]), fibberHint: 2 as const };
-	expect(result(OVERTIME, p, "x").split("\n")[7]).toBe(
-		"🤥 Fibber caught 🟠 · 💢 0 complaints",
-	);
+	expect(result(OVERTIME, p, "x").split("\n")[7]).toBe("🤥 Fibber caught 🟠");
 	expect(result(OVERTIME, { ...p, fibberHint: 1 }, "x").split("\n")[7]).toBe(
-		"🤥 Fibber caught 🟡 · 💢 0 complaints",
+		"🤥 Fibber caught 🟡",
 	);
 	expect(square(p, "B1")).toBe("🟩");
 	expect(VERDICTS[1] as readonly string[]).toContain(verdict(p, DAY.date));
