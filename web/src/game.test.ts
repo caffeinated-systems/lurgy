@@ -542,3 +542,14 @@ test("a hint toward calling BS stays off the fibber's tile and square, but still
 	expect(square(p, "B1")).toBe("🟩");
 	expect(VERDICTS[1] as readonly string[]).toContain(verdict(p, DAY.date));
 });
+
+test("calling BS on someone who complained says it sticks this time", () => {
+	let game = reducer(start(OVERTIME), { type: "complained", desk: "A1" });
+
+	game = reducer(game, { type: "caught", desk: "A1", at: 1 });
+
+	expect(game.message).toBe(
+		"BS called again, and this time it sticks: NameA1 was the fibber.",
+	);
+	expect(game.progress.complaints).toEqual(["A1"]); // the complaint stays
+});

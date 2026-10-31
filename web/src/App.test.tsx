@@ -807,6 +807,10 @@ test("a rejected BS call makes a complaint, not a mask", async () => {
 	fireEvent.click(screen.getByRole("button", { name: "Call BS on NameA1" }));
 
 	await screen.findByText(/^Not enough evidence\. NameA1 says/);
+	// Still a suspect: the button invites calling BS on them again.
+	expect(
+		screen.getByRole("button", { name: "Call BS again on NameA1" }).textContent,
+	).toBe("BS again");
 	expect(tile("A1").getAttribute("aria-label")).toContain("made a complaint");
 	expect(tile("A1").getAttribute("aria-label")).not.toContain("wearing a mask");
 	expect(tile("A1").querySelector(".flush")).not.toBeNull();

@@ -188,18 +188,19 @@ export const REMARKS = [
 	"I'll remember this at my leaving do.",
 ];
 
-// What a coworker says back when BS is wrongly called on them: indignant, and like
-// a remark, never a hint of whether the call was wrong or only early.
+// What a coworker says back when BS is called on them too soon or wrongly: put out,
+// but never a denial, since an early call on the real fibber gets one too. Like a
+// remark, it never hints whether the call was wrong or only early.
 // Drafted with AI, edited by a human.
 export const COMPLAINTS = [
-	"I'll have you know I'm a very honest person.",
+	"Prove it.",
+	"You'll need more than that.",
+	"Bold accusation. Got anything to back it up?",
 	"I'm putting in a formal complaint.",
-	"How dare you. I've never told a lie in my life.",
-	"I'd like to see some evidence for that.",
-	"That's slander, that is.",
-	"I'm telling HR you said that.",
-	"Me? Lie? On double time?",
-	"Unbelievable. And on a weekend.",
+	"Come back when you've done your homework.",
+	"That's a serious thing to say without evidence.",
+	"I'll be speaking to HR about this.",
+	"On a weekend, and with no evidence. Charming.",
 ];
 
 // The taunt on solving, by how many coworkers wear a mask or carry a hint:
@@ -359,7 +360,10 @@ export function reducer(game: Game, action: Action): Game {
 		case "caught": {
 			const { desk, at } = action;
 			const caught = { desk, after: progress.reveals.length - 1 };
-			const line = `BS called! ${nameOf(game, desk)} was the fibber: their clue was a lie.`;
+			const name = nameOf(game, desk);
+			const line = progress.complaints.includes(desk)
+				? `BS called again, and this time it sticks: ${name} was the fibber.`
+				: `BS called! ${name} was the fibber: their clue was a lie.`;
 			return finish(game, { ...progress, caught }, desk, line, at);
 		}
 		case "complained": {

@@ -193,6 +193,8 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 		coworkers.slice(r * COLUMNS, (r + 1) * COLUMNS),
 	);
 	const nameOf = (desk: Desk) => coworkers.find((c) => c.desk === desk)?.name;
+	// They complained at an early call: calling BS on them again is still allowed.
+	const again = !!chosen && progress.complaints.includes(chosen.desk);
 	// Only a clue the open hint points to is spelled out, with its desks outlined.
 	const explained = game.hint?.explanations.find(
 		(e) => e.desk === game.reading,
@@ -431,11 +433,11 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 									type="button"
 									className="btn-bs"
 									disabled={game.pending}
-									aria-label={`Call BS on ${chosen.name}`}
+									aria-label={`Call BS ${again ? "again " : ""}on ${chosen.name}`}
 									aria-keyshortcuts="B"
 									onClick={() => declare(chosen.desk, "fibber")}
 								>
-									BS
+									{again ? "BS again" : "BS"}
 								</button>
 							</div>
 						)}

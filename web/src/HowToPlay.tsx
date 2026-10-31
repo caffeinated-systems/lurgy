@@ -69,7 +69,8 @@ export function HowToPlay() {
 							<li>
 								Once the clues prove which sick coworker is lying, pick them and
 								call BS. Call it too soon, or on the wrong person, and they make
-								a complaint instead.
+								a complaint instead. A complaint isn't proof they're honest: you
+								can call BS on them again once the clues prove it.
 							</li>
 							<li>
 								The puzzle is solved when everyone is declared and you've called
