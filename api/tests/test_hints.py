@@ -141,7 +141,7 @@ def test_hints_alone_walk_a_hard_day_with_the_fewest_clues_each_time() -> None:
 
 
 def test_more_declarations_than_desks_is_invalid() -> None:
-    assert ask(PERFECT + PERFECT[:1])[0] == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert ask(PERFECT + PERFECT[:2])[0] == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 def test_a_hint_spells_out_each_of_its_clues() -> None:
