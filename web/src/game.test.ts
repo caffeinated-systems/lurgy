@@ -2,6 +2,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 import { Busy } from "./api.ts";
 import { DAY, DESKS } from "./fixture.ts";
 import {
+	COMPLAINTS,
 	type Desk,
 	declared,
 	elapsed,
@@ -14,8 +15,10 @@ import {
 	reducer,
 	result,
 	save,
+	solved,
 	square,
 	start,
+	suspect,
 	VERDICTS,
 	verdict,
 } from "./game.ts";
@@ -33,6 +36,7 @@ test("a new day starts with the starting coworker and selects the first hidden d
 		masks: [],
 		hints: {},
 		dimmed: [],
+		complaints: [],
 	});
 	expect(game.selected).toBe("B1");
 });
@@ -58,6 +62,7 @@ test("a saved day resumes where it left off", () => {
 		masks: ["C1" as const],
 		hints: {},
 		dimmed: ["A1" as const],
+		complaints: [],
 		startedAt: 5,
 	};
 	save(DAY.date, progress);
@@ -74,6 +79,7 @@ test("a solved day resumes with the starting coworker selected", () => {
 		masks: [],
 		hints: {},
 		dimmed: [],
+		complaints: [],
 		startedAt: 0,
 		solvedAt: 9,
 	});
@@ -93,20 +99,31 @@ test("broken or foreign storage starts the day afresh", () => {
 		{ reveals: [DAY.start], masks: [], startedAt: 0, hints: "oops" },
 		{ reveals: [DAY.start], masks: [], startedAt: 0, hints: [] },
 		{ reveals: [DAY.start], masks: [], startedAt: 0, dimmed: "oops" },
+		{ reveals: [DAY.start], masks: [], startedAt: 0, complaints: "oops" },
 	]) {
 		localStorage.setItem("office-bug:2026-10-19", JSON.stringify(saved));
 		expect(load(DAY)).toBeUndefined();
 	}
 });
 
-test("a day saved before hints or dimming existed loads with none of either", () => {
+test("a day saved before hints, dimming or complaints existed loads with none", () => {
 	const saved = { reveals: [DAY.start], masks: [], startedAt: 0 };
 	for (const missing of [undefined, null]) {
 		localStorage.setItem(
 			"office-bug:2026-10-19",
-			JSON.stringify({ ...saved, hints: missing, dimmed: missing }),
+			JSON.stringify({
+				...saved,
+				hints: missing,
+				dimmed: missing,
+				complaints: missing,
+			}),
 		);
-		expect(load(DAY)).toEqual({ ...saved, hints: {}, dimmed: [] });
+		expect(load(DAY)).toEqual({
+			...saved,
+			hints: {},
+			dimmed: [],
+			complaints: [],
+		});
 	}
 });
 
@@ -347,6 +364,7 @@ const progress = (masks: Desk[], hints: Progress["hints"] = {}): Progress => ({
 	masks,
 	hints,
 	dimmed: [],
+	complaints: [],
 	startedAt: 1_000,
 	solvedAt: 284_000,
 });
@@ -396,4 +414,142 @@ test("a day built before grading leaves the difficulty out", () => {
 	const text = result({ ...DAY, difficulty: null }, progress([]), "https://x");
 
 	expect(text.split("\n")[0]).toBe("Office Lurgy · Mon 19 Oct · ⏱ 04:43");
+});
+
+// The fixture day as Overtime.
+const OVERTIME = { ...DAY, overtime: true };
+const flavour = (desk: Desk) =>
+	({ desk, state: "sick", kind: "flavour", text: "Hm." }) as const;
+const well = (desk: Desk) =>
+	({ desk, state: "well", kind: "clue", text: "Hi." }) as const;
+
+test("calling BS goes in the declarations where it was made", () => {
+	const p: Progress = {
+		...start(OVERTIME).progress,
+		reveals: [DAY.start, reveal("B1"), reveal("C1")],
+		caught: { desk: "B1", after: 1 },
+	};
+
+	expect(declared(p)).toEqual([
+		{ desk: "B1", state: "sick" },
+		{ desk: "B1", state: "fibber" },
+		{ desk: "C1", state: "sick" },
+	]);
+});
+
+test("BS can be called only on a revealed sick coworker with a clue, on Overtime, until caught", () => {
+	const p: Progress = {
+		...start(OVERTIME).progress,
+		reveals: [DAY.start, reveal("B1"), well("C1"), flavour("D1")],
+	};
+
+	expect(suspect(OVERTIME, p, "B1")).toBe(true);
+	expect(suspect(DAY, p, "B1")).toBe(false); // a weekday
+	expect(suspect(OVERTIME, p, "C1")).toBe(false); // well
+	expect(suspect(OVERTIME, p, "D1")).toBe(false); // no clue
+	expect(suspect(OVERTIME, p, "A2")).toBe(false); // not revealed
+	const caught = { ...p, caught: { desk: "B1" as Desk, after: 1 } };
+	expect(suspect(OVERTIME, caught, "B1")).toBe(false);
+});
+
+test("Overtime is solved once everyone is declared and BS is called", () => {
+	const everyone = { ...start(OVERTIME).progress, reveals: DESKS.map(reveal) };
+
+	expect(solved(DAY, everyone)).toBe(true);
+	expect(solved(OVERTIME, everyone)).toBe(false);
+	expect(
+		solved(OVERTIME, { ...everyone, caught: { desk: "B1", after: 3 } }),
+	).toBe(true);
+});
+
+test("calling BS on the fibber says so, closes a hint on them, and can solve the day", () => {
+	let game = reducer(start(OVERTIME), { type: "sent", at: 0 });
+	for (const desk of DESKS.slice(1)) {
+		game = reducer(game, { type: "accepted", reveal: reveal(desk), at: 1 });
+	}
+	expect(game.progress.solvedAt).toBeUndefined();
+	game = {
+		...game,
+		hint: { clues: ["B1"], coworker: "B1", explanations: [], presses: 2 },
+	};
+
+	game = reducer(game, { type: "caught", desk: "B1", at: 83_000 });
+
+	expect(game.progress.caught).toEqual({ desk: "B1", after: 19 });
+	expect(game.hint).toBeUndefined();
+	expect(game.progress.solvedAt).toBe(83_000);
+	expect(game.message).toBe(
+		`BS called! NameB1 was the fibber: their clue was a lie. ${verdict(game.progress, DAY.date)} Office cleared in 01:23.`,
+	);
+});
+
+test("a rejected BS call makes one complaint, which counts toward the verdict", () => {
+	let game = reducer(start(OVERTIME), { type: "complained", desk: "B1" });
+	expect(game.message).toBe(
+		`Not enough evidence. NameB1 says: “${pick(COMPLAINTS, DAY.date, "B1", 0)}”`,
+	);
+	game = reducer(game, { type: "complained", desk: "B1" });
+
+	expect(game.progress.complaints).toEqual(["B1"]);
+	expect(game.progress.masks).toEqual([]);
+	// One coworker marked: the middle tier.
+	expect(VERDICTS[1] as readonly string[]).toContain(
+		verdict(game.progress, DAY.date),
+	);
+});
+
+test("an Overtime result says so, and sums up the fibber without any position", () => {
+	const p = { ...progress([]), complaints: ["B1", "C2"] as Desk[] };
+	const lines = result(OVERTIME, p, "https://lurgy.app").split("\n");
+
+	expect(lines[0]).toBe(
+		"Office Lurgy · Overtime · Mon 19 Oct (Medium) · ⏱ 04:43",
+	);
+	expect(lines.slice(2, 7)).toEqual(Array(5).fill("🟩🟩🟩🟩"));
+	expect(lines[7]).toBe("🤥 Fibber caught · 💢 2 complaints");
+	const one = result(OVERTIME, { ...p, complaints: ["B1"] }, "x").split("\n");
+	expect(one[7]).toBe("🤥 Fibber caught · 💢 1 complaint");
+	const none = result(OVERTIME, { ...p, complaints: [] }, "x").split("\n");
+	expect(none[7]).toBe("🤥 Fibber caught");
+});
+
+test("a hint toward calling BS stays off the fibber's tile and square, but still counts", () => {
+	let game = reducer(start(OVERTIME), {
+		type: "accepted",
+		reveal: reveal("B1"),
+		at: 1,
+	});
+	const toBS = {
+		clues: ["A1" as Desk],
+		coworker: "B1" as Desk,
+		explanations: [],
+	};
+
+	game = reducer(game, { type: "hinted", hint: toBS });
+	expect(game.progress.hints).toEqual({});
+	expect(game.progress.fibberHint).toBe(1);
+	game = reducer(game, { type: "hinted-again" });
+	expect(game.message).toMatch(/Those clues catch NameB1 lying\.$/);
+	expect(game.progress.fibberHint).toBe(2);
+	game = reducer(game, { type: "hinted", hint: toBS }); // keeps the stronger mark
+	expect(game.progress.fibberHint).toBe(2);
+
+	const p = { ...progress([]), fibberHint: 2 as const };
+	expect(result(OVERTIME, p, "x").split("\n")[7]).toBe("🤥 Fibber caught 🟠");
+	expect(result(OVERTIME, { ...p, fibberHint: 1 }, "x").split("\n")[7]).toBe(
+		"🤥 Fibber caught 🟡",
+	);
+	expect(square(p, "B1")).toBe("🟩");
+	expect(VERDICTS[1] as readonly string[]).toContain(verdict(p, DAY.date));
+});
+
+test("calling BS on someone who complained says it sticks this time", () => {
+	let game = reducer(start(OVERTIME), { type: "complained", desk: "A1" });
+
+	game = reducer(game, { type: "caught", desk: "A1", at: 1 });
+
+	expect(game.message).toBe(
+		"BS called again, and this time it sticks: NameA1 was the fibber.",
+	);
+	expect(game.progress.complaints).toEqual(["A1"]); // the complaint stays
 });

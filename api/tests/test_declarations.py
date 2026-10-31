@@ -141,7 +141,8 @@ def test_more_declarations_than_desks_are_invalid() -> None:
     a3 = {"desk": "A3", "state": "sick"}
     response = client.post(
         "/api/declarations",
-        json={"date": "2026-10-19", "declared": [a3] * 19, "declaration": a3},
+        # Everyone but the starting coworker and BS is 19, plus this one.
+        json={"date": "2026-10-19", "declared": [a3] * 20, "declaration": a3},
     )
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

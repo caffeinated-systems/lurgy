@@ -7,7 +7,7 @@ import subprocess
 from collections import Counter
 from datetime import date, datetime, time, timedelta
 from functools import cache
-from itertools import chain, combinations
+from itertools import chain, combinations, count
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -31,7 +31,16 @@ from app.board import (
     Row,
     cell,
 )
-from app.cast import iso_monday, load_cast, load_story, quiet_week, story_path
+from app.cast import (
+    DAYS,
+    OVERTIME,
+    iso_monday,
+    load_cast,
+    load_overtime,
+    load_story,
+    quiet_week,
+    story_path,
+)
 from app.clues import (
     BOARDS,
     EVERYONE,
@@ -55,11 +64,21 @@ from app.clues import (
     Total,
     Way,
     family_groups,
+    fits,
     next_desk,
     settled,
 )
-from app.grade import Grade, Step, grade, next_step
-from app.week import EARLIEST, Day, Difficulty, Generator, Reveal, Week, utc_now
+from app.grade import Grade, Step, grade, next_step, suspects
+from app.week import (
+    EARLIEST,
+    Call,
+    Day,
+    Difficulty,
+    Generator,
+    Reveal,
+    Week,
+    utc_now,
+)
 from app.wording import explanation, wording
 
 if TYPE_CHECKING:
@@ -127,13 +146,15 @@ def generate_day(  # noqa: PLR0913
     jokes: Mapping[Desk, Sequence[str]] | None = None,
     lines: Mapping[Desk, Sequence[str]] | None = None,
     told: set[str] | None = None,
+    overtime: bool = False,
 ) -> Day:
     """A day at this difficulty, replayed from scratch before it's returned.
 
     Coworkers with flavour say it in place of a clue; never the starting one, who
     has to give the office manager something to go on. Jokes and lines are each
     coworker's pools: a joke after one or two clues, and a joke or line from
-    anyone with nothing new to tell. Told is what the week has said so far.
+    anyone with nothing new to tell. Told is what the week has said so far. On
+    Overtime, one sick coworker is the fibber and says a lie.
     """
     flavour, jokes, lines = flavour or {}, jokes or {}, lines or {}
     told = set() if told is None else told
@@ -141,7 +162,13 @@ def generate_day(  # noqa: PLR0913
     for _ in range(attempts):
         if (
             built := _attempt(
-                board, day, difficulty, rng, flavour=flavour, chatty=chatty
+                board,
+                day,
+                difficulty,
+                rng,
+                flavour=flavour,
+                chatty=chatty,
+                overtime=overtime,
             )
         ) is None:
             continue
@@ -175,11 +202,13 @@ def _attempt(  # noqa: PLR0913
     *,
     flavour: Mapping[Desk, str],
     chatty: Container[Desk],
-) -> tuple[Day, list[tuple[Desk, State]], Grade, set[Desk]] | None:
-    """One try: reveal coworkers in order until everyone is declared, or stuck.
+    overtime: bool,
+) -> tuple[Day, list[tuple[Desk, Call]], Grade, set[Desk]] | None:
+    """One try: reveal coworkers in order until everyone is declared and BS is
+    called on any fibber, or stuck.
 
     Chatty coworkers with nothing new to tell are idle: they say no clue, and get
-    their flavour once the day is kept.
+    their flavour once the day is kept. The fibber is never idle: they lie.
     """
     sick = frozenset(rng.sample(DESKS, rng.randint(FEWEST_SICK, MOST_SICK)))
     solution = sum(1 << DESKS.index(d) for d in sick)
@@ -190,11 +219,16 @@ def _attempt(  # noqa: PLR0913
             for f, clues in catalogue.items()
         }
 
+    # Sorted: a frozenset's order follows PYTHONHASHSEED, and a seed must replay.
+    fibber = (
+        rng.choice(sorted(sick - set(flavour), key=DESKS.index)) if overtime else None
+    )
+    caught = fibber is None
     start = rng.choice([d for d in DESKS if d not in flavour])
     declared: dict[Desk, bool] = {start: start in sick}
     known = _keep(BOARDS, start, solution)  # fits the declarations alone
     alive = known  # fits the clues too
-    order: list[tuple[Desk, State]] = []
+    order: list[tuple[Desk, Call]] = []
     clues: dict[Desk, Clue] = {}
     steps: list[Step] = []
     new = [start]
@@ -204,6 +238,19 @@ def _attempt(  # noqa: PLR0913
     # fewest clues that force anyone decide who's declared next.
     while True:
         for desk in (d for d in new if d not in flavour):
+            if desk == fibber:
+                clues[desk] = lie = _lie(board, solution, known, rng)
+                said.append(lie)
+                alive = _alive(
+                    board,
+                    clues,
+                    fibber=fibber,
+                    sick=sick,
+                    known=known,
+                    declared=declared,
+                    caught=caught,
+                )
+                continue
             drawn = _candidates(catalogue, rng)
             clue = _choose(
                 board,
@@ -222,12 +269,28 @@ def _attempt(  # noqa: PLR0913
             clues[desk] = clue = clue or rng.choice(drawn)
             said.append(clue)
             catalogue[_form(clue)].remove(clue)  # no one says it twice
-            alive = alive[clue.mask(board, alive)]
-        if len(declared) == len(DESKS):
+            alive = (
+                alive[clue.mask(board, alive)]
+                if fibber is None
+                else _alive(
+                    board,
+                    clues,
+                    fibber=fibber,
+                    sick=sick,
+                    known=known,
+                    declared=declared,
+                    caught=caught,
+                )
+            )
+        if len(declared) == len(DESKS) and caught:
             break
         try:
-            step, forced = next_step(
-                said, [c.mask(board, known) for c in said], known, declared
+            step, forced, liar = next_step(
+                said,
+                [c.mask(board, known) for c in said],
+                known,
+                declared,
+                suspects(fibber, sick, [*clues], known, declared, caught=caught),
             )
         except ValueError:
             return None  # stuck: start again
@@ -237,6 +300,9 @@ def _attempt(  # noqa: PLR0913
             declared[d] = d in sick
             order.append((d, "sick" if d in sick else "well"))
             known = _keep(known, d, solution)
+        if liar is not None:
+            order.append(([*clues][liar], "fibber"))
+            caught = True
     reveals = tuple(
         Reveal(text=flavour[d])
         if d in flavour
@@ -250,7 +316,7 @@ def _attempt(  # noqa: PLR0913
         for d in DESKS
     )
     return (
-        Day(date=day, start=start, sick=sick, reveals=reveals),
+        Day(date=day, start=start, sick=sick, reveals=reveals, fibber=fibber),
         order,
         Grade(tuple(steps)),
         idle,
@@ -299,6 +365,47 @@ def _choose(  # noqa: PLR0913
         return rng.choice(held or candidates)
     together = [c for c in held if forces(c, alive)]
     return rng.choice(together or alone or candidates)
+
+
+def _alive(  # noqa: PLR0913
+    board: Board,
+    clues: Mapping[Desk, Clue],
+    *,
+    fibber: Desk,
+    sick: Container[Desk],
+    known: Boards,
+    declared: Container[Desk],
+    caught: bool,
+) -> Boards:
+    """The boards that fit the declarations and everything said, allowing for
+    whoever could be the fibber."""
+    fibbing = suspects(fibber, sick, [*clues], known, declared, caught=caught)
+    return known[
+        fits(
+            [c.mask(board, known) for c in clues.values()],
+            [i in fibbing.liars for i in range(len(clues))],
+            elsewhere=fibbing.unspoken,
+        )
+    ]
+
+
+def _lie(board: Board, solution: int, known: Boards, rng: random.Random) -> Clue:
+    """A false clue of any kind, drawn the way any clue is: true of another office
+    that fits the declarations so far, so it isn't caught on sight.
+    """
+    others = known[known != solution]
+    # Found last, everyone else declared: no other office fits, so the lie comes
+    # from one that doesn't and is caught on sight.
+    other = int(rng.choice(others)) if others.size else solution ^ 1
+    catalogue = _true_clues(board, other, rng)
+    one = np.array([solution], dtype=np.uint32)
+    # Some count always tells the two offices apart, so the search ends.
+    return next(
+        c
+        for _ in count()
+        for c in _candidates(catalogue, rng)
+        if not c.mask(board, one)[0]
+    )
 
 
 def _keep(boards: Boards, desk: Desk, solution: int) -> Boards:
@@ -584,8 +691,10 @@ def _speak(  # noqa: PLR0913
     return tuple(spoken)
 
 
-# Monday to Friday.
-SCHEDULE: tuple[Difficulty, ...] = ("Easy", "Medium", "Medium", "Hard", "Hard")
+# Monday to Friday, then Overtime on Saturday and Sunday.
+SCHEDULE: tuple[Difficulty, ...] = (
+    "Easy", "Medium", "Medium", "Hard", "Hard", "Medium", "Hard",
+)  # fmt: skip
 
 
 def seat(who: Sequence[Member]) -> Board:
@@ -598,12 +707,19 @@ def seat(who: Sequence[Member]) -> Board:
     )
 
 
-def generate_week(
-    cast: Cast, monday: date, seed: int, commit: str, story: Story | None = None
+def generate_week(  # noqa: PLR0913
+    cast: Cast,
+    monday: date,
+    seed: int,
+    commit: str,
+    story: Story | None = None,
+    *,
+    overtime: Member,
 ) -> Week:
-    """A Week's five days, each from its own generator seeded by the Week's seed.
+    """A Week's seven days, each from its own generator seeded by the Week's seed.
 
-    A story says who's in and who speaks; a quiet week picks both.
+    A story says who's in and who speaks; a quiet week picks both. At the weekend
+    everyone says the overtime lines and jokes, and the story has ended.
     """
     # ponytail: random, not secrets: the seed is the secret, and it must replay.
     rngs = [random.Random(f"{seed}:{i}") for i in range(len(SCHEDULE))]  # noqa: S311
@@ -614,7 +730,10 @@ def generate_week(
     told: set[str] = set()  # nobody repeats a joke or line until they run out
     for i, difficulty in enumerate(SCHEDULE):
         rng = rngs[i]
-        if story:
+        weekend = i >= len(DAYS)
+        if weekend:
+            said = {}
+        elif story:
             said = story.days[i]
         else:
             chatty = [m for m in who if m.lines]
@@ -630,9 +749,10 @@ def generate_week(
                 difficulty,
                 rng,
                 flavour={desk[name]: line for name, line in said.items()},
-                jokes={desk[m.name]: m.jokes for m in who},
-                lines={desk[m.name]: m.lines for m in who},
+                jokes={desk[m.name]: (overtime if weekend else m).jokes for m in who},
+                lines={desk[m.name]: (overtime if weekend else m).lines for m in who},
                 told=told,
+                overtime=weekend,
             )
         )
     return Week(
@@ -671,7 +791,14 @@ def main(argv: Sequence[str] | None = None) -> None:
     commit = _git("rev-parse", "HEAD") + (
         "-dirty" if _git("status", "--porcelain") else ""
     )
-    week = generate_week(cast, args.week, secrets.randbits(128), commit, story)
+    week = generate_week(
+        cast,
+        args.week,
+        secrets.randbits(128),
+        commit,
+        story,
+        overtime=load_overtime(args.stories / OVERTIME),
+    )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(week.model_dump_json(indent=2) + "\n")
     tiers = ", ".join(str(d.difficulty) for d in week.days)

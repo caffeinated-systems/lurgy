@@ -2,13 +2,15 @@ import random
 import secrets
 from dataclasses import replace
 from datetime import UTC, date, datetime
+from functools import cache
 from typing import TYPE_CHECKING, get_args
 
+import numpy as np
 import pytest
 
 from app import generate
 from app.board import DESKS, Board, Desk, Row
-from app.cast import fits, load_cast, load_story
+from app.cast import DAYS, fits, load_cast, load_overtime, load_story
 from app.clues import (
     BOARDS,
     WIDE,
@@ -33,6 +35,7 @@ from app.generate import (
     _directions,
     _form,
     _how_many,
+    _lie,
     _overlaps,
     _speak,
     _true_clues,
@@ -40,8 +43,8 @@ from app.generate import (
     generate_week,
     main,
 )
-from app.grade import grade, next_step
-from app.week import Reveal, Week, load_days
+from app.grade import grade, hint, next_step
+from app.week import Call, Reveal, Week, load_days
 from tests.factories import MONDAY, SAMPLE_BOARD, STORIES, board_index, desks
 
 if TYPE_CHECKING:
@@ -52,6 +55,18 @@ if TYPE_CHECKING:
 
 CAST = load_cast(STORIES / "cast.md")
 STORY = load_story(STORIES / "2026-W45.md", CAST)
+OVERTIME = load_overtime(STORIES / "overtime.md")
+
+
+@pytest.fixture
+def weekdays(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Monday to Friday only: Overtime takes most of a Week's build time."""
+    monkeypatch.setattr(generate, "SCHEDULE", SCHEDULE[: len(DAYS)])
+
+
+@cache
+def story_week() -> Week:
+    return generate_week(CAST, date(2026, 11, 2), 1, "0" * 40, STORY, overtime=OVERTIME)
 
 
 @pytest.mark.parametrize("difficulty", ["Easy", "Medium", "Hard"])
@@ -97,17 +112,18 @@ def test_the_cli_writes_a_week_that_loads(
     main(["2026-W45", "-o", str(out), "--stories", str(STORIES)])
 
     days = load_days(tmp_path)
-    assert sorted(days) == [date(2026, 11, d) for d in range(2, 7)]
+    assert sorted(days) == [date(2026, 11, d) for d in range(2, 9)]
     assert [day.difficulty for _, day in days.values()] == list(SCHEDULE)
     week = Week.model_validate_json(out.read_bytes())
     assert week.generator is not None
     assert week.generator.seed == 2026  # noqa: PLR2004
     # Only where it went and how hard: no clue, solution or seed.
     assert capsys.readouterr().out == (
-        f"wrote {out} (Easy, Medium, Medium, Hard, Hard)\n"
+        f"wrote {out} (Easy, Medium, Medium, Hard, Hard, Medium, Hard)\n"
     )
 
 
+@pytest.mark.usefixtures("weekdays")
 def test_the_cli_leaves_a_built_week_alone(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -120,6 +136,7 @@ def test_the_cli_leaves_a_built_week_alone(
     assert capsys.readouterr().out == "2026-W45 is already built\n"
 
 
+@pytest.mark.usefixtures("weekdays")
 def test_the_cli_rebuilds_a_week_until_it_starts_anywhere(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -147,6 +164,7 @@ def test_the_cli_rebuilds_a_week_until_it_starts_anywhere(
     assert out.read_text() == "built\n"
 
 
+@pytest.mark.usefixtures("weekdays")
 def test_the_cli_builds_a_quiet_week_without_a_story(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -167,16 +185,19 @@ def test_the_cli_builds_a_quiet_week_without_a_story(
 def test_the_same_seed_builds_the_same_week() -> None:
     commit = "0" * 40
 
-    first = generate_week(CAST, date(2026, 11, 2), 1, commit, STORY)
+    first = story_week()
 
-    assert generate_week(CAST, date(2026, 11, 2), 1, commit, STORY) == first
+    assert (
+        generate_week(CAST, date(2026, 11, 2), 1, commit, STORY, overtime=OVERTIME)
+        == first
+    )
     _seats_the_story_and_gives_speakers_their_lines(first)
 
 
 def _seats_the_story_and_gives_speakers_their_lines(week: Week) -> None:
     names = [c.name for c in week.board.coworkers]
     assert names == sorted(m.name for m in STORY.who)
-    for day, said in zip(week.days, STORY.days, strict=True):
+    for day, said in zip(week.days[: len(DAYS)], STORY.days, strict=True):
         flavour = {
             names[DESKS.index(d)]: day.reveal(d).text
             for d in DESKS
@@ -258,9 +279,9 @@ def test_a_clue_that_tells_nothing_new_is_swapped_for_one_that_does() -> None:
 
 
 def test_every_clue_tells_something_new_when_it_is_said() -> None:
-    week = generate_week(CAST, date(2026, 11, 2), 1, "0" * 40, STORY)
+    week = story_week()
 
-    for day in week.days:
+    for day in week.days[: len(DAYS)]:  # Overtime has its own tests
         declared, said, new = {day.start}, list[Clue](), [day.start]
         while True:
             for desk in new:
@@ -272,7 +293,7 @@ def test_every_clue_tells_something_new_when_it_is_said() -> None:
                 break
             known = _fits(week.board, declared, day.sick, [])
             masks = [c.mask(week.board, known) for c in said]
-            _, forced = next_step(said, masks, known, declared)
+            _, forced, _ = next_step(said, masks, known, declared)
             new = sorted(forced)
             declared |= forced
     # The fixture cast has a joke and a line each, so someone is always idle.
@@ -292,6 +313,7 @@ def _fits(
     return boards
 
 
+@pytest.mark.usefixtures("weekdays")
 def test_nobody_repeats_themselves_in_a_week() -> None:
     # Someone speaks once a day, so five things each means no repeat is ever needed.
     cast = {
@@ -303,7 +325,7 @@ def test_nobody_repeats_themselves_in_a_week() -> None:
         for name, m in CAST.items()
     }
 
-    week = generate_week(cast, date(2026, 11, 9), 1, "0" * 40)
+    week = generate_week(cast, date(2026, 11, 9), 1, "0" * 40, overtime=OVERTIME)
 
     names = [c.name for c in week.board.coworkers]
     said: dict[str, list[str]] = {name: [] for name in names}
@@ -368,3 +390,46 @@ def test_connected_and_directional_clues_keep_to_their_rules() -> None:
             if (nxt := next_desk(d, clue.direction))
         ]
         assert len(there) >= 2, clue  # noqa: PLR2004 (one desk there would name them)
+
+
+def test_the_weekend_is_overtime_with_a_fibber_who_lies() -> None:
+    week = story_week()
+    names = [c.name for c in week.board.coworkers]
+
+    saturday, sunday = week.days[len(DAYS) :]
+    assert (saturday.date, sunday.date) == (date(2026, 11, 7), date(2026, 11, 8))
+    assert (saturday.difficulty, sunday.difficulty) == ("Medium", "Hard")
+    for day in (saturday, sunday):
+        assert day.fibber in day.sick
+        solution = board_index(set(day.sick))
+        for desk in DESKS:
+            if clue := day.reveal(desk).clue:
+                # Everyone tells the truth but the fibber.
+                assert clue.mask(week.board)[solution] == (desk != day.fibber), desk
+        # The story has ended: everyone says overtime lines and jokes.
+        said = [r.text for r in day.reveals if r.clue is None]
+        said += [r.joke for r in day.reveals if r.joke]
+        assert set(said) <= {*OVERTIME.lines, *OVERTIME.jokes}
+        assert not any(t.startswith(tuple(names)) for t in said)
+
+
+def test_hints_walk_an_overtime_day_to_calling_bs() -> None:
+    week = story_week()
+    day = week.days[-1]
+    steps: list[tuple[Desk, Call]] = []
+    while len(steps) < len(DESKS):  # everyone but the starting coworker, and BS
+        _, coworker = hint(week.board, day, steps)
+        declared = coworker in {d for d, _ in steps} | {day.start}
+        steps.append((coworker, "fibber" if declared else day.state(coworker)))
+
+    assert (day.fibber, "fibber") in steps
+    assert day.accepts(week.board, steps)
+
+
+def test_a_fibber_found_last_still_lies() -> None:
+    solution = board_index({"A1", "B3", "C3"})
+    known = np.array([solution], dtype=np.uint32)  # everyone else declared
+
+    lie = _lie(SAMPLE_BOARD, solution, known, random.Random(1))
+
+    assert not lie.mask(SAMPLE_BOARD, known)[0]

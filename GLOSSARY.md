@@ -13,8 +13,12 @@ Everyone who works at the office, whether or not they are in that week. Each mem
 _Avoid_: characters, staff
 
 **Week**:
-The five puzzles from Monday to Friday that share the same coworkers at the same desks, and at most one story.
+The seven puzzles from Monday to Sunday that share the same coworkers at the same desks, and at most one story, which ends on Friday. Saturday and Sunday are Overtime.
 _Avoid_: episode, season
+
+**Overtime**:
+The weekend puzzles, Saturday and Sunday, where one sick coworker is the fibber.
+_Avoid_: weekend mode, bonus round
 
 **Story**:
 The tale a week's flavour tells, from Monday's setup to Friday's finale. The story never says or suggests whether a coworker on the board is sick or well.
@@ -49,8 +53,12 @@ The coworkers at the desks touching a coworker's desk, diagonals included: up to
 _Avoid_: adjacent, nearby
 
 **Clue**:
-A true statement a revealed coworker makes about who is sick or well: one coworker, or how many in one or more groups. Every clue is true, whoever says it, and tells the office manager something the clues and declarations before it haven't already. A clue names coworkers in the first person when they are the speaker ("my neighbours", "I").
+A statement a revealed coworker makes about who is sick or well: one coworker, or how many in one or more groups. Every clue is true, whoever says it, except the fibber's on Overtime, and tells the office manager something the clues and declarations before it haven't already. A clue names coworkers in the first person when they are the speaker ("my neighbours", "I").
 _Avoid_: hint, statement, evidence
+
+**Fibber**:
+On Overtime, the one sick coworker whose clue is false. The office manager knows there is exactly one, and that they are sick, but not who.
+_Avoid_: liar, cheat
 
 **Flavour**:
 What a revealed coworker says that is not a clue: a joke, a general line or a line of the week's story in place of a clue, or a short joke after one. A coworker with nothing new to tell says a joke or general line in place of a clue. Flavour never carries or suggests logic.
@@ -85,11 +93,15 @@ A coworker and at least one other: "Kev is one of the sick people in row 2" mean
 _Avoid_: among
 
 **Declare**:
-The office manager's move: naming a coworker as sick or well. A declaration is accepted only when it is both correct and forced.
+The office manager's move: naming a coworker as sick or well, or on Overtime calling BS on one. A declaration is accepted only when it is both correct and forced.
 _Avoid_: guess, mark, flag, accuse
 
+**Call BS**:
+On Overtime, declaring a revealed sick coworker the fibber. Forced once their clue is false on every board that fits everything else known. An Overtime puzzle is solved when every coworker is declared and BS is called on the fibber.
+_Avoid_: accuse, expose, flag
+
 **Forced**:
-A coworker whose state is the same in every board that fits everything known so far: every revealed clue and every coworker already declared.
+A coworker whose state is the same in every board that fits everything known so far: every revealed clue and every coworker already declared. On Overtime a board fits when every revealed clue is true except at most one sick coworker's, the fibber's.
 _Avoid_: provable, certain, deducible, obvious
 
 **Hint**:
@@ -101,8 +113,12 @@ How hard a puzzle is: Easy, Medium or Hard, set by its hardest step, the most cl
 _Avoid_: level, rating
 
 **Mask**:
-What a declaration rejected with "Not enough evidence" leaves on a coworker: they answer back with a remark and put on a face mask. A wrong declaration and one not yet forced get the same mask and the same kind of remark, so neither reveals which it was. A coworker wears at most one.
+What a sick or well declaration rejected with "Not enough evidence" leaves on a coworker: they answer back with a remark and put on a face mask. A wrong declaration and one not yet forced get the same mask and the same kind of remark, so neither reveals which it was. A coworker wears at most one.
 _Avoid_: mistake, error, strike, wrong guess
+
+**Complaint**:
+What calling BS rejected with "Not enough evidence" leaves on a coworker: they answer back indignantly and make a complaint. Like a mask, a wrong call and one not yet forced look the same. A coworker makes at most one.
+_Avoid_: mask, strike, grievance
 
 **Remark**:
 What a coworker says back when they get a mask. Like flavour, a remark never carries or suggests logic.
@@ -113,9 +129,9 @@ The game's own jab at the office manager, after a hint or a solve. A masked cowo
 _Avoid_: diss, insult, banter
 
 **Verdict**:
-The taunt on solving a puzzle, chosen by how many coworkers wear a mask or carry a hint: none, a few, or many.
+The taunt on solving a puzzle, chosen by how many coworkers wear a mask, make a complaint or carry a hint: none, a few, or many.
 _Avoid_: score, grade, rating
 
 **Result**:
-What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers wear a mask or carry a hint.
+What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers wear a mask or carry a hint. On Overtime a line sums up the fibber and complaints instead, since a square on either would give away who is sick.
 _Avoid_: score, scorecard

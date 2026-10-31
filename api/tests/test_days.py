@@ -37,7 +37,8 @@ def test_a_day_never_shows_the_solution_or_other_clues() -> None:
     response = client.get("/api/days/2026-10-19")
 
     body = response.json()
-    assert body.keys() == {"date", "coworkers", "start", "difficulty"}
+    assert body.keys() == {"date", "coworkers", "start", "difficulty", "overtime"}
+    assert body["overtime"] is False
     assert all(c.keys() == {"desk", "name", "department"} for c in body["coworkers"])
     _, day = load_days(FIXTURES)[MONDAY]
     hidden = [r.text for r in day.reveals if r is not day.reveal("B3")]

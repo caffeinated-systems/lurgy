@@ -2,10 +2,10 @@ from datetime import UTC, date, datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Annotated, Literal
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, model_validator
 
 from app.board import DESKS, Board, Desk
-from app.clues import BOARDS, Clue, State
+from app.clues import BOARDS, EVERYONE, Clue, State, fits
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -23,6 +23,8 @@ def utc_now() -> datetime:
 
 
 type Difficulty = Literal["Easy", "Medium", "Hard"]
+# A declaration: a coworker's state, or calling BS on them as the fibber.
+type Call = State | Literal["fibber"]
 
 
 class _Model(BaseModel):
@@ -54,6 +56,20 @@ class Day(_Model):
     reveals: Annotated[
         tuple[Reveal, ...], Field(min_length=len(DESKS), max_length=len(DESKS))
     ]
+    # Overtime only: the sick coworker whose clue is false.
+    fibber: Desk | None = None
+
+    @model_validator(mode="after")
+    def _fibber_lies(self) -> Day:
+        fibber = self.fibber
+        if fibber and (fibber not in self.sick or not self.reveal(fibber).clue):
+            msg = "the fibber must be sick and give a clue"
+            raise ValueError(msg)
+        return self
+
+    @property
+    def overtime(self) -> bool:
+        return self.fibber is not None
 
     def reveal(self, desk: Desk) -> Reveal:
         return self.reveals[DESKS.index(desk)]
@@ -61,29 +77,51 @@ class Day(_Model):
     def state(self, desk: Desk) -> State:
         return "sick" if desk in self.sick else "well"
 
-    def accepts(self, board: Board, steps: Iterable[tuple[Desk, State]]) -> bool:
+    def accepts(self, board: Board, steps: Iterable[tuple[Desk, Call]]) -> bool:
         """Whether every step, in order, was correct and forced when it was made.
 
         The starting coworker is already known, so a step can't name them.
         """
-        # ponytail: masks span all 2^20 boards, ~140 ms to replay a whole day; index
-        # the surviving boards instead if #42's limits or hints need it faster.
-        alive = np.ones(BOARDS.shape, dtype=np.bool_)
+        boards = BOARDS  # every board that fits the declarations so far
         known: set[Desk] = set()
-        for i, (desk, state) in enumerate(
+        said: dict[Desk, Clue] = {}
+        named = False
+        for i, (desk, call) in enumerate(
             [(self.start, self.state(self.start)), *steps]
         ):
-            sick = (BOARDS >> DESKS.index(desk) & 1).astype(np.bool_)
+            # ponytail: every clue is rechecked on every step, but only over the
+            # boards the declarations allow, which halve with each one.
+            masks = [clue.mask(board, boards) for clue in said.values()]
+            liars = [self.overtime and d in self.sick for d in said]
+            undeclared = EVERYONE & ~sum(1 << DESKS.index(d) for d in known)
+            fitting = (
+                fits(masks, liars, elsewhere=(boards & np.uint32(undeclared)) != 0)
+                if said
+                else np.ones(boards.shape, dtype=np.bool_)
+            )
+            if call == "fibber":
+                # Forced: their clue is false on every board that fits.
+                truthful = (
+                    np.count_nonzero(masks[[*said].index(desk)][fitting])
+                    if desk in said
+                    else 1
+                )
+                if named or desk != self.fibber or truthful:
+                    return False
+                named = True
+                continue
+            fit = boards[fitting]
             # Every step scans in full before deciding, so a wrong guess and a right
             # but unforced one take the same time. Forced: no board left with the
             # opposite state, which only means something once the state is correct.
-            opposite = np.count_nonzero(alive & (sick != (state == "sick")))
-            if desk in known or state != self.state(desk) or (i and opposite):
+            sick = (fit >> DESKS.index(desk) & 1).astype(np.bool_)
+            opposite = np.count_nonzero(sick != (call == "sick"))
+            if desk in known or call != self.state(desk) or (i and opposite):
                 return False
             known.add(desk)
-            alive &= sick == (state == "sick")
+            boards = boards[(boards >> DESKS.index(desk) & 1) == (call == "sick")]
             if clue := self.reveal(desk).clue:
-                alive &= clue.mask(board)
+                said[desk] = clue
         return True
 
 

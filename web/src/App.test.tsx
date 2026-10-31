@@ -8,7 +8,7 @@ import {
 	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { App, countdown, localToday, nextMonday, weekOf } from "./App.tsx";
+import { App, localToday, weekOf } from "./App.tsx";
 import { DAY, DESKS } from "./fixture.ts";
 import type { Hint, Reveal } from "./game.ts";
 
@@ -48,6 +48,13 @@ const sick = (desk: (typeof DESKS)[number], text = "Hi."): Reveal => ({
 	text,
 });
 
+const well = (desk: (typeof DESKS)[number], text = "Hi."): Reveal => ({
+	desk,
+	state: "well",
+	kind: "clue",
+	text,
+});
+
 async function open(...answers: Answer[]) {
 	const fetch = serve(Response.json(DAY), ...answers);
 	render(<App />);
@@ -64,6 +71,8 @@ const tile = (desk: string) =>
 const MONDAY = new Date(2026, 9, 19, 12);
 
 beforeEach(() => {
+	// jsdom has no scrolling.
+	Element.prototype.scrollIntoView = vi.fn();
 	vi.useFakeTimers({ toFake: ["Date"], now: MONDAY });
 	localStorage.clear();
 	history.replaceState(null, "", "/?day=2026-10-19");
@@ -83,13 +92,15 @@ test.each([
 	["Friday", "2026-10-23"],
 	["Saturday", "2026-10-24"],
 	["Sunday", "2026-10-25"],
-])("on %s the Week is that Monday to Friday", (_, date) => {
+])("on %s the Week is that Monday to Sunday", (_, date) => {
 	expect(weekOf(date)).toEqual([
 		"2026-10-19",
 		"2026-10-20",
 		"2026-10-21",
 		"2026-10-22",
 		"2026-10-23",
+		"2026-10-24",
+		"2026-10-25",
 	]);
 });
 
@@ -100,21 +111,9 @@ test("a Week can span two months", () => {
 		"2026-10-28",
 		"2026-10-29",
 		"2026-10-30",
+		"2026-10-31",
+		"2026-11-01",
 	]);
-});
-
-test.each([
-	[new Date(2026, 9, 24, 12), new Date(2026, 9, 26)],
-	[new Date(2026, 9, 25, 23, 59), new Date(2026, 9, 26)],
-	[new Date(2026, 9, 31), new Date(2026, 10, 2)],
-])("from %s the next Monday starts %s", (now, monday) => {
-	expect(nextMonday(now)).toEqual(monday);
-});
-
-test("the countdown shows hours, minutes and seconds, rounded up", () => {
-	expect(countdown(36 * 3600_000)).toBe("36:00:00");
-	expect(countdown(61_500)).toBe("00:01:02");
-	expect(countdown(-1)).toBe("00:00:00");
 });
 
 test("the week strip links every day so far and marks the one open", async () => {
@@ -146,40 +145,28 @@ test.each([
 	expect(fetch).not.toHaveBeenCalled();
 });
 
-test("at the weekend the office is closed, counting down to Monday", () => {
-	// Not 24 Oct: 25 Oct is when European clocks go back, so that weekend has 37 hours.
-	vi.setSystemTime(new Date(2026, 9, 17, 12));
+test("at the weekend today's Overtime opens, with the weekend marked", async () => {
+	vi.setSystemTime(new Date(2026, 9, 24, 12));
 	history.replaceState(null, "", "/");
-	const fetch = serve(Response.json(DAY));
+	const fetch = serve(
+		Response.json({ ...DAY, date: "2026-10-24", overtime: true }),
+	);
 	render(<App />);
 
-	expect(screen.getByText(/^Office closed for the weekend/)).toBeDefined();
-	expect(screen.getByRole("timer").textContent).toBe("36:00:00");
+	await screen.findByRole("grid", { name: /office floor/i });
+	expect(fetch).toHaveBeenCalledWith("/api/days/2026-10-24");
 	const week = screen.getByRole("navigation", { name: "The week's puzzles" });
-	expect(within(week).getAllByRole("link")).toHaveLength(5);
-	expect(fetch).not.toHaveBeenCalled();
+	const links = within(week).getAllByRole("link");
+	expect(links).toHaveLength(6);
+	expect(links[5]?.getAttribute("aria-label")).toBe("Sat 24 Oct, Overtime");
+	expect(week.textContent).toContain("Sun, not open yet");
 });
 
-test("the Week just ended stays playable at the weekend", async () => {
+test("an earlier day stays playable at the weekend", async () => {
 	vi.setSystemTime(new Date(2026, 9, 25, 12));
 	await open();
 
 	expect(screen.getByText("Mon 19 Oct")).toBeDefined();
-});
-
-test("Monday opens when the countdown runs out", async () => {
-	vi.useFakeTimers({ now: new Date(2026, 9, 25, 23, 59, 58) });
-	history.replaceState(null, "", "/");
-	const fetch = serve(new Response(null, { status: 404 }));
-	render(<App />);
-	expect(screen.getByRole("timer").textContent).toBe("00:00:02");
-
-	await act(() => vi.advanceTimersByTimeAsync(1000));
-	expect(screen.getByRole("timer").textContent).toBe("00:00:01");
-	await act(() => vi.advanceTimersByTimeAsync(1000));
-
-	expect(screen.queryByText(/^Office closed for the weekend/)).toBeNull();
-	expect(fetch).toHaveBeenCalledWith("/api/days/2026-10-26");
 });
 
 test("with no ?day it asks for the player's local today", async () => {
@@ -274,6 +261,23 @@ test("an accepted declaration reveals the coworker and posts what came before", 
 		"NameB1 · B1 · sickHi.",
 		"NameA1 · A1 · wellTwo in my row.",
 	]);
+});
+
+test("selecting a revealed coworker outlines what they said and brings it into view", async () => {
+	await open(sick("B1"));
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 sick" }));
+	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
+	vi.mocked(Element.prototype.scrollIntoView).mockClear();
+
+	fireEvent.click(tile("A1"));
+
+	const [b1, a1] = screen.getAllByRole("listitem") as HTMLElement[];
+	expect(a1?.classList).toContain("chosen");
+	expect(b1?.classList).not.toContain("chosen");
+	expect(Element.prototype.scrollIntoView).toHaveBeenCalledOnce();
+	fireEvent.click(tile("C1")); // hidden: nothing to show
+	expect(a1?.classList).not.toContain("chosen");
+	expect(Element.prototype.scrollIntoView).toHaveBeenCalledOnce();
 });
 
 test("a rejected declaration masks the coworker", async () => {
@@ -510,7 +514,7 @@ test("flavour can be read and dimmed like a clue", async () => {
 
 	const dim = screen.getByRole("button", { name: "Dim NameB1's message" });
 	fireEvent.click(dim);
-	expect(dim.closest("li")?.className).toBe("dimmed");
+	expect(dim.closest("li")?.classList).toContain("dimmed");
 	fireEvent.click(screen.getByRole("button", { name: /Nice weather\./ }));
 	expect(tile("B1").getAttribute("aria-label")).toContain(
 		"said the clue you're reading",
@@ -777,12 +781,108 @@ test("help opens how to play over the board", async () => {
 	expect(within(panel).getByText("Keys")).toBeDefined();
 });
 
-test("help is on the weekend screen too", () => {
-	vi.setSystemTime(new Date(2026, 9, 17, 12));
-	history.replaceState(null, "", "/");
-	serve(Response.json(DAY));
-	render(<App />);
+// The fixture day as Overtime, starting from a sick coworker with a clue.
+const OVERTIME = {
+	...DAY,
+	overtime: true,
+	start: { ...DAY.start, state: "sick" as const },
+};
 
-	fireEvent.click(screen.getByRole("button", { name: "Help" }));
-	expect(screen.getByRole("dialog", { name: "How to play" })).toBeDefined();
+async function overtime(...answers: Answer[]) {
+	const fetch = serve(Response.json(OVERTIME), ...answers);
+	render(<App />);
+	await screen.findByRole("grid", { name: /office floor/i });
+	return fetch;
+}
+
+test("Overtime stamps the logo and says someone is lying; a weekday doesn't", async () => {
+	await overtime();
+	const logo = screen.getByRole("heading", { level: 1 });
+	expect(within(logo).getByText("Overtime")).toBeDefined();
+	expect(screen.getByText("One sick coworker is lying.")).toBeDefined();
+	expect(tile("A1").getAttribute("aria-keyshortcuts")).toBe("S W B");
+	cleanup();
+
+	await open();
+	expect(screen.queryByText("One sick coworker is lying.")).toBeNull();
+	expect(tile("A1").getAttribute("aria-keyshortcuts")).toBe("S W");
+});
+
+test("on a revealed sick coworker, BS takes the place of Sick and Well", async () => {
+	await overtime();
+
+	fireEvent.click(tile("A1"));
+
+	// Their clue, the one about to be called a lie, is outlined and brought into view.
+	const entry = screen.getAllByRole("listitem").at(-1) as HTMLElement;
+	expect(entry.classList).toContain("accused");
+	expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({
+		block: "nearest",
+	});
+
+	expect(
+		screen.getByRole("button", { name: "Call BS on NameA1" }).textContent,
+	).toBe("Call BS on NameA1");
+	expect(screen.queryByRole("button", { name: /^Declare NameA1/ })).toBeNull();
+});
+
+test("a rejected BS call makes a complaint, not a mask", async () => {
+	await overtime("rejected");
+
+	fireEvent.click(tile("A1"));
+	fireEvent.click(screen.getByRole("button", { name: "Call BS on NameA1" }));
+
+	await screen.findByText(/^Not enough evidence\. NameA1 says/);
+	// Still a suspect: the button invites calling BS on them again.
+	expect(
+		screen.getByRole("button", { name: "Call BS again on NameA1" }).textContent,
+	).toBe("Call BS again on NameA1");
+	expect(tile("A1").getAttribute("aria-label")).toContain("made a complaint");
+	expect(tile("A1").getAttribute("aria-label")).not.toContain("wearing a mask");
+	expect(tile("A1").querySelector(".flush")).not.toBeNull();
+});
+
+test("calling BS on the fibber strikes out their clue and posts in order", async () => {
+	const fetch = await overtime(sick("B1"), OVERTIME.start, well("C1"));
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 sick" }));
+	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
+
+	fireEvent.click(tile("A1"));
+	fireEvent.keyDown(tile("A1"), { key: "b" });
+	await screen.findByText(/^BS called! NameA1 was the fibber/);
+	fireEvent.click(tile("C1"));
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameC1 well" }));
+	await screen.findByText("NameC1 is well. NameC1 says: Hi.");
+
+	expect(JSON.parse(fetch.mock.calls[3]?.[1]?.body as string).declared).toEqual(
+		[
+			{ desk: "B1", state: "sick" },
+			{ desk: "A1", state: "fibber" },
+		],
+	);
+	const lie = screen.getAllByRole("listitem").at(-1) as HTMLElement;
+	expect(lie.querySelector("s")?.textContent).toBe("Two in my row.");
+	expect(within(lie).getByText("A lie: BS called.")).toBeDefined();
+	expect(within(tile("A1")).getByText("BS")).toBeDefined();
+	expect(tile("A1").getAttribute("aria-label")).toContain(
+		"caught as the fibber",
+	);
+	// Caught: no more BS on them.
+	fireEvent.click(tile("A1"));
+	expect(
+		screen.queryByRole("button", { name: "Call BS on NameA1" }),
+	).toBeNull();
+});
+
+test("B does nothing on someone BS can't be called on", async () => {
+	const fetch = await overtime();
+
+	fireEvent.keyDown(tile("B1"), { key: "b" }); // not revealed
+	expect(fetch).toHaveBeenCalledTimes(1); // only the day
+	cleanup();
+
+	const weekday = await open();
+	fireEvent.click(tile("A1"));
+	fireEvent.keyDown(tile("A1"), { key: "b" });
+	expect(weekday).toHaveBeenCalledTimes(1);
 });

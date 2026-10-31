@@ -14,7 +14,7 @@ from app.board import DESKS, Board, Desk
 from app.clues import State
 from app.grade import hint
 from app.limits import limit
-from app.week import EARLIEST, LATEST, Day, Difficulty, load_days, utc_now
+from app.week import EARLIEST, LATEST, Call, Day, Difficulty, load_days, utc_now
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -158,12 +158,25 @@ class DayResponse(BaseModel):
             examples=["Medium"],
         ),
     ]
+    overtime: Annotated[
+        bool,
+        Field(
+            description="Whether it's Overtime: one sick coworker, the fibber, "
+            "gives a false clue, and the puzzle is solved once BS is called on them.",
+            examples=[False],
+        ),
+    ]
 
 
 class Declaration(BaseModel):
     desk: Annotated[Desk, Field(description="Who is declared.", examples=["A3"])]
     state: Annotated[
-        State, Field(description="Sick or well, as declared.", examples=["sick"])
+        Call,
+        Field(
+            description="Sick or well, as declared; or, on Overtime, `fibber` to "
+            "call BS on a revealed sick coworker.",
+            examples=["sick"],
+        ),
     ]
 
 
@@ -177,8 +190,8 @@ class DeclarationRequest(BaseModel):
             description="Every declaration accepted so far, in order, "
             "not counting the starting coworker.",
             examples=[[{"desk": "A3", "state": "sick"}]],
-            # Everyone but the starting coworker and this declaration.
-            max_length=len(DESKS) - 2,
+            # Everyone but the starting coworker and this one, and calling BS.
+            max_length=len(DESKS) - 1,
         ),
     ]
     declaration: Annotated[Declaration, Field(description="The new declaration.")]
@@ -194,7 +207,8 @@ class HintRequest(BaseModel):
             description="Every declaration accepted so far, in order, "
             "not counting the starting coworker.",
             examples=[[{"desk": "A3", "state": "sick"}]],
-            max_length=len(DESKS) - 1,
+            # Everyone but the starting coworker, and calling BS.
+            max_length=len(DESKS),
         ),
     ]
 
@@ -239,7 +253,11 @@ class Hint(BaseModel):
     ]
     coworker: Annotated[
         Desk,
-        Field(description="The first coworker those clues force.", examples=["A4"]),
+        Field(
+            description="The first coworker those clues force; on Overtime, once "
+            "everyone they force is declared, the fibber they catch.",
+            examples=["A4"],
+        ),
     ]
     explanations: Annotated[
         list[ExplainedClue],
@@ -288,6 +306,7 @@ def get_day(day: date, days: Days, today: Today, week: OpenWeek) -> DayResponse:
         ],
         start=RevealedCoworker.at(puzzle, puzzle.start),
         difficulty=puzzle.difficulty,
+        overtime=puzzle.overtime,
     )
 
 
@@ -299,7 +318,7 @@ def get_day(day: date, days: Days, today: Today, week: OpenWeek) -> DayResponse:
 def declare(
     request: DeclarationRequest, days: Days, today: Today, week: OpenWeek
 ) -> Accepted | Rejected:
-    """Declare a coworker sick or well.
+    """Declare a coworker sick or well, or call BS on the fibber.
 
     Accepted only if every declaration so far, then this one, was correct and forced
     when made. Otherwise rejected, always with the same body, whatever the reason.
@@ -317,7 +336,7 @@ def declare(
         **NOT_FOUND,
         **TOO_MANY,
         HTTPStatus.BAD_REQUEST: {"description": "Not enough evidence."},
-        HTTPStatus.CONFLICT: {"description": "Everyone is already declared."},
+        HTTPStatus.CONFLICT: {"description": "The puzzle is already solved."},
     },
     dependencies=[Depends(limit("hints", 30))],
 )
@@ -331,8 +350,8 @@ def get_hint(request: HintRequest, days: Days, today: Today, week: OpenWeek) -> 
     steps = [(d.desk, d.state) for d in request.declared]
     if not puzzle.accepts(board, steps):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Not enough evidence.")
-    if len(steps) == len(DESKS) - 1:
-        raise HTTPException(HTTPStatus.CONFLICT, "Everyone is already declared.")
+    if len(steps) == len(DESKS) - 1 + puzzle.overtime:
+        raise HTTPException(HTTPStatus.CONFLICT, "The puzzle is already solved.")
     clues, coworker = hint(board, puzzle, steps)
     return Hint(
         clues=clues,

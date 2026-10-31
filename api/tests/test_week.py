@@ -4,8 +4,9 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
-from app.board import DESKS
-from app.week import Day, Reveal, load_days
+from app.board import DESKS, Board, Desk, Row
+from app.clues import Count
+from app.week import Call, Day, Reveal, load_days
 from tests.factories import FIXTURES, MONDAY, SAMPLE_BOARD, board_index
 
 if TYPE_CHECKING:
@@ -93,3 +94,72 @@ def test_a_day_writes_its_sick_coworkers_in_desk_order() -> None:
         "C5",
         "D5",
     ]
+
+
+def test_the_fibber_must_be_sick() -> None:
+    _, day = load_days(FIXTURES)[MONDAY]
+
+    with pytest.raises(ValidationError, match="fibber"):
+        Day.model_validate({**day.model_dump(), "fibber": "B1"})  # well
+
+
+def test_the_fibber_must_give_a_clue() -> None:
+    _, day = load_days(FIXTURES)[MONDAY]
+    reveals = list(day.reveals)
+    reveals[DESKS.index("A1")] = Reveal(text="Just a cold, honest.")  # sick
+
+    with pytest.raises(ValidationError, match="fibber"):
+        Day.model_validate({**day.model_dump(), "reveals": reveals, "fibber": "A1"})
+
+
+def test_calling_bs_is_only_accepted_on_overtime() -> None:
+    board, day = load_days(FIXTURES)[MONDAY]
+
+    assert not day.accepts(board, [("A3", "sick"), ("A1", "fibber")])
+
+
+def _overtime() -> tuple[Board, Day]:
+    """The Monday sample with A3, first found by B3's clue, as the fibber.
+
+    A3 is sick yet says row 3 has no one sick: a lie caught as soon as it's said.
+    """
+    board, day = load_days(FIXTURES)[MONDAY]
+    reveals = list(day.reveals)
+    reveals[DESKS.index("A3")] = Reveal(
+        clue=Count(group=Row(row=3), n=0), text="Nobody's ill in row 3."
+    )
+    return board, day.model_copy(update={"reveals": tuple(reveals), "fibber": "A3"})
+
+
+def test_bs_is_called_on_the_fibber_once_their_clue_cant_be_true() -> None:
+    board, day = _overtime()
+
+    assert day.overtime
+    assert day.accepts(board, [("A3", "sick"), ("A3", "fibber")])
+
+
+@pytest.mark.parametrize(
+    "steps",
+    [
+        [("A3", "fibber")],  # hasn't said anything yet
+        [("A3", "sick"), ("B3", "fibber")],  # well, so telling the truth
+        [("A3", "sick"), ("A3", "fibber"), ("A3", "fibber")],  # called already
+    ],
+)
+def test_bs_is_rejected_unless_forced_on_the_fibber(
+    steps: list[tuple[Desk, Call]],
+) -> None:
+    board, day = _overtime()
+
+    assert not day.accepts(board, steps)
+
+
+def test_bs_on_the_fibber_is_rejected_while_their_clue_could_be_true() -> None:
+    board, day = _overtime()
+    reveals = list(day.reveals)
+    reveals[DESKS.index("A3")] = Reveal(
+        clue=Count(group=Row(row=3), n=2), text="Two of us in row 3 are ill."
+    )  # one is: A3 alone, but nothing shows that yet
+    day = day.model_copy(update={"reveals": tuple(reveals)})
+
+    assert not day.accepts(board, [("A3", "sick"), ("A3", "fibber")])
