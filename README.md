@@ -19,13 +19,14 @@ A daily deduction puzzle: a bug is doing the rounds of an open-plan office, and 
 
 - Twenty coworkers sit at a 4 × 5 grid of desks, seated alphabetically by the hot-desking system. One starts revealed.
 - Declare a coworker **sick** or **well**. It's accepted only if it's correct *and* forced: the same in every office that fits what you know so far. No guessing.
-- Each coworker you find says something true about who's sick or well in their row, column, neighbours, department and so on. Some just say something daft.
+- Each coworker you find says something true (except the fibber on Overtime) about who's sick or well in their row, column, neighbours, department and so on. Some just say something daft.
 - Get it wrong, or right too early, and it's "Not enough evidence", and the two look the same. Stuck? A hint shows the fewest clues that settle someone, then who.
-- A new puzzle every weekday, Easy on Monday to Hard by Friday, with the same office all week and a story running through it.
+- A new puzzle every day, Easy on Monday to Hard by Friday, with the same office all week and a story running through it.
+- At the weekend it's **Overtime** (Medium on Saturday, Hard on Sunday): one sick coworker, the fibber, gives a false clue. Work out who and call BS on them.
 
 ## How it's made
 
-- **Every puzzle is generated, not written.** An offline generator picks a hidden outbreak and gives each coworker a true clue, and a solver checks each step against all 2²⁰ possible offices. A puzzle ships only if it can be solved without guessing and grades at the day's difficulty.
+- **Every puzzle is generated, not written.** An offline generator picks a hidden outbreak and gives each coworker a true clue (one false on Overtime), and a solver checks each step against all 2²⁰ possible offices. A puzzle ships only if it can be solved without guessing and grades at the day's difficulty.
 - **The office has a script.** The cast and each Week's story are edited text files in [`stories/`](stories/). Their lines never hint at who's sick.
 - **Solutions never touch this repo.** Built Weeks go to a private repo. The server checks every declaration and never sends a solution or an unrevealed clue to the browser ([ADR 0002](docs/adr/0002-puzzles-in-a-private-repo.md)).
 - **Stack:** a stateless FastAPI JSON API in [`api/`](api/) and a React + TypeScript single-page app in [`web/`](web/), deployed together ([ADR 0001](docs/adr/0001-fastapi-json-api-with-react-spa.md)). The words the game uses are in [`GLOSSARY.md`](GLOSSARY.md).
