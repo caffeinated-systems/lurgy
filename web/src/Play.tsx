@@ -85,6 +85,15 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 
 	useEffect(() => save(day.date, progress), [day.date, progress]);
 
+	// About to call BS on someone: bring the clue in question into view in the log.
+	const accused = suspect(day, progress, selected) ? selected : undefined;
+	useEffect(() => {
+		if (!accused) return;
+		document
+			.querySelector(`.log li[data-desk="${accused}"]`)
+			?.scrollIntoView({ block: "nearest" });
+	}, [accused]);
+
 	// The solving move unmounts the Sick/Well buttons; hand focus to Share so it
 	// isn't dropped. Not on reloading a solved day.
 	const shareButton = useRef<HTMLButtonElement>(null);
@@ -325,9 +334,14 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 						game.reading === r.desk && "reading",
 						dimmed && "dimmed",
 						lie && "lie",
+						r.desk === selected && suspect(day, progress, r.desk) && "accused",
 					].filter(Boolean);
 					return (
-						<li key={r.desk} className={classes.join(" ") || undefined}>
+						<li
+							key={r.desk}
+							data-desk={r.desk}
+							className={classes.join(" ") || undefined}
+						>
 							<button
 								type="button"
 								className="entry"

@@ -394,6 +394,10 @@ div.axis {
 .log li.hinted {
 	border: 2px dashed var(--accent);
 }
+/* The clue of whoever BS is about to be called on. */
+.log li.accused {
+	border: 2px solid var(--bs);
+}
 /* Reading a clue: an inset ring on its entry and its speaker's tile, and for a hinted
    clue a dotted border on the desks it covers, apart from the outlines above. */
 .log li.reading,

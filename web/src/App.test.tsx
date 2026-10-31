@@ -71,6 +71,8 @@ const tile = (desk: string) =>
 const MONDAY = new Date(2026, 9, 19, 12);
 
 beforeEach(() => {
+	// jsdom has no scrolling.
+	Element.prototype.scrollIntoView = vi.fn();
 	vi.useFakeTimers({ toFake: ["Date"], now: MONDAY });
 	localStorage.clear();
 	history.replaceState(null, "", "/?day=2026-10-19");
@@ -793,6 +795,13 @@ test("on a revealed sick coworker, BS takes the place of Sick and Well", async (
 	await overtime();
 
 	fireEvent.click(tile("A1"));
+
+	// Their clue, the one about to be called a lie, is outlined and brought into view.
+	const entry = screen.getAllByRole("listitem").at(-1) as HTMLElement;
+	expect(entry.classList).toContain("accused");
+	expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({
+		block: "nearest",
+	});
 
 	expect(
 		screen.getByRole("button", { name: "Call BS on NameA1" }).textContent,
