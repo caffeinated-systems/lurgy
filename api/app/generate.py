@@ -7,7 +7,7 @@ import subprocess
 from collections import Counter
 from datetime import date, datetime, time, timedelta
 from functools import cache
-from itertools import chain, combinations
+from itertools import chain, combinations, count
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -239,7 +239,7 @@ def _attempt(  # noqa: PLR0913
     while True:
         for desk in (d for d in new if d not in flavour):
             if desk == fibber:
-                clues[desk] = lie = _lie(board, catalogue, known, rng)
+                clues[desk] = lie = _lie(board, solution, known, rng)
                 said.append(lie)
                 alive = _alive(
                     board,
@@ -389,32 +389,23 @@ def _alive(  # noqa: PLR0913
     ]
 
 
-def _lie(
-    board: Board,
-    catalogue: Catalogue,
-    known: Boards,
-    rng: random.Random,
-) -> Clue:
-    """A false clue that flips cleanly once caught: a count that's off, or the
-    wrong parity. It fits the declarations if it can, so it isn't caught on sight.
+def _lie(board: Board, solution: int, known: Boards, rng: random.Random) -> Clue:
+    """A false clue of any kind, drawn the way any clue is: true of another office
+    that fits the declarations so far, so it isn't caught on sight.
     """
-    lies: list[Clue] = [
-        c.model_copy(update={"n": n})
-        for c in catalogue["count"]
-        if isinstance(c, Count | Total) and c.op == "exactly"
-        for n in range(
-            (board.bits(c.group) if isinstance(c, Count) else EVERYONE).bit_count() + 1
-        )
-        if n != c.n
-    ]
-    lies += [
-        c.model_copy(update={"parity": "even" if c.parity == "odd" else "odd"})
-        for c in catalogue["parity"]
-        if isinstance(c, Parity)
-    ]
-    rng.shuffle(lies)
-    # Found last, everyone else declared: no lie fits, so one is caught on sight.
-    return next((c for c in lies if c.mask(board, known).any()), lies[0])
+    others = known[known != solution]
+    # Found last, everyone else declared: no other office fits, so the lie comes
+    # from one that doesn't and is caught on sight.
+    other = int(rng.choice(others)) if others.size else solution ^ 1
+    catalogue = _true_clues(board, other, rng)
+    one = np.array([solution], dtype=np.uint32)
+    # Some count always tells the two offices apart, so the search ends.
+    return next(
+        c
+        for _ in count()
+        for c in _candidates(catalogue, rng)
+        if not c.mask(board, one)[0]
+    )
 
 
 def _keep(boards: Boards, desk: Desk, solution: int) -> Boards:

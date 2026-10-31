@@ -5,6 +5,7 @@ from datetime import UTC, date, datetime
 from functools import cache
 from typing import TYPE_CHECKING, get_args
 
+import numpy as np
 import pytest
 
 from app import generate
@@ -34,6 +35,7 @@ from app.generate import (
     _directions,
     _form,
     _how_many,
+    _lie,
     _overlaps,
     _speak,
     _true_clues,
@@ -422,3 +424,12 @@ def test_hints_walk_an_overtime_day_to_calling_bs() -> None:
 
     assert (day.fibber, "fibber") in steps
     assert day.accepts(week.board, steps)
+
+
+def test_a_fibber_found_last_still_lies() -> None:
+    solution = board_index({"A1", "B3", "C3"})
+    known = np.array([solution], dtype=np.uint32)  # everyone else declared
+
+    lie = _lie(SAMPLE_BOARD, solution, known, random.Random(1))
+
+    assert not lie.mask(SAMPLE_BOARD, known)[0]
