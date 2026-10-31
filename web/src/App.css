@@ -176,7 +176,6 @@ main.notice .week {
 .tile .stamp {
 	top: 42%;
 	padding: 0 8px;
-	border-width: 3px;
 	/* A wash behind the ink, so it reads on a faded face. */
 	background: color-mix(in srgb, var(--surface) 75%, transparent);
 	font-size: clamp(1.1rem, 4vw, 1.6rem);

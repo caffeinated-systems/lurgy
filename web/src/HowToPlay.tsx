@@ -77,18 +77,6 @@ export function HowToPlay() {
 								who.
 							</li>
 						</ul>
-
-						<h3>Keys</h3>
-						<p>
-							Arrow keys move between desks. S declares sick, W declares well,
-							and on Overtime B calls BS.
-						</p>
-
-						<h3>About</h3>
-						<p>
-							Your progress stays in this browser; there are no accounts. Fonts:
-							Poppins and DSEG7, both under the SIL Open Font License.
-						</p>
 					</section>
 					<section>
 						<h3>Reading the clues</h3>
@@ -141,6 +129,17 @@ export function HowToPlay() {
 						</p>
 					</section>
 				</div>
+				<h3>Keys</h3>
+				<p>
+					Arrow keys move between desks. S declares sick, W declares well, and
+					on Overtime B calls BS.
+				</p>
+
+				<h3>About</h3>
+				<p>
+					Your progress stays in this browser; there are no accounts. Fonts:
+					Poppins and DSEG7, both under the SIL Open Font License.
+				</p>
 			</dialog>
 		</>
 	);
