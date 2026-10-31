@@ -437,7 +437,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 									aria-keyshortcuts="B"
 									onClick={() => declare(chosen.desk, "fibber")}
 								>
-									{again ? "BS again" : "BS"}
+									{again ? "Call BS again" : "Call BS"}
 								</button>
 							</div>
 						)}
