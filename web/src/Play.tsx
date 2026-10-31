@@ -9,7 +9,6 @@ import {
 import { hint as askForHint, declare as post } from "./api.ts";
 import {
 	type Call,
-	COMPLAINT,
 	type Day,
 	type Desk,
 	dayLabel,
@@ -283,6 +282,8 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 										src={`/portraits/${c.name.toLowerCase()}.svg`}
 										alt=""
 									/>
+									{/* A complaint flushes the face red, under any mask. */}
+									{complained && <span className="flush" aria-hidden="true" />}
 									{masked && (
 										<img
 											className="portrait mask"
@@ -300,14 +301,9 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 										<span className="dept">{code}</span>
 									</span>
 									{reveal && <span className="state">{reveal.state}</span>}
-									{(hints || complained) && (
+									{hints && (
 										<span className="marks" aria-hidden="true">
-											{hints && (
-												<span className="mark">
-													{hints === 1 ? "🟡" : "🟠"}
-												</span>
-											)}
-											{complained && <span className="mark">{COMPLAINT}</span>}
+											<span className="mark">{hints === 1 ? "🟡" : "🟠"}</span>
 										</span>
 									)}
 								</button>

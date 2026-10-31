@@ -809,7 +809,7 @@ test("a rejected BS call makes a complaint, not a mask", async () => {
 	await screen.findByText(/^Not enough evidence\. NameA1 says/);
 	expect(tile("A1").getAttribute("aria-label")).toContain("made a complaint");
 	expect(tile("A1").getAttribute("aria-label")).not.toContain("wearing a mask");
-	expect(within(tile("A1")).getByText("💢")).toBeDefined();
+	expect(tile("A1").querySelector(".flush")).not.toBeNull();
 });
 
 test("calling BS on the fibber strikes out their clue and posts in order", async () => {
