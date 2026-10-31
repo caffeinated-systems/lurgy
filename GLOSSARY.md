@@ -133,5 +133,5 @@ The taunt on solving a puzzle, chosen by how many coworkers wear a mask, make a 
 _Avoid_: score, grade, rating
 
 **Result**:
-What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers wear a mask, make a complaint or carry a hint, and on Overtime where the fibber sat.
+What a solved puzzle leaves to share, including the time since it was first opened, the verdict, and a grid showing which coworkers wear a mask or carry a hint. On Overtime a line sums up the fibber and complaints instead, since a square on either would give away who is sick.
 _Avoid_: score, scorecard
