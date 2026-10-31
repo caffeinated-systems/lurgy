@@ -394,7 +394,10 @@ div.axis {
 .log li.hinted {
 	border: 2px dashed var(--accent);
 }
-/* The clue of whoever BS is about to be called on. */
+/* What the selected coworker said; in red when BS is about to be called on it. */
+.log li.chosen {
+	border: 2px solid var(--accent);
+}
 .log li.accused {
 	border: 2px solid var(--bs);
 }

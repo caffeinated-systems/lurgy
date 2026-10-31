@@ -85,14 +85,14 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 
 	useEffect(() => save(day.date, progress), [day.date, progress]);
 
-	// About to call BS on someone: bring the clue in question into view in the log.
-	const accused = suspect(day, progress, selected) ? selected : undefined;
+	// Selecting someone revealed brings what they said into view in the log.
+	const shown = revealOf(progress, selected) ? selected : undefined;
 	useEffect(() => {
-		if (!accused) return;
+		if (!shown) return;
 		document
-			.querySelector(`.log li[data-desk="${accused}"]`)
+			.querySelector(`.log li[data-desk="${shown}"]`)
 			?.scrollIntoView({ block: "nearest" });
-	}, [accused]);
+	}, [shown]);
 
 	// The solving move unmounts the Sick/Well buttons; hand focus to Share so it
 	// isn't dropped. Not on reloading a solved day.
@@ -334,7 +334,8 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 						game.reading === r.desk && "reading",
 						dimmed && "dimmed",
 						lie && "lie",
-						r.desk === selected && suspect(day, progress, r.desk) && "accused",
+						r.desk === selected &&
+							(suspect(day, progress, r.desk) ? "accused" : "chosen"),
 					].filter(Boolean);
 					return (
 						<li

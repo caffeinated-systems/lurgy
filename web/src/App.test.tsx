@@ -263,6 +263,23 @@ test("an accepted declaration reveals the coworker and posts what came before", 
 	]);
 });
 
+test("selecting a revealed coworker outlines what they said and brings it into view", async () => {
+	await open(sick("B1"));
+	fireEvent.click(screen.getByRole("button", { name: "Declare NameB1 sick" }));
+	await screen.findByText("NameB1 is sick. NameB1 says: Hi.");
+	vi.mocked(Element.prototype.scrollIntoView).mockClear();
+
+	fireEvent.click(tile("A1"));
+
+	const [b1, a1] = screen.getAllByRole("listitem") as HTMLElement[];
+	expect(a1?.classList).toContain("chosen");
+	expect(b1?.classList).not.toContain("chosen");
+	expect(Element.prototype.scrollIntoView).toHaveBeenCalledOnce();
+	fireEvent.click(tile("C1")); // hidden: nothing to show
+	expect(a1?.classList).not.toContain("chosen");
+	expect(Element.prototype.scrollIntoView).toHaveBeenCalledOnce();
+});
+
 test("a rejected declaration masks the coworker", async () => {
 	await open("rejected");
 
@@ -497,7 +514,7 @@ test("flavour can be read and dimmed like a clue", async () => {
 
 	const dim = screen.getByRole("button", { name: "Dim NameB1's message" });
 	fireEvent.click(dim);
-	expect(dim.closest("li")?.className).toBe("dimmed");
+	expect(dim.closest("li")?.classList).toContain("dimmed");
 	fireEvent.click(screen.getByRole("button", { name: /Nice weather\./ }));
 	expect(tile("B1").getAttribute("aria-label")).toContain(
 		"said the clue you're reading",
