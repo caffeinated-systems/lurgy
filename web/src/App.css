@@ -439,6 +439,21 @@ main.notice .btn-help {
 .help dd {
 	margin: 0 0 8px;
 }
+/* Wide screens: room to read, with each clue word beside what it means. */
+@media (min-width: 900px) {
+	.help {
+		max-width: min(48rem, calc(100vw - 32px));
+		padding: 24px 32px;
+	}
+	.help dl {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		gap: 8px 20px;
+	}
+	.help dd {
+		margin: 0;
+	}
+}
 
 .log-title {
 	font:
