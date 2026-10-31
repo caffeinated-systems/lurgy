@@ -1,7 +1,6 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { fetchDay } from "./api.ts";
 import { type Day, dayLabel, failure } from "./game.ts";
-import { HowToPlay } from "./HowToPlay.tsx";
 import { Logo, Play } from "./Play.tsx";
 
 /** The player's local date as YYYY-MM-DD. */
@@ -10,33 +9,19 @@ export function localToday(now = new Date()): string {
 	return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
-/** Monday to Friday of the Week a date is in; at the weekend, the Week just ended. */
+/** Monday to Sunday of the Week a date is in: Saturday and Sunday are Overtime. */
 export function weekOf(date: string): string[] {
 	const [year = 0, month = 1, day = 1] = date.split("-").map(Number);
 	const monday = day - ((new Date(year, month - 1, day).getDay() + 6) % 7);
-	return [0, 1, 2, 3, 4].map((i) =>
+	return [0, 1, 2, 3, 4, 5, 6].map((i) =>
 		localToday(new Date(year, month - 1, monday + i)),
 	);
 }
 
-/** Local midnight at the start of the coming Monday (only asked at the weekend). */
-export function nextMonday(now: Date): Date {
-	const days = (8 - now.getDay()) % 7;
-	return new Date(now.getFullYear(), now.getMonth(), now.getDate() + days);
-}
-
-/** "47:59:59": hours, minutes and seconds left, rounded up. */
-export function countdown(ms: number): string {
-	const seconds = Math.max(0, Math.ceil(ms / 1000));
-	const pad = (n: number) => String(n).padStart(2, "0");
-	return `${pad(Math.floor(seconds / 3600))}:${pad(Math.floor(seconds / 60) % 60)}:${pad(seconds % 60)}`;
-}
-
 export function App() {
-	// ponytail: "now" moves only when the weekend countdown ends, so a tab left open
-	// past a weekday midnight keeps yesterday's strip until reloaded; add a midnight
-	// timeout if players notice.
-	const [now, setNow] = useState(() => new Date());
+	// ponytail: a tab left open past midnight keeps yesterday's strip until
+	// reloaded; add a midnight timeout if players notice.
+	const [now] = useState(() => new Date());
 	const [day, setDay] = useState<Day | "missing" | { failed: string }>();
 	const today = localToday(now);
 	const days = weekOf(today);
@@ -45,7 +30,6 @@ export function App() {
 	// Only the Week of the player's own date, up to today: the server allows a day
 	// either side for timezones, so a later day may exist without being open here.
 	const open = days.includes(date) && date <= today;
-	const weekend = asked === null && !days.includes(today);
 
 	useEffect(() => {
 		if (!open) return;
@@ -58,12 +42,10 @@ export function App() {
 	const week = <Week days={days} today={today} current={date} />;
 	return (
 		<>
-			{weekend ? (
-				<Closed week={week} onOpen={() => setNow(new Date())} />
-			) : !open ? (
+			{!open ? (
 				<Notice week={week}>
-					That day isn't open: the office only does this week's puzzles, Monday
-					to Friday.
+					That day isn't open: the office only does this week's puzzles, up to
+					today.
 				</Notice>
 			) : day === "missing" ? (
 				<Notice week={week}>
@@ -91,7 +73,7 @@ export function App() {
 	);
 }
 
-/** Monday to Friday, each a link once it has started. */
+/** Monday to Sunday, each a link once it has started; the weekend is Overtime. */
 function Week({
 	days,
 	today,
@@ -103,57 +85,32 @@ function Week({
 }) {
 	return (
 		<nav className="week" aria-label="The week's puzzles">
-			{days.map((d) => {
+			{days.map((d, i) => {
 				const name = new Date(`${d}T00:00`).toLocaleDateString("en-GB", {
 					weekday: "short",
 				});
+				const overtime = i >= 5 ? "overtime" : undefined;
 				return d <= today ? (
 					<a
 						key={d}
 						href={`?day=${d}`}
-						aria-label={dayLabel(d)}
+						className={overtime}
+						aria-label={`${dayLabel(d)}${overtime ? ", Overtime" : ""}`}
 						aria-current={d === current ? "page" : undefined}
 					>
 						{name}
 					</a>
 				) : (
-					<span key={d} className="later">
+					<span
+						key={d}
+						className={["later", overtime].filter(Boolean).join(" ")}
+					>
 						{name}
 						<span className="sr-only">, not open yet</span>
 					</span>
 				);
 			})}
 		</nav>
-	);
-}
-
-/** The weekend: a countdown to Monday, then onOpen. */
-function Closed({ week, onOpen }: { week: ReactNode; onOpen: () => void }) {
-	const [opens] = useState(() => nextMonday(new Date()).getTime());
-	const [now, setNow] = useState(Date.now);
-
-	useEffect(() => {
-		const id = setInterval(() => {
-			const at = Date.now();
-			setNow(at);
-			if (at >= opens) onOpen();
-		}, 1000);
-		return () => clearInterval(id);
-	}, [opens, onOpen]);
-
-	return (
-		<main className="notice">
-			<Logo />
-			<p>
-				Office closed for the weekend. Missed a day? This week's puzzles are
-				still on the desk.
-			</p>
-			{week}
-			<p>
-				Back Monday in <span role="timer">{countdown(opens - now)}</span>
-			</p>
-			<HowToPlay />
-		</main>
 	);
 }
 

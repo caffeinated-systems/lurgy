@@ -23,8 +23,8 @@ export function HowToPlay() {
 				<p>
 					Something's going round the office. As office manager, work out who's
 					caught the lurgy and who's fine, using only what your coworkers let
-					slip. A new puzzle every weekday, Monday to Friday, and the week's
-					puzzles stay on the desk till Sunday.
+					slip. A new puzzle every day, and the week's puzzles stay on the desk
+					till Sunday.
 				</p>
 				<ul>
 					<li>Pick a coworker and declare them Sick or Well.</li>
@@ -36,7 +36,8 @@ export function HowToPlay() {
 					</li>
 					<li>
 						Each coworker you declare says something: a clue, or just chat
-						marked "Flavour: no clue". Every clue is true, whoever says it.
+						marked "Flavour: no clue". Every clue is true, whoever says it,
+						except on Overtime.
 					</li>
 					<li>
 						Tap a clue to see who said it. Dim a clue once you've used it up.
@@ -50,6 +51,25 @@ export function HowToPlay() {
 						show in your result.
 					</li>
 					<li>Each tile shows the coworker's department code and colour.</li>
+				</ul>
+
+				<h3>Overtime</h3>
+				<p>
+					At the weekend the office does overtime, and one sick coworker has
+					come in anyway for the double pay: the fibber. Their clue is false;
+					everyone else, sick or well, tells the truth. Until you catch them,
+					any sick coworker's clue could be the lie.
+				</p>
+				<ul>
+					<li>
+						Once the clues prove which sick coworker is lying, pick them and
+						call BS. Call it too soon, or on the wrong person, and they make a
+						complaint instead.
+					</li>
+					<li>
+						The puzzle is solved when everyone is declared and you've called BS
+						on the fibber. Your result counts complaints but never says who.
+					</li>
 				</ul>
 
 				<h3>Reading the clues</h3>
@@ -100,7 +120,10 @@ export function HowToPlay() {
 				</p>
 
 				<h3>Keys</h3>
-				<p>Arrow keys move between desks. S declares sick, W declares well.</p>
+				<p>
+					Arrow keys move between desks. S declares sick, W declares well, and
+					on Overtime B calls BS.
+				</p>
 
 				<h3>About</h3>
 				<p>

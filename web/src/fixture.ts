@@ -15,4 +15,5 @@ export const DAY: Day = {
 	})),
 	start: { desk: "A1", state: "well", kind: "clue", text: "Two in my row." },
 	difficulty: "Medium",
+	overtime: false,
 };

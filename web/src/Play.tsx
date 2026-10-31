@@ -8,6 +8,8 @@ import {
 } from "react";
 import { hint as askForHint, declare as post } from "./api.ts";
 import {
+	type Call,
+	COMPLAINT,
 	type Day,
 	type Desk,
 	dayLabel,
@@ -18,9 +20,9 @@ import {
 	reducer,
 	result,
 	revealOf,
-	type State,
 	save,
 	start,
+	suspect,
 	verdict,
 } from "./game.ts";
 import { HowToPlay } from "./HowToPlay.tsx";
@@ -52,10 +54,11 @@ function move(i: number, key: string, count: number): number | undefined {
 	return undefined;
 }
 
-export function Logo() {
+export function Logo({ overtime = false }: { overtime?: boolean }) {
 	return (
 		<h1 className="logo">
 			<img src="/logo.svg" alt="Office Lurgy" width="262" height="148" />
+			{overtime && <span className="stamp">Overtime</span>}
 		</h1>
 	);
 }
@@ -94,20 +97,27 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 		shareButton.current?.focus();
 	}, [progress.solvedAt]);
 
-	async function declare(desk: Desk, state: State) {
-		if (revealOf(progress, desk)) return dispatch({ type: "already" });
+	async function declare(desk: Desk, call: Call) {
+		const bs = call === "fibber";
+		if (bs && !suspect(day, progress, desk)) return;
+		if (!bs && revealOf(progress, desk)) return dispatch({ type: "already" });
 		if (game.pending) return;
 		dispatch({ type: "sent", at: Date.now() });
 		try {
 			const reveal = await post({
 				date: day.date,
 				declared: declared(progress),
-				declaration: { desk, state },
+				declaration: { desk, state: call },
 			});
+			const at = Date.now();
 			dispatch(
-				reveal
-					? { type: "accepted", reveal, at: Date.now() }
-					: { type: "rejected", desk, state },
+				call === "fibber"
+					? reveal
+						? { type: "caught", desk, at }
+						: { type: "complained", desk }
+					: reveal
+						? { type: "accepted", reveal, at }
+						: { type: "rejected", desk, state: call },
 			);
 		} catch (error) {
 			dispatch({ type: "failed", error });
@@ -166,6 +176,11 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 			declare(selected, key === "s" ? "sick" : "well");
 			return;
 		}
+		if (key === "b" && day.overtime) {
+			event.preventDefault();
+			declare(selected, "fibber");
+			return;
+		}
 		const next = coworkers[move(index, event.key, coworkers.length) ?? -1];
 		if (!next) return;
 		event.preventDefault();
@@ -187,13 +202,14 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 	return (
 		<main>
 			<header>
-				<Logo />
+				<Logo overtime={day.overtime} />
 				<div className="today">
 					<p className="date">{dayLabel(day.date)}</p>
 					<Timer progress={progress} />
 					<HowToPlay />
 				</div>
 				{week}
+				{day.overtime && <p className="lying">One sick coworker is lying.</p>}
 			</header>
 
 			{/* biome-ignore lint/a11y/useSemanticElements: an ARIA grid, not a data table, so screen readers pass arrows and S/W to the page */}
@@ -221,6 +237,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 						{row.map((c) => {
 							const reveal = revealOf(progress, c.desk);
 							const masked = progress.masks.includes(c.desk);
+							const complained = progress.complaints.includes(c.desk);
 							const hints = progress.hints[c.desk];
 							const lit = game.hint?.clues.includes(c.desk);
 							const named =
@@ -237,6 +254,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 								c.department,
 								reveal?.state ?? "unknown",
 								...(masked ? ["wearing a mask"] : []),
+								...(complained ? ["made a complaint"] : []),
 								...(hints ? [hints === 1 ? "one hint" : "two hints"] : []),
 								...(lit ? ["hinted clue"] : []),
 								...(named ? ["the hint is about them"] : []),
@@ -250,10 +268,10 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 									type="button"
 									key={c.desk}
 									data-desk={c.desk}
-									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""} ${speaker ? "speaker" : ""} ${inClue ? "in-clue" : ""}`}
+									className={`tile ${reveal ? `st-${reveal.state}` : ""} ${complained ? "complained" : ""} ${lit ? "hint-clue" : ""} ${named ? "hint-named" : ""} ${speaker ? "speaker" : ""} ${inClue ? "in-clue" : ""}`}
 									tabIndex={c.desk === selected ? 0 : -1}
 									role="gridcell"
-									aria-keyshortcuts="S W"
+									aria-keyshortcuts={day.overtime ? "S W B" : "S W"}
 									aria-selected={c.desk === selected}
 									aria-label={label}
 									onClick={() => dispatch({ type: "selected", desk: c.desk })}
@@ -275,9 +293,14 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 										<span className="dept">{code}</span>
 									</span>
 									{reveal && <span className="state">{reveal.state}</span>}
-									{hints && (
-										<span className="mark" aria-hidden="true">
-											{hints === 1 ? "🟡" : "🟠"}
+									{(hints || complained) && (
+										<span className="marks" aria-hidden="true">
+											{hints && (
+												<span className="mark">
+													{hints === 1 ? "🟡" : "🟠"}
+												</span>
+											)}
+											{complained && <span className="mark">{COMPLAINT}</span>}
 										</span>
 									)}
 								</button>
@@ -291,10 +314,12 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 			<ul className="log">
 				{progress.reveals.toReversed().map((r) => {
 					const dimmed = progress.dimmed.includes(r.desk);
+					const lie = progress.caught?.desk === r.desk;
 					const classes = [
 						game.hint?.clues.includes(r.desk) && "hinted",
 						game.reading === r.desk && "reading",
 						dimmed && "dimmed",
+						lie && "lie",
 					].filter(Boolean);
 					return (
 						<li key={r.desk} className={classes.join(" ") || undefined}>
@@ -312,7 +337,14 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 								<span className="who">
 									{nameOf(r.desk)} · {r.desk} · {r.state}
 								</span>
-								<span>{r.text}</span>
+								{lie ? (
+									<>
+										<s>{r.text}</s>
+										<span className="plain">A lie: BS called.</span>
+									</>
+								) : (
+									<span>{r.text}</span>
+								)}
 								{r.joke && <span className="joke">{r.joke}</span>}
 								{r.kind === "flavour" && (
 									<span className="plain">Flavour: no clue.</span>
@@ -389,7 +421,22 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 						>
 							{game.hint ? "Who do they settle?" : "Hint"}
 						</button>
-						{chosen && (
+						{chosen && suspect(day, progress, chosen.desk) && (
+							<div className="big">
+								{/* In place of the spent Sick and Well: calling BS on them. */}
+								<button
+									type="button"
+									className="btn-bs"
+									disabled={game.pending}
+									aria-label={`Call BS on ${chosen.name}`}
+									aria-keyshortcuts="B"
+									onClick={() => declare(chosen.desk, "fibber")}
+								>
+									BS
+								</button>
+							</div>
+						)}
+						{chosen && !suspect(day, progress, chosen.desk) && (
 							<div className="big">
 								{(["sick", "well"] as const).map((state) => (
 									<button

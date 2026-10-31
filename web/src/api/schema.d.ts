@@ -58,7 +58,7 @@ export interface paths {
         put?: never;
         /**
          * Declare
-         * @description Declare a coworker sick or well.
+         * @description Declare a coworker sick or well, or call BS on the fibber.
          *
          *     Accepted only if every declaration so far, then this one, was correct and forced
          *     when made. Otherwise rejected, always with the same body, whatever the reason.
@@ -109,6 +109,7 @@ export interface components {
             /** @description The declared coworker, now revealed. */
             reveal: components["schemas"]["RevealedCoworker"];
         };
+        Call: components["schemas"]["State"] | "fibber";
         /** DayResponse */
         DayResponse: {
             /**
@@ -137,6 +138,12 @@ export interface components {
              * @example Medium
              */
             difficulty: components["schemas"]["Difficulty"] | null;
+            /**
+             * Overtime
+             * @description Whether it's Overtime: one sick coworker, the fibber, gives a false clue, and the puzzle is solved once BS is called on them.
+             * @example false
+             */
+            overtime: boolean;
         };
         /** Declaration */
         Declaration: {
@@ -146,10 +153,10 @@ export interface components {
              */
             desk: components["schemas"]["Desk"];
             /**
-             * @description Sick or well, as declared.
+             * @description Sick or well, as declared; or, on Overtime, `fibber` to call BS on a revealed sick coworker.
              * @example sick
              */
-            state: components["schemas"]["State"];
+            state: components["schemas"]["Call"];
         };
         /** DeclarationRequest */
         DeclarationRequest: {
@@ -229,7 +236,7 @@ export interface components {
              */
             clues: components["schemas"]["Desk"][];
             /**
-             * @description The first coworker those clues force.
+             * @description The first coworker those clues force; on Overtime, once everyone they force is declared, the fibber they catch.
              * @example A4
              */
             coworker: components["schemas"]["Desk"];
@@ -494,7 +501,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Everyone is already declared. */
+            /** @description The puzzle is already solved. */
             409: {
                 headers: {
                     [name: string]: unknown;

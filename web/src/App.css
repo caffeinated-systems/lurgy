@@ -34,6 +34,8 @@
 	--well-ink: #1c6882;
 	--hint: #c75a12;
 	--accent: #2b4c7e;
+	/* Overtime: the stamp, the banner and calling BS. */
+	--bs: #c1121f;
 	color-scheme: light;
 	/* The page's side margin; the thumb bar cancels it to run edge to edge. */
 	--gutter: 8px;
@@ -51,6 +53,7 @@
 		--well-ink: #7cc6de;
 		--hint: #f0883e;
 		--accent: #8fb3ff;
+		--bs: #ff6b6b;
 		color-scheme: dark;
 	}
 }
@@ -66,6 +69,7 @@
 	--well-ink: #7cc6de;
 	--hint: #f0883e;
 	--accent: #8fb3ff;
+	--bs: #ff6b6b;
 	color-scheme: dark;
 }
 
@@ -130,6 +134,9 @@ header {
 .week .later {
 	opacity: 0.5;
 }
+.week .overtime {
+	color: var(--bs);
+}
 .sr-only {
 	position: absolute;
 	width: 1px;
@@ -142,8 +149,35 @@ main.notice .week {
 	width: 100%;
 }
 .logo {
+	position: relative;
 	margin: 0;
 	line-height: 0;
+}
+/* A rubber stamp across the logo: skewed, with a broken border and ink. */
+.stamp {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	padding: 2px 8px;
+	border: 3px solid var(--bs);
+	border-radius: 4px;
+	color: var(--bs);
+	font:
+		800 1.15rem / 1.2 system-ui,
+		sans-serif;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	transform: translate(-50%, -50%) rotate(-12deg);
+	/* Specks of noise knocked out of the ink, so it reads as stamped. */
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='40'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -2.4 1.6'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+	pointer-events: none;
+}
+.lying {
+	flex-basis: 100%;
+	margin: 4px 0 0;
+	color: var(--bs);
+	font-weight: 700;
+	text-align: center;
 }
 .logo img {
 	width: 140px;
@@ -318,10 +352,14 @@ div.axis {
 	outline: 3px solid var(--hint);
 	outline-offset: 1px;
 }
-.mark {
+.marks {
 	position: absolute;
 	top: 2px;
 	right: 4px;
+	display: flex;
+	gap: 2px;
+}
+.mark {
 	/* A chip, so the mark holds up on a faded sick or well wash. */
 	padding: 0 2px;
 	border-radius: 4px;
@@ -468,6 +506,10 @@ main.notice .btn-help {
 	margin: 0;
 	font-size: 0.85rem;
 }
+.log li.lie s {
+	text-decoration-color: var(--bs);
+	text-decoration-thickness: 2px;
+}
 .log li.dimmed {
 	opacity: 0.5;
 	font-size: 0.8em;
@@ -545,6 +587,13 @@ main.notice .btn-help {
 .btn-well {
 	background: var(--well);
 	color: var(--well-ink);
+}
+/* Calling BS takes the place of both Sick and Well. */
+.btn-bs {
+	grid-column: 1 / -1;
+	background: var(--bs);
+	color: var(--surface);
+	letter-spacing: 0.08em;
 }
 @media (prefers-reduced-motion: no-preference) {
 	.tile {
