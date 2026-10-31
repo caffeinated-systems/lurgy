@@ -833,6 +833,10 @@ test("calling BS on the fibber strikes out their clue and posts in order", async
 	const lie = screen.getAllByRole("listitem").at(-1) as HTMLElement;
 	expect(lie.querySelector("s")?.textContent).toBe("Two in my row.");
 	expect(within(lie).getByText("A lie: BS called.")).toBeDefined();
+	expect(within(tile("A1")).getByText("BS")).toBeDefined();
+	expect(tile("A1").getAttribute("aria-label")).toContain(
+		"caught as the fibber",
+	);
 	// Caught: no more BS on them.
 	fireEvent.click(tile("A1"));
 	expect(

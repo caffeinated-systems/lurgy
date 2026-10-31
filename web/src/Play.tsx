@@ -238,6 +238,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 							const reveal = revealOf(progress, c.desk);
 							const masked = progress.masks.includes(c.desk);
 							const complained = progress.complaints.includes(c.desk);
+							const caught = progress.caught?.desk === c.desk;
 							const hints = progress.hints[c.desk];
 							const lit = game.hint?.clues.includes(c.desk);
 							const named =
@@ -255,6 +256,7 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 								reveal?.state ?? "unknown",
 								...(masked ? ["wearing a mask"] : []),
 								...(complained ? ["made a complaint"] : []),
+								...(caught ? ["caught as the fibber"] : []),
 								...(hints ? [hints === 1 ? "one hint" : "two hints"] : []),
 								...(lit ? ["hinted clue"] : []),
 								...(named ? ["the hint is about them"] : []),
@@ -287,6 +289,11 @@ export function Play({ day, week }: { day: Day; week: ReactNode }) {
 											src="/portraits/mask.svg"
 											alt=""
 										/>
+									)}
+									{caught && (
+										<span className="stamp" aria-hidden="true">
+											BS
+										</span>
 									)}
 									<span className="nm" style={{ borderColor: colour }}>
 										<span className="name">{c.name}</span>
