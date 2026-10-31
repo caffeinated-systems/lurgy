@@ -22,6 +22,9 @@ export type Progress = {
 	complaints: Desk[];
 	// Overtime: BS called on the fibber, after that many declarations.
 	caught?: { desk: Desk; after: number };
+	// Overtime: hints that pointed at calling BS. Kept off the fibber's tile and
+	// square, where they would give the fibber away in a shared result.
+	fibberHint?: 1 | 2;
 	// Set by the first declaration or hint; the clock holds at 00:00 until then.
 	startedAt?: number;
 	solvedAt?: number;
@@ -222,17 +225,35 @@ export const VERDICTS = [
 	],
 ] as const;
 
-/** Every coworker who wears a mask, made a complaint or carries a hint. */
-function marked(progress: Progress): Set<string> {
+/** Every coworker who wears a mask, made a complaint or carries a hint, and any
+ * hint toward calling BS. */
+function marks(progress: Progress): Set<string> {
 	return new Set([
 		...progress.masks,
 		...progress.complaints,
 		...Object.keys(progress.hints),
+		...(progress.fibberHint ? ["BS"] : []),
 	]);
 }
 
+/** A hint's mark, keeping the stronger: on the coworker, or, when it points at
+ * calling BS on someone already revealed, off the board. */
+function marked(progress: Progress, desk: Desk, presses: 1 | 2): Progress {
+	if (revealOf(progress, desk)) {
+		return {
+			...progress,
+			fibberHint: Math.max(progress.fibberHint ?? 0, presses) as 1 | 2,
+		};
+	}
+	const hints = {
+		...progress.hints,
+		[desk]: Math.max(progress.hints[desk] ?? 0, presses) as 1 | 2,
+	};
+	return { ...progress, hints };
+}
+
 export function verdict(progress: Progress, date: string): string {
-	const n = marked(progress).size;
+	const n = marks(progress).size;
 	const tier = n === 0 ? 0 : n <= 3 ? 1 : 2;
 	return pick([...VERDICTS[tier]], date, tier);
 }
@@ -268,7 +289,9 @@ export function result(day: Day, progress: Progress, url: string): string {
 	// The fibber and complaints never go in the grid: BS is only called on someone
 	// sick, so a square would give the day away.
 	const n = progress.complaints.length;
-	const fibber = `🤥 Fibber caught · ${COMPLAINT} ${n} complaint${n === 1 ? "" : "s"}`;
+	const hinted =
+		progress.fibberHint === 2 ? " 🟠" : progress.fibberHint ? " 🟡" : "";
+	const fibber = `🤥 Fibber caught${hinted} · ${COMPLAINT} ${n} complaint${n === 1 ? "" : "s"}`;
 	return [
 		`Office Lurgy${overtime} · ${dayLabel(day.date)}${difficulty} · ⏱ ${time}`,
 		`"${verdict(progress, day.date)}"`,
@@ -365,10 +388,6 @@ export function reducer(game: Game, action: Action): Game {
 		}
 		case "hinted": {
 			const { hint } = action;
-			const hints = {
-				...progress.hints,
-				[hint.coworker]: progress.hints[hint.coworker] ?? 1,
-			};
 			const taunt = pick(
 				HINT_TAUNTS,
 				game.day.date,
@@ -384,7 +403,7 @@ export function reducer(game: Game, action: Action): Game {
 				{
 					...game,
 					hint: { ...hint, presses: 1 },
-					progress: { ...progress, hints },
+					progress: marked(progress, hint.coworker, 1),
 				},
 				`${taunt} Look at what ${names} said.`,
 			);
@@ -403,12 +422,11 @@ export function reducer(game: Game, action: Action): Game {
 					...game,
 					hint: { ...hint, presses: 2 },
 					selected: hint.coworker,
-					progress: {
-						...progress,
-						hints: { ...progress.hints, [hint.coworker]: 2 },
-					},
+					progress: marked(progress, hint.coworker, 2),
 				},
-				`${taunt} Those clues settle ${nameOf(game, hint.coworker)}.`,
+				revealOf(progress, hint.coworker)
+					? `${taunt} Those clues catch ${nameOf(game, hint.coworker)} lying.`
+					: `${taunt} Those clues settle ${nameOf(game, hint.coworker)}.`,
 			);
 		}
 		case "failed":
